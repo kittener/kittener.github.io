@@ -3,18 +3,33 @@
   <entry>
     <title>静态编译</title>
     <url>/2020/03/24/%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91/</url>
-    <content><![CDATA[<hr>
-<h2 id="log"><a href="#log" class="headerlink" title="log"></a>log</h2><p>今天由一道入群题入手之后了解到了静态编译这个知识：  </p>
+    <content><![CDATA[<p>今天由一道入群题入手之后了解到了静态编译这个知识：  </p>
+<ul>
+<li><a id="more"></a>  
+
+</li>
+</ul>
 <h3 id="1-静态编译："><a href="#1-静态编译：" class="headerlink" title="1.静态编译："></a>1.静态编译：</h3><p>编译器在编译可执行文件时，把需要用到的对应动态链接库(.so或.ilb)中的部分提取出来，链接到可执行文件中去，<br>使可执行文件在运行时不需要依赖于动态链接库.</p>
 <h3 id="2-动态编译"><a href="#2-动态编译" class="headerlink" title="2.动态编译:"></a>2.动态编译:</h3><p>动态编译的可执行文件需要附带一个的动态链接库，在执行时，需要调用其对应动态链接库中的命令。所以其优点一<br>方面是缩小了执行文件本身的体积，另一方面是加快了编译速度，节省了系统资源。缺点一是哪怕是很简单的程序，只用到了链接库中的一两条命令，也需要附带一个相对庞大的链接库；二是如果其他计算机上没有安装对应的运行库，则用动态编译的可执行文件就不能运行。</p>
 <p>然后静态库的连接与使用看<a href="https://www.cnblogs.com/xiaotianxiedaima/p/9824643.html" target="_blank" rel="noopener">这</a></p>
 <p>IDA使用sig文件的说明看<a href="https://www.jianshu.com/p/7a1441e4f355" target="_blank" rel="noopener">这</a><br>但是我的libc.a是在/usr/lib/x86_64-linux-gnu下的并不是这篇博客的libx32下的<br>然后这道题好像因为glibc版本的关系，还是有一些库函数没被解出来，所以我被迫爆破出了flag…  </p>
 ]]></content>
+      <categories>
+        <category>re</category>
+      </categories>
+      <tags>
+        <tag>技术</tag>
+      </tags>
   </entry>
   <entry>
     <title>Diary</title>
     <url>/2020/03/21/kittener&#39;s%20blog/</url>
-    <content><![CDATA[<h1 id="这是一个记录学习生活的日记本"><a href="#这是一个记录学习生活的日记本" class="headerlink" title="这是一个记录学习生活的日记本"></a>这是一个记录学习生活的日记本</h1><h2 id="督促自己学习为了让以后的自己看看摸鱼的自己增加悔恨值-确信"><a href="#督促自己学习为了让以后的自己看看摸鱼的自己增加悔恨值-确信" class="headerlink" title="督促自己学习为了让以后的自己看看摸鱼的自己增加悔恨值(确信)"></a><del>督促自己学习</del>为了让以后的自己看看摸鱼的自己增加悔恨值(确信)</h2><h2 id="2020-3-21"><a href="#2020-3-21" class="headerlink" title="2020-3-21"></a>2020-3-21</h2><p>今天上午做了BJD的re题，tcl硬编码竟然没想到，卡了半小时，问了问师傅才发现，不过好想吐槽出题人出的什么题啊。。。好吧据说没有出题人，那就没事了<br>下午出门理发(摁，又是发际线高高扬起的我)，看到了漂亮的小改改<br>晚上继续学mysql，今晚就能学完了吧，明天开始动手写pki了,Mark一个学习MySQL非常好的<a href="http://c.biancheng.net/view/2361.html" target="_blank" rel="noopener">网站</a><br>又是菜的一天(茶)</p>
+    <content><![CDATA[<h1 id="这是一个记录学习生活的日记本"><a href="#这是一个记录学习生活的日记本" class="headerlink" title="这是一个记录学习生活的日记本"></a>这是一个记录学习生活的日记本</h1><h2 id="督促自己学习为了让以后的自己看看摸鱼的自己增加悔恨值-确信"><a href="#督促自己学习为了让以后的自己看看摸鱼的自己增加悔恨值-确信" class="headerlink" title="督促自己学习为了让以后的自己看看摸鱼的自己增加悔恨值(确信)"></a><del>督促自己学习</del>为了让以后的自己看看摸鱼的自己增加悔恨值(确信)</h2><ul>
+<li><a id="more"></a>
+
+</li>
+</ul>
+<h2 id="2020-3-21"><a href="#2020-3-21" class="headerlink" title="2020-3-21"></a>2020-3-21</h2><p>今天上午做了BJD的re题，tcl硬编码竟然没想到，卡了半小时，问了问师傅才发现，不过好想吐槽出题人出的什么题啊。。。好吧据说没有出题人，那就没事了<br>下午出门理发(摁，又是发际线高高扬起的我)，看到了漂亮的小改改<br>晚上继续学mysql，今晚就能学完了吧，明天开始动手写pki了,Mark一个学习MySQL非常好的<a href="http://c.biancheng.net/view/2361.html" target="_blank" rel="noopener">网站</a><br>又是菜的一天(茶)</p>
 <h2 id="2020-3-22"><a href="#2020-3-22" class="headerlink" title="2020-3-22"></a>2020-3-22</h2><p>昨晚到底还是没有看完MySQL，今天还没看完，ddl快要到了我死了，还剩8天…<br>今天竟然写了一天的作业，概率论作业真的绝了<br>BJD最后更了一道 <del>re</del> pwn题，干死出题人，学pwn的事情也要提到日程上了…<br>又是fw的一天(茶)</p>
 <h2 id="2020-3-23"><a href="#2020-3-23" class="headerlink" title="2020-3-23"></a>2020-3-23</h2><p>今天把MySQL收个尾(我到底拖了几天啊…)<br>上了一天课，Java老师的死亡提问真的无解2333，今天开始看程序员的自我修养这本书，计划两周看完吧(又开始立flag了-。-)<br>ddl往后推了15天，又能愉快<del>摸鱼</del>了呢<br>推特还把我的号封着，淦啊！！注意到苹果开始用rust语言替代c和c++了，唔是不是考虑学一手呢  </p>
 <h2 id="2020-3-24"><a href="#2020-3-24" class="headerlink" title="2020-3-24"></a>2020-3-24</h2><p>自修这本书开了个头，概率论上课让我重回大一下的二重积分QAQ<br>从一道入群题学到了一个知识点，对底层的东西掌握还是不够啊<br>明天开始学rust 冲</p>
@@ -25,6 +40,9 @@
 <h2 id="2020-3-29"><a href="#2020-3-29" class="headerlink" title="2020-3-29"></a>2020-3-29</h2><p>写作业…概率论作业每次都是这么多…<br>调了一道MRctf的题，大体知道了花指令怎么patch和堆栈怎么平衡了  </p>
 <h2 id="2020-3-30"><a href="#2020-3-30" class="headerlink" title="2020-3-30"></a>2020-3-30</h2><p>今天上午收到域名审批下来的短信，心血来潮再次修了修blog，终于可以实现挂载到服务器上了，下一步就是熟悉熟悉next主题的使用了<br>跟sakura师傅请教了一下，人生哲理增加了！(确信)<br>看符号执行的帖子也就图一乐，真要学明白还是得<a href="https://github.com/saswatanand/symexbib" target="_blank" rel="noopener">看论文</a>  </p>
 ]]></content>
+      <tags>
+        <tag>diary</tag>
+      </tags>
   </entry>
   <entry>
     <title>Hello World</title>
