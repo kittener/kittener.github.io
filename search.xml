@@ -1,6 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>关于python2的encode(&#39;hex&#39;)在python3上的解决</title>
+    <url>/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>今天在实验RSA加解密的文件的时候，由于该文件是基于python2写的，所以在python3上没有很好的运行，记录一下这个知识点  </p>
+<a id="more"></a>  
+
+<p>python2对于字符串转换成hex编码的时候使用的是str本身具有的方法，即str.encode(‘hex’)<br>但是这个方法在python3中取消了，解决方案如下：<br>首先  </p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">str1 &#x3D; bytes(str,encoding &#x3D; &#39;utf-8&#39;)  </span><br><span class="line">str1.hex()</span><br></pre></td></tr></table></figure>
+<p>即可  </p>
+<p>顺便扩充一下知识：  </p>
+<h2 id="bytes定义"><a href="#bytes定义" class="headerlink" title="bytes定义"></a>bytes定义</h2><h3 id="1-使用bytes函数创建bytes"><a href="#1-使用bytes函数创建bytes" class="headerlink" title="1.使用bytes函数创建bytes"></a>1.使用bytes函数创建bytes</h3><ul>
+<li>bytes() 创建一个空的bytes  </li>
+<li>bytes(int) 创建一个int位的全位0的bytes  </li>
+<li>bytes(iterabl_of_ints) 可迭代数字组成的bytes(比如range)</li>
+<li>bytes(string,encoding[,errors]) 等价于string.encode()</li>
+<li>bytes(bytes of buffer) 创建一个bytes的copy<h3 id="2-直接定义"><a href="#2-直接定义" class="headerlink" title="2.直接定义"></a>2.直接定义</h3></li>
+</ul>
+<p>比如：</p>
+<p>​ b = b’abc’</p>
+<p>​ b = b’\x61’</p>
+<h3 id="3-类型转换"><a href="#3-类型转换" class="headerlink" title="3.类型转换"></a>3.类型转换</h3><ul>
+<li>string.encode()</li>
+<li>int.tobytes()</li>
+<li>bytes.from</li>
+<li>bytes函数定义</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; bytes()</span><br><span class="line">b&#39;&#39;</span><br><span class="line">&gt;&gt;&gt; bytes(3)</span><br><span class="line">b&#39;\x00\x00\x00&#39;</span><br><span class="line">&gt;&gt;&gt; bytes(range(3))</span><br><span class="line">b&#39;\x00\x01\x02&#39;</span><br><span class="line">&gt;&gt;&gt; b &#x3D; bytes(&#39;中国&#39;, encoding&#x3D;&#39;utf-8&#39;)</span><br><span class="line">&gt;&gt;&gt; b</span><br><span class="line">b&#39;\xe4\xb8\xad\xe5\x9b\xbd&#39;</span><br><span class="line">&gt;&gt;&gt; bytes(b)</span><br><span class="line">b&#39;\xe4\xb8\xad\xe5\x9b\xbd&#39;</span><br></pre></td></tr></table></figure>
+
+
+<p>直接创建：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; b &#x3D; b&#39;abc&#39;</span><br><span class="line">&gt;&gt;&gt; b</span><br><span class="line">b&#39;abc&#39;</span><br></pre></td></tr></table></figure>
+<p>类型转换：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; n &#x3D; 97</span><br><span class="line">&gt;&gt;&gt; n.to_bytes(1,byteorder&#x3D;&#39;big&#39;)</span><br><span class="line">b&#39;a&#39;</span><br><span class="line">&gt;&gt;&gt; s &#x3D; &#39;中国&#39;</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; s.encode(encoding &#x3D; &#39;utf-8&#39;)</span><br><span class="line">b&#39;\xe4\xb8\xad\xe5\x9b\xbd&#39;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; bytes.fromhex(&#39;61&#39;)</span><br><span class="line">b&#39;a&#39;</span><br></pre></td></tr></table></figure>
+<h2 id="bytes的显示方式"><a href="#bytes的显示方式" class="headerlink" title="bytes的显示方式"></a>bytes的显示方式</h2><blockquote>
+<blockquote>
+<blockquote>
+<p>Only ASCII characters are permitted in bytes literals (regardless of the declared source code encoding). Any binary values over 127 must be entered into bytes literals using the appropriate escape sequence.</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>只有ASCII中的字符串是可以直接在bytes类型中显示出来的，所有大于127的数值用转义字符表达。</p>
+<p>比如，内存中的字节对象用十六进制表示为61，在python中显示的方式不是b’\x61’ 而是b’a’；而b’\xe4’显示方式就是b’\xe4’；注意：仅仅是显示方式而已</p>
+<p>另外，并不是所有的小于127的都可以被友好的显示出来，有些对象本身不可显示，就显示其十六进制表示。比如</p>
+<p>b’\x00’</p>
+<p>bytes的一般方法<br>bytes类似于string；在方法上，除了自己特有的方法外，跟str也类似。</p>
+<p>比如：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&gt;&gt;&gt; b&#39;abc&#39;.find(b&#39;\x63&#39;)</span><br><span class="line">2</span><br><span class="line">&gt;&gt;&gt; b&#39;abc&#39;.replace(b&#39;\61&#39;,b&#39;A&#39;)</span><br><span class="line">b&#39;abc&#39;</span><br></pre></td></tr></table></figure>
+<h2 id="bytearray定义"><a href="#bytearray定义" class="headerlink" title="bytearray定义"></a>bytearray定义</h2><p>bytearray是可变的bytes数据类型，可以通过bytearray创建和定义</p>
+<h3 id="一：bytearray-定义"><a href="#一：bytearray-定义" class="headerlink" title="一：bytearray()定义"></a>一：bytearray()定义</h3><ul>
+<li><p>bytearray() 创建一个空的bytearray</p>
+</li>
+<li><p>bytearray(int) 创建一个int位的全位0的bytearray</p>
+</li>
+<li><p>bytearray(iterabl_of_ints) 可迭代数字组成的bytearray(比如range)</p>
+</li>
+<li><p>bytearray(string,encoding[,errors]) 将一个字符串编码为bytearray</p>
+</li>
+<li><p>bytearray(bytes of buffer) 创建一个bytearray</p>
+<h3 id="二-bytearray的方法定义"><a href="#二-bytearray的方法定义" class="headerlink" title="二: bytearray的方法定义"></a>二: bytearray的方法定义</h3></li>
+<li><p>bytearray.fromhex()  </p>
+<h3 id="bytearray的一般方法"><a href="#bytearray的一般方法" class="headerlink" title="bytearray的一般方法"></a>bytearray的一般方法</h3></li>
+</ul>
+<p>bytearray具备bytes的操作方法，像字符串一样操作；</p>
+<p>另外bytearray还具备像list一样的操作方法，比如pop，append等</p>
+<h3 id="bytes-和-bytearray的方法"><a href="#bytes-和-bytearray的方法" class="headerlink" title="bytes 和 bytearray的方法"></a>bytes 和 bytearray的方法</h3><p>十六进制和字节类型的相互转换</p>
+<pre><code>bytes.fromhex()
+bytearray.fromhex()
+bytes.hex()
+bytesarray.hex()
+&gt;&gt;&gt; b = bytes(&apos;hell&apos;,encoding=&apos;utf-8&apos;)
+&gt;&gt;&gt; ba = bytearray(&apos;hell&apos;,encoding=&apos;utf-8&apos;)
+&gt;&gt;&gt; b
+b&apos;hell&apos;
+&gt;&gt;&gt; ba
+bytearray(b&apos;hell&apos;)
+&gt;&gt;&gt; b.hex()
+&apos;68656c6c&apos;
+&gt;&gt;&gt; ba.hex()
+&apos;68656c6c&apos;</code></pre>]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>技术</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>静态编译</title>
     <url>/2020/03/24/%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91/</url>
     <content><![CDATA[<p>今天由一道入群题入手之后了解到了静态编译这个知识：  </p>

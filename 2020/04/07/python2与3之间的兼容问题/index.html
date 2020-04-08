@@ -77,7 +77,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="技术," />
 
 
 
@@ -88,11 +88,16 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Kittener&#39;s blog">
-<meta property="og:url" content="http://www.kittener.top/archives/index.html">
+<meta name="description" content="今天在实验RSA加解密的文件的时候，由于该文件是基于python2写的，所以在python3上没有很好的运行，记录一下这个知识点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于python2的encode(&#39;hex&#39;)在python3上的解决">
+<meta property="og:url" content="http://www.kittener.top/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/index.html">
 <meta property="og:site_name" content="Kittener&#39;s blog">
+<meta property="og:description" content="今天在实验RSA加解密的文件的时候，由于该文件是基于python2写的，所以在python3上没有很好的运行，记录一下这个知识点">
+<meta property="article:published_time" content="2020-04-07T14:34:38.000Z">
+<meta property="article:modified_time" content="2020-04-07T14:52:28.784Z">
 <meta property="article:author" content="Kittener">
+<meta property="article:tag" content="技术">
 <meta name="twitter:card" content="summary">
 
 
@@ -123,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="http://www.kittener.top/archives/"/>
+  <link rel="canonical" href="http://www.kittener.top/2020/04/07/python2与3之间的兼容问题/"/>
 
 
 
 
 
-  <title>归档 | Kittener's blog</title>
+  <title>关于python2的encode('hex')在python3上的解决 | Kittener's blog</title>
   
 
 
@@ -148,7 +153,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -286,185 +291,270 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-      <span class="archive-page-counter">
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.kittener.top/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Kittener">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kittener's blog">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
+          <h1 class="post-title" itemprop="name headline">关于python2的encode('hex')在python3上的解决</h1>
         
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-07T22:34:38+08:00">
+                2020-04-07
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2020-04-07T22:52:28+08:00">
+                2020-04-07
+              </time>
+            
+          </span>
+
           
-        
-        嗯..! 目前共计 4 篇日志。 继续努力。
-      </span>
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/python/" itemprop="url" rel="index">
+                    <span itemprop="name">python</span>
+                  </a>
+                </span>
 
-      
-
-        
-        
-        
-
-        
+                
+                
+              
+            </span>
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2020">2020</h1>
-          </div>
-        
-        
 
-        
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2020/04/07/python2与3之间的兼容问题/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/" itemprop="url">
-              
-                <span itemprop="name">关于python2的encode('hex')在python3上的解决</span>
-              
-            </a>
-        
-      </h2>
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-04-07T22:34:38+08:00"
-              content="2020-04-07" >
-          04-07
-        </time>
-      </div>
+          
 
-    </header>
-  </article>
+          
 
+        </div>
+      </header>
+    
 
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/03/24/%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91/" itemprop="url">
-              
-                <span itemprop="name">静态编译</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-03-24T20:20:32+08:00"
-              content="2020-03-24" >
-          03-24
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-tags" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/03/21/kittener's%20blog/" itemprop="url">
-              
-                <span itemprop="name">Diary</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-03-21T19:45:42+08:00"
-              content="2020-03-21" >
-          03-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/03/19/hello-world/" itemprop="url">
-              
-                <span itemprop="name">Hello World</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-03-19T12:00:09+08:00"
-              content="2020-03-19" >
-          03-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
+        <p>今天在实验RSA加解密的文件的时候，由于该文件是基于python2写的，所以在python3上没有很好的运行，记录一下这个知识点  </p>
+<a id="more"></a>  
 
+<p>python2对于字符串转换成hex编码的时候使用的是str本身具有的方法，即str.encode(‘hex’)<br>但是这个方法在python3中取消了，解决方案如下：<br>首先  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">str1 &#x3D; bytes(str,encoding &#x3D; &#39;utf-8&#39;)  </span><br><span class="line">str1.hex()</span><br></pre></td></tr></table></figure>
+<p>即可  </p>
+<p>顺便扩充一下知识：  </p>
+<h2 id="bytes定义"><a href="#bytes定义" class="headerlink" title="bytes定义"></a>bytes定义</h2><h3 id="1-使用bytes函数创建bytes"><a href="#1-使用bytes函数创建bytes" class="headerlink" title="1.使用bytes函数创建bytes"></a>1.使用bytes函数创建bytes</h3><ul>
+<li>bytes() 创建一个空的bytes  </li>
+<li>bytes(int) 创建一个int位的全位0的bytes  </li>
+<li>bytes(iterabl_of_ints) 可迭代数字组成的bytes(比如range)</li>
+<li>bytes(string,encoding[,errors]) 等价于string.encode()</li>
+<li>bytes(bytes of buffer) 创建一个bytes的copy<h3 id="2-直接定义"><a href="#2-直接定义" class="headerlink" title="2.直接定义"></a>2.直接定义</h3></li>
+</ul>
+<p>比如：</p>
+<p>​ b = b’abc’</p>
+<p>​ b = b’\x61’</p>
+<h3 id="3-类型转换"><a href="#3-类型转换" class="headerlink" title="3.类型转换"></a>3.类型转换</h3><ul>
+<li>string.encode()</li>
+<li>int.tobytes()</li>
+<li>bytes.from</li>
+<li>bytes函数定义</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; bytes()</span><br><span class="line">b&#39;&#39;</span><br><span class="line">&gt;&gt;&gt; bytes(3)</span><br><span class="line">b&#39;\x00\x00\x00&#39;</span><br><span class="line">&gt;&gt;&gt; bytes(range(3))</span><br><span class="line">b&#39;\x00\x01\x02&#39;</span><br><span class="line">&gt;&gt;&gt; b &#x3D; bytes(&#39;中国&#39;, encoding&#x3D;&#39;utf-8&#39;)</span><br><span class="line">&gt;&gt;&gt; b</span><br><span class="line">b&#39;\xe4\xb8\xad\xe5\x9b\xbd&#39;</span><br><span class="line">&gt;&gt;&gt; bytes(b)</span><br><span class="line">b&#39;\xe4\xb8\xad\xe5\x9b\xbd&#39;</span><br></pre></td></tr></table></figure>
+
+
+<p>直接创建：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; b &#x3D; b&#39;abc&#39;</span><br><span class="line">&gt;&gt;&gt; b</span><br><span class="line">b&#39;abc&#39;</span><br></pre></td></tr></table></figure>
+<p>类型转换：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; n &#x3D; 97</span><br><span class="line">&gt;&gt;&gt; n.to_bytes(1,byteorder&#x3D;&#39;big&#39;)</span><br><span class="line">b&#39;a&#39;</span><br><span class="line">&gt;&gt;&gt; s &#x3D; &#39;中国&#39;</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; s.encode(encoding &#x3D; &#39;utf-8&#39;)</span><br><span class="line">b&#39;\xe4\xb8\xad\xe5\x9b\xbd&#39;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; bytes.fromhex(&#39;61&#39;)</span><br><span class="line">b&#39;a&#39;</span><br></pre></td></tr></table></figure>
+<h2 id="bytes的显示方式"><a href="#bytes的显示方式" class="headerlink" title="bytes的显示方式"></a>bytes的显示方式</h2><blockquote>
+<blockquote>
+<blockquote>
+<p>Only ASCII characters are permitted in bytes literals (regardless of the declared source code encoding). Any binary values over 127 must be entered into bytes literals using the appropriate escape sequence.</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>只有ASCII中的字符串是可以直接在bytes类型中显示出来的，所有大于127的数值用转义字符表达。</p>
+<p>比如，内存中的字节对象用十六进制表示为61，在python中显示的方式不是b’\x61’ 而是b’a’；而b’\xe4’显示方式就是b’\xe4’；注意：仅仅是显示方式而已</p>
+<p>另外，并不是所有的小于127的都可以被友好的显示出来，有些对象本身不可显示，就显示其十六进制表示。比如</p>
+<p>b’\x00’</p>
+<p>bytes的一般方法<br>bytes类似于string；在方法上，除了自己特有的方法外，跟str也类似。</p>
+<p>比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; b&#39;abc&#39;.find(b&#39;\x63&#39;)</span><br><span class="line">2</span><br><span class="line">&gt;&gt;&gt; b&#39;abc&#39;.replace(b&#39;\61&#39;,b&#39;A&#39;)</span><br><span class="line">b&#39;abc&#39;</span><br></pre></td></tr></table></figure>
+<h2 id="bytearray定义"><a href="#bytearray定义" class="headerlink" title="bytearray定义"></a>bytearray定义</h2><p>bytearray是可变的bytes数据类型，可以通过bytearray创建和定义</p>
+<h3 id="一：bytearray-定义"><a href="#一：bytearray-定义" class="headerlink" title="一：bytearray()定义"></a>一：bytearray()定义</h3><ul>
+<li><p>bytearray() 创建一个空的bytearray</p>
+</li>
+<li><p>bytearray(int) 创建一个int位的全位0的bytearray</p>
+</li>
+<li><p>bytearray(iterabl_of_ints) 可迭代数字组成的bytearray(比如range)</p>
+</li>
+<li><p>bytearray(string,encoding[,errors]) 将一个字符串编码为bytearray</p>
+</li>
+<li><p>bytearray(bytes of buffer) 创建一个bytearray</p>
+<h3 id="二-bytearray的方法定义"><a href="#二-bytearray的方法定义" class="headerlink" title="二: bytearray的方法定义"></a>二: bytearray的方法定义</h3></li>
+<li><p>bytearray.fromhex()  </p>
+<h3 id="bytearray的一般方法"><a href="#bytearray的一般方法" class="headerlink" title="bytearray的一般方法"></a>bytearray的一般方法</h3></li>
+</ul>
+<p>bytearray具备bytes的操作方法，像字符串一样操作；</p>
+<p>另外bytearray还具备像list一样的操作方法，比如pop，append等</p>
+<h3 id="bytes-和-bytearray的方法"><a href="#bytes-和-bytearray的方法" class="headerlink" title="bytes 和 bytearray的方法"></a>bytes 和 bytearray的方法</h3><p>十六进制和字节类型的相互转换</p>
+<pre><code>bytes.fromhex()
+bytearray.fromhex()
+bytes.hex()
+bytesarray.hex()
+&gt;&gt;&gt; b = bytes(&apos;hell&apos;,encoding=&apos;utf-8&apos;)
+&gt;&gt;&gt; ba = bytearray(&apos;hell&apos;,encoding=&apos;utf-8&apos;)
+&gt;&gt;&gt; b
+b&apos;hell&apos;
+&gt;&gt;&gt; ba
+bytearray(b&apos;hell&apos;)
+&gt;&gt;&gt; b.hex()
+&apos;68656c6c&apos;
+&gt;&gt;&gt; ba.hex()
+&apos;68656c6c&apos;</code></pre>
+      
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/24/%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91/" rel="next" title="静态编译">
+                <i class="fa fa-chevron-left"></i> 静态编译
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -472,6 +562,17 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+      <div class="ds-thread" data-thread-key="2020/04/07/python2与3之间的兼容问题/"
+           data-title="关于python2的encode('hex')在python3上的解决" data-url="http://www.kittener.top/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/">
+      </div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -492,8 +593,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -581,6 +691,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#bytes定义"><span class="nav-number">1.</span> <span class="nav-text">bytes定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用bytes函数创建bytes"><span class="nav-number">1.1.</span> <span class="nav-text">1.使用bytes函数创建bytes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-直接定义"><span class="nav-number">1.2.</span> <span class="nav-text">2.直接定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-类型转换"><span class="nav-number">1.3.</span> <span class="nav-text">3.类型转换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bytes的显示方式"><span class="nav-number">2.</span> <span class="nav-text">bytes的显示方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bytearray定义"><span class="nav-number">3.</span> <span class="nav-text">bytearray定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一：bytearray-定义"><span class="nav-number">3.1.</span> <span class="nav-text">一：bytearray()定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二-bytearray的方法定义"><span class="nav-number">3.2.</span> <span class="nav-text">二: bytearray的方法定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bytearray的一般方法"><span class="nav-number">3.3.</span> <span class="nav-text">bytearray的一般方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bytes-和-bytearray的方法"><span class="nav-number">3.4.</span> <span class="nav-text">bytes 和 bytearray的方法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -741,6 +867,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
