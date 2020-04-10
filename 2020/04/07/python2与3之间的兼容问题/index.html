@@ -95,7 +95,7 @@
 <meta property="og:site_name" content="Kittener&#39;s blog">
 <meta property="og:description" content="今天在实验RSA加解密的文件的时候，由于该文件是基于python2写的，所以在python3上没有很好的运行，记录一下这个知识点">
 <meta property="article:published_time" content="2020-04-07T14:34:38.000Z">
-<meta property="article:modified_time" content="2020-04-07T14:52:28.784Z">
+<meta property="article:modified_time" content="2020-04-08T11:28:26.957Z">
 <meta property="article:author" content="Kittener">
 <meta property="article:tag" content="技术">
 <meta name="twitter:card" content="summary">
@@ -350,8 +350,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-04-07T22:52:28+08:00">
-                2020-04-07
+              <time title="更新于" itemprop="dateModified" datetime="2020-04-08T19:28:26+08:00">
+                2020-04-08
               </time>
             
           </span>
@@ -433,9 +433,9 @@
 <li>bytes(int) 创建一个int位的全位0的bytes  </li>
 <li>bytes(iterabl_of_ints) 可迭代数字组成的bytes(比如range)</li>
 <li>bytes(string,encoding[,errors]) 等价于string.encode()</li>
-<li>bytes(bytes of buffer) 创建一个bytes的copy<h3 id="2-直接定义"><a href="#2-直接定义" class="headerlink" title="2.直接定义"></a>2.直接定义</h3></li>
+<li>bytes(bytes of buffer) 创建一个bytes的copy  </li>
 </ul>
-<p>比如：</p>
+<h3 id="2-直接定义"><a href="#2-直接定义" class="headerlink" title="2.直接定义"></a>2.直接定义</h3><p>比如：</p>
 <p>​ b = b’abc’</p>
 <p>​ b = b’\x61’</p>
 <h3 id="3-类型转换"><a href="#3-类型转换" class="headerlink" title="3.类型转换"></a>3.类型转换</h3><ul>
@@ -483,20 +483,33 @@
 <p>bytearray具备bytes的操作方法，像字符串一样操作；</p>
 <p>另外bytearray还具备像list一样的操作方法，比如pop，append等</p>
 <h3 id="bytes-和-bytearray的方法"><a href="#bytes-和-bytearray的方法" class="headerlink" title="bytes 和 bytearray的方法"></a>bytes 和 bytearray的方法</h3><p>十六进制和字节类型的相互转换</p>
-<pre><code>bytes.fromhex()
-bytearray.fromhex()
-bytes.hex()
-bytesarray.hex()
-&gt;&gt;&gt; b = bytes(&apos;hell&apos;,encoding=&apos;utf-8&apos;)
-&gt;&gt;&gt; ba = bytearray(&apos;hell&apos;,encoding=&apos;utf-8&apos;)
-&gt;&gt;&gt; b
-b&apos;hell&apos;
-&gt;&gt;&gt; ba
-bytearray(b&apos;hell&apos;)
-&gt;&gt;&gt; b.hex()
-&apos;68656c6c&apos;
-&gt;&gt;&gt; ba.hex()
-&apos;68656c6c&apos;</code></pre>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">bytes.fromhex()</span><br><span class="line">bytearray.fromhex()</span><br><span class="line">bytes.hex()</span><br><span class="line">bytesarray.hex()</span><br><span class="line">&gt;&gt;&gt; b &#x3D; bytes(&#39;hell&#39;,encoding&#x3D;&#39;utf-8&#39;)</span><br><span class="line">&gt;&gt;&gt; ba &#x3D; bytearray(&#39;hell&#39;,encoding&#x3D;&#39;utf-8&#39;)</span><br><span class="line">&gt;&gt;&gt; b</span><br><span class="line">b&#39;hell&#39;</span><br><span class="line">&gt;&gt;&gt; ba</span><br><span class="line">bytearray(b&#39;hell&#39;)</span><br><span class="line">&gt;&gt;&gt; b.hex()</span><br><span class="line">&#39;68656c6c&#39;</span><br><span class="line">&gt;&gt;&gt; ba.hex()</span><br><span class="line">&#39;68656c6c&#39;</span><br><span class="line">&#96;&#96;&#96;  </span><br><span class="line"></span><br><span class="line">但是decode的好像没有特别好的办法除了使用binascii模块...  </span><br><span class="line"></span><br><span class="line">## binascii模块的使用  </span><br><span class="line">### 简介  </span><br><span class="line">binascii模块包含很多用来方法来转换二进制和各种ASCII编码的二进制表示法。通常不直接使用这些功能，而是使用封装模块，如uu, base64或binhex。binascii模块包含用C语言编写更快的低级功能，通常为高级模块所使用。</span><br><span class="line"></span><br><span class="line">- 相关模块  </span><br><span class="line">1. base64 模块</span><br><span class="line">2. binhex 模块</span><br><span class="line">3. uu 模块</span><br><span class="line">4. quopri 模块</span><br><span class="line">  </span><br><span class="line">### UU编码  </span><br><span class="line">相关函数binascii.a2b_uu(string)和binascii.b2a_uu(data)，更多资料点[这](http:&#x2F;&#x2F;docs.python.org&#x2F;2&#x2F;library&#x2F;uu.html)  </span><br><span class="line"></span><br><span class="line">### Binhex编码  </span><br><span class="line">相关函数有：binascii.rledecode_hqx(data) ，binascii.rlecode_hqx(data)，binascii.b2a_hqx(data) ，binascii.crc_hqx(data, crc)，更多资料点[这](http:&#x2F;&#x2F;docs.python.org&#x2F;2&#x2F;library&#x2F;uu.html)  </span><br><span class="line"></span><br><span class="line">### Base64编码  </span><br><span class="line">binascii.a2b_base64(string)：转换的base64数据块为二进制，并返回二进制数据。一次可以传递多行。和base64. b64decode对应。 binascii.b2a_base64(data)：转换二进制数据为一行base64编码的ASCII字符。返回字符串包含换行符。根据base64的标准data的长度最大为57。和base64. b64encode对应。，更多资料点[这](http:&#x2F;&#x2F;docs.python.org&#x2F;2&#x2F;library&#x2F;base64.html)</span><br><span class="line"></span><br><span class="line">### QP编码  </span><br><span class="line">Quoted-printable，或QP encoding，没有规范的中文译名，可译为“可打印字符引用编码”、“使用可打印字符的编码”。Quoted-printable是使用可打印的 ASCII字符 (如字母、数字与&quot;&#x3D;&quot;)表示各种编码格式下的字符，以便能在7-bit数据通路上传输8-bit数据, 或者更一般地说在非8-bit clean媒体上正确处理数据。这被定义为MIME content transfer encoding，用于e-mail。</span><br><span class="line"></span><br><span class="line">QP使用&quot;&#x3D;&quot;开头的转义字符. 一般限制行宽为76，因为有些软件限制了行宽.</span><br><span class="line"></span><br><span class="line">binascii.a2b_qp(string[, header])：转换引述打印数据块为二进制，并返回二进制数据。多行可以在同一时间被传递。如果可选参数头存在和真实，下划线将被解码为空格。</span><br><span class="line"></span><br><span class="line">实际上，QP码是是把’\x00’转换成’&#x3D;00’，也就是替换’\x’为’&#x3D;’。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>s =’\x00=’<br>s = ‘=\x00hello’<br>import binascii<br>encoded = binascii.b2a_qp(s)<br>encoded<br>‘=3D=00hello’<br>decoded = binascii.a2b_qp(encoded)<br>print decoded<br>=hello<br>print repr(decoded)<br>‘=\x00hello’</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### CRC校验和</span><br><span class="line">binascii.crc32(data[, crc])：计算的data 的32位校验和CRC- 32时，crc为初始CRC 。crc32与ZIP文件的校验和一致。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>print binascii.crc32(“hello world”)<br>222957957<br>crc = binascii.crc32(“hello”)<br>crc = binascii.crc32(“ world”, crc) &amp; 0xffffffff<br>print ‘crc32 = 0x%08x’ % crc<br>crc32 = 0x0d4a1185<br>crc<br>222957957</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 二进制转换  </span><br><span class="line">binascii.b2a_hex(data)和binascii.hexlify(data)：返回二进制数据的十六进制表示。每个字节被转换成相应的 2位十六进制表示形式。因此，得到的字符串是是原数据长度的两倍。 binascii.a2b_hex(hexstr) 和 binascii.unhexlify(hexstr)：从十六进制字符串hexstr返回二进制数据。是b2a_hex的逆向操作。 hexstr必须包含偶数个十六进制数字（可以是大写或小写），否则报TypeError。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>s = ‘hello’<br>b = b2a_hex(s)<br>print b<br>68656c6c6f<br>a2b_hex(b)<br>‘hello’<br>b = hexlify(s)<br>print b<br>68656c6c6f<br>unhexlify(b)<br>‘hello’</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<pre><code>
+参考博客：https://www.jianshu.com/p/701960098b7a
+</code></pre>
       
     </div>
     
