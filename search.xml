@@ -1,6 +1,341 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>操作系统</title>
+    <url>/2020/05/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<p>记录一下《计算机操作系统》这本书，可能以后也会用到，所以一直会更新下去，直到读完</p>
+<a id="more"></a>
+<h1 id="引论"><a href="#引论" class="headerlink" title="引论"></a>引论</h1><h2 id="操作系统的目标"><a href="#操作系统的目标" class="headerlink" title="操作系统的目标"></a>操作系统的目标</h2><ol>
+<li>方便性  </li>
+<li>有效性<br>有效性的第一层含义是提高系统资源的利用率。另一层含义是，提高系统的吞吐量。OS可以通过合理地组织计算机的工作流程，加速程序的运行，缩短程序的运行周期，从而提高了系统的吞吐量。  </li>
+<li>可扩充性<br>OS从早期的无结构发展称模块化结构，进而发展成层次化结构，近年来广泛采用了微内核结构，具有良好的可扩充性。  </li>
+<li>开放性<br>指系统能遵循世界标准规范，特别是遵循开放系统互连OSI国际标准。  </li>
+</ol>
+<h2 id="操作系统的作用"><a href="#操作系统的作用" class="headerlink" title="操作系统的作用"></a>操作系统的作用</h2><ol>
+<li>OS作为用户与计算机硬件系统之间的接口<br>用户通过命令方式、系统调用方式和图标——窗口方式来实现与操作系统的通信  </li>
+<li>OS作为计算机系统资源的管理者<br>OS中的资源分为四类：处理机、存储器、I/O设备以及文件（数据和程序）  </li>
+<li>OS实现了对计算机资源的抽象<br>OS是铺设在计算机硬件上的多层软件的集合，不仅增强了系统的功能，还隐藏了对硬件操作的具体细节，实现了对计算机硬件操作的多个层次的抽象模型。  </li>
+</ol>
+<h2 id="单道批处理系统"><a href="#单道批处理系统" class="headerlink" title="单道批处理系统"></a>单道批处理系统</h2><ol>
+<li>处理过程<br>简单来说就是将作业装在磁带上，一个一个单个处理，如图：<br><img src="%E5%9B%BE1.jpg" alt="单道批处理系统">  </li>
+<li>缺点<br>资源得不到充分利用，如图：<br><img src="%E5%9B%BE2.jpg" alt="运行情况">  </li>
+</ol>
+<h2 id="多道批处理系统"><a href="#多道批处理系统" class="headerlink" title="多道批处理系统"></a>多道批处理系统</h2><ol>
+<li>处理过程<br>用户所提交的作业先放在外存上，并排成一个队列，称为“后备队列”。然后由作业调度程序按一定的算法，从后备队列中选择若干个作业调入内存，使它们共享CPU和系统中的各种资源。  </li>
+<li>优缺点<br>（1）资源利用率高<br>（2）系统吞吐量大<br>（3）平均周转时间长<br>（4）无交互能力  </li>
+</ol>
+<h2 id="分时系统"><a href="#分时系统" class="headerlink" title="分时系统"></a>分时系统</h2><ol>
+<li>运行方式  </li>
+</ol>
+<ul>
+<li>作业直接进入内存  </li>
+<li>采用轮转运行方式（加入时间片）  </li>
+</ul>
+<ol start="2">
+<li>特征  </li>
+</ol>
+<ul>
+<li>多路性：系统允许将多台终端同时链接到一台主机上  </li>
+<li>独立性：系统提供了这样的用户各自独立环境  </li>
+<li>及时性：用户的请求很短时间内能得到相应  </li>
+<li>交互性：用户可通过终端进行人机对话  </li>
+</ul>
+<h2 id="操作系统的种类"><a href="#操作系统的种类" class="headerlink" title="操作系统的种类"></a>操作系统的种类</h2><ul>
+<li>单用户单任务操作系统  </li>
+<li>单用户多任务操作系统  </li>
+<li>多用户多任务操作系统  </li>
+</ul>
+<h2 id="基本特性"><a href="#基本特性" class="headerlink" title="基本特性"></a>基本特性</h2><h3 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h3><ol>
+<li>并行与并发  </li>
+</ol>
+<ul>
+<li>并行性是指两个或多个事件在同一时刻发生  </li>
+<li>并发性是指两个或多个事件在统一时间间隔内发生  </li>
+</ul>
+<ol start="2">
+<li>引入进程  </li>
+</ol>
+<ul>
+<li>进程是指：在系统中能独立运行并作为资源分配的基本单位，它是由一组机器指令、数据和堆栈等组成的，是一个能独立运行的活动实体。  </li>
+</ul>
+<h3 id="共享"><a href="#共享" class="headerlink" title="共享"></a>共享</h3><ol>
+<li>互斥共享方式<br>一个进程访问完资源后，资源才能被另一个进程访问。资源叫做<strong>临界资源</strong>    </li>
+<li>同时访问方式  </li>
+</ol>
+<h3 id="虚拟"><a href="#虚拟" class="headerlink" title="虚拟"></a>虚拟</h3><p>在os中，把通过某种技术将一个物理实体变为若干个逻辑上的对应物的功能称为<strong>虚拟</strong>。  </p>
+<ol>
+<li>时分复用技术（时间）  </li>
+<li>空分复用技术（空间）  </li>
+</ol>
+<h2 id="操作系统的功能"><a href="#操作系统的功能" class="headerlink" title="操作系统的功能"></a>操作系统的功能</h2><h3 id="处理机管理功能"><a href="#处理机管理功能" class="headerlink" title="处理机管理功能"></a>处理机管理功能</h3><ol>
+<li>进程控制：为作业创建进程、撤销（终止）已结束的进程，以及控制进程在运行过程中的状态转换。  </li>
+<li>进程同步：  </li>
+</ol>
+<ul>
+<li>进程互斥方式：指诸进程在对临界资源进行访问时，应采用互斥方式  </li>
+<li>进程同步方式：指在相互合作去完成共同任务的诸进程间，由同步机构对它们的执行次序加以协调。  </li>
+</ul>
+<ol start="3">
+<li>进程通信：通常采用直接通信方式，由源进程利用发送命令直接将消息挂到目标进程的消息队列上，以后由目标进程利用接受命令从其消息队列中取出消息  </li>
+<li>调度  </li>
+</ol>
+<ul>
+<li>作业调度：从后备队列中按一定算法取出若干队列。为其分配运行所需资源。</li>
+<li>进程调度：从就绪队列中按照一定的算法选出一个进程，执行。</li>
+</ul>
+<h3 id="存储器管理功能"><a href="#存储器管理功能" class="headerlink" title="存储器管理功能"></a>存储器管理功能</h3><ol>
+<li>内存分配  </li>
+</ol>
+<ul>
+<li>静态分配方式：每个作业的内存空间是在作业装入时确定的，在作业装入后的整个运行期间不允许该作业再申请新的内存空间。</li>
+<li>动态分配方式：允许申请新的空间。  </li>
+</ul>
+<ol start="2">
+<li>内存保护：每个程序互不打扰，操作系统的程序和数据不允许访问。</li>
+<li>地址映射  </li>
+<li>内存扩充  </li>
+</ol>
+<ul>
+<li>请求调入功能：将程序所需部分从存储器中调入内存</li>
+<li>置换功能：将内存和磁盘的数据进行置换  </li>
+</ul>
+<h1 id="进程的描述与控制"><a href="#进程的描述与控制" class="headerlink" title="进程的描述与控制"></a>进程的描述与控制</h1><h2 id="进程通信"><a href="#进程通信" class="headerlink" title="进程通信"></a>进程通信</h2><h3 id="进程通信的类型"><a href="#进程通信的类型" class="headerlink" title="进程通信的类型"></a>进程通信的类型</h3><ol>
+<li>共享存储器系统  </li>
+</ol>
+<ul>
+<li>基于共享数据结构的通信方式。</li>
+</ul>
+<h1 id="处理机调度与死锁"><a href="#处理机调度与死锁" class="headerlink" title="处理机调度与死锁"></a>处理机调度与死锁</h1><h2 id="处理机调度的层次和调度算法的目标"><a href="#处理机调度的层次和调度算法的目标" class="headerlink" title="处理机调度的层次和调度算法的目标"></a>处理机调度的层次和调度算法的目标</h2><h3 id="处理机调度的层次"><a href="#处理机调度的层次" class="headerlink" title="处理机调度的层次"></a>处理机调度的层次</h3><ol>
+<li>高级调度<br>调度对象是作业，其主要功能是根据某种算法，决定将外存上处于后备队列中的哪几个作业调入内存，为其创建进程、分配资源，放入就绪队列，主要应用于多道批处理系统  </li>
+<li>低级调度<br>又称为进程调度或短程调度，其调度对象是进程(或内核级线程)。其主要功能是根据某种算法决定就绪队列中的哪个进程应获得处理机。</li>
+<li>中级调度<br>提高内存利用率和系统吞吐量，把暂时不能运行的进程调至外存，把能运行的调至内存。  </li>
+</ol>
+<h3 id="处理机调度算法的目标"><a href="#处理机调度算法的目标" class="headerlink" title="处理机调度算法的目标"></a>处理机调度算法的目标</h3><ol>
+<li>处理机调度算法的共同目标<br>(1)<strong>资源利用率</strong> CPU的利用率 = CPU的有效工作时间/(CPU的有效工作时间+CPU的空闲等待时间)<br>(2)<strong>公平性</strong> 每个进程都应该获得合理的CPU时间<br>(3)<strong>平衡性</strong> 尽可能保持系统资源使用的平衡性<br>(4)<strong>策略强制执行</strong> 对所制订的策略，保证其准确执行  </li>
+<li>批处理系统的目标<br>(1)<strong>平均周转时间短</strong><br>(2)<strong>系统吞吐量高</strong><br>(3)<strong>处理机利用率高</strong>  </li>
+<li>分时系统的目标<br>(1)<strong>响应时间快</strong><br>(2)<strong>均衡性</strong>  </li>
+<li>实时系统的目标<br>(1)<strong>截止时间的保证</strong><br>(2)<strong>可预测性</strong>  </li>
+</ol>
+<h2 id="作业与作业调度"><a href="#作业与作业调度" class="headerlink" title="作业与作业调度"></a>作业与作业调度</h2><ol>
+<li>作业与作业步<br>(1)作业。不仅包含通常的程序和数据，还包括一份作业说明书，再批处理系统中，作业为基本单位从外存调入内存<br>(2)作业步。每个作业都必须经过若干个相对独立，又相互关联的顺序加工步骤才能得到结果。每个步骤叫做一个作业步。  </li>
+<li>作业的三种状态和三个阶段  </li>
+</ol>
+<ul>
+<li>收容阶段，操作员把用户提交的作业通过某种输入方式输入到硬盘上，再为该作业建立JCB，并把它放入作业后备队列中。(后备状态)</li>
+<li>运行阶段(运行阶段)  </li>
+<li>完成阶段(完成阶段)  </li>
+</ul>
+<ol start="3">
+<li>先来先服务和短作业优先调度算法  </li>
+</ol>
+<ul>
+<li>先来先服务调度算法(FCFS)  </li>
+<li>短作业优先调度算法(SJF):作业越短优先级越高  </li>
+<li>优先级调度算法(PSA):外部赋予作业优先级  </li>
+<li>高响应比优先调度算法(HRRN):优先权 = (等待时间+要求服务时间)/要求服务时间  </li>
+</ul>
+<h2 id="进程调度"><a href="#进程调度" class="headerlink" title="进程调度"></a>进程调度</h2><h3 id="进程调度方式"><a href="#进程调度方式" class="headerlink" title="进程调度方式"></a>进程调度方式</h3><ol>
+<li>非抢占方式<br>一旦处理机分配给某进程后，就一直让它运行下去，不会因为时钟中断而被抢占。<br>可能引起进程调度的因素：  </li>
+</ol>
+<ul>
+<li>程序执行完毕，或发生某种事件使程序无法执行  </li>
+<li>I/O请求  </li>
+<li>原语操作如Block<br>不适用于分时系统和大多数实时系统  </li>
+</ul>
+<ol start="2">
+<li>抢占方式<br>允许调度程序根据某一原则暂停执行中的程序，分配处理机给新的进程<br>原则：  </li>
+</ol>
+<ul>
+<li>优先权原则：高优先级先运行  </li>
+<li>短进程优先原则</li>
+<li>时间片原则：时间片用完就暂停执行  <h3 id="轮转调度算法"><a href="#轮转调度算法" class="headerlink" title="轮转调度算法"></a>轮转调度算法</h3>就绪队列上的每个进程每次仅运行一个时间片。  </li>
+</ul>
+<ol>
+<li><strong>原理</strong><br>系统将所有的就绪进程按FCFS策略排成一个就绪队列。  </li>
+<li><strong>进程切换时机</strong>  </li>
+</ol>
+<ul>
+<li>执行完成</li>
+<li>时间片用完，计时器中断处理程序被激活  </li>
+</ul>
+<ol start="3">
+<li><strong>时间片大小的确定</strong><br>略大于典型交互时间  <h3 id="优先级调度算法"><a href="#优先级调度算法" class="headerlink" title="优先级调度算法"></a>优先级调度算法</h3></li>
+<li><strong>类型</strong>  </li>
+</ol>
+<ul>
+<li>非抢占式优先级调度算法：一旦处理机分配给了优先级最高的进程，则一直执行下去直至完成。</li>
+<li>抢占式优先级调度算法：出现了更高优先级的进程，中断当前执行进程，转而去执行更高优先级的进程。  </li>
+</ul>
+<ol start="2">
+<li>优先级的类型  </li>
+</ol>
+<ul>
+<li>静态优先级：进程运行过程中优先级保持不变  </li>
+<li>动态优先级：随着时间增加而改变  <h3 id="多队列调度算法"><a href="#多队列调度算法" class="headerlink" title="多队列调度算法"></a>多队列调度算法</h3>将系统中的进程就绪队列从一个拆分成若干个，将不同类型或性质的进程固定分配在不同的就绪队列，不同的就绪队列采用不同的算法。<h3 id="多级反馈队列调度算法"><a href="#多级反馈队列调度算法" class="headerlink" title="多级反馈队列调度算法"></a>多级反馈队列调度算法</h3></li>
+</ul>
+<ol>
+<li>调度机制  </li>
+</ol>
+<ul>
+<li>设置多个就绪队列，每个队列不同的优先级不同的时间片大小，在优先级愈高的队列中，其时间片就越小。  </li>
+<li>每个队列采用FCFS算法。</li>
+<li>按队列优先级调度。 <h3 id="基于公平原则的调度算法"><a href="#基于公平原则的调度算法" class="headerlink" title="基于公平原则的调度算法"></a>基于公平原则的调度算法</h3></li>
+</ul>
+<ol>
+<li>保证调度算法<br>这里的保证并不是优先运行，而是性能保证。</li>
+</ol>
+<ul>
+<li>跟踪计算每个进程自创建以来已经执行的处理时间</li>
+<li>计算每个进程应获得的处理机时间，即自创建以来的时间除以n  </li>
+<li>计算进程获得处理机时间的比率，即进程实际执行的处理时间和应获得的处理机时间之比  </li>
+<li>比较各进程获得处理机时间的比率</li>
+<li>选择比率最小的进程将处理机分配给它，知道超过最接近它的进程比率</li>
+</ul>
+<ol start="2">
+<li>公平分享调度方法<br>对用户公平  </li>
+</ol>
+<h2 id="实时调度"><a href="#实时调度" class="headerlink" title="实时调度"></a>实时调度</h2><h3 id="实现实时调度的基本条件"><a href="#实现实时调度的基本条件" class="headerlink" title="实现实时调度的基本条件"></a>实现实时调度的基本条件</h3><ol>
+<li>提供必要的信息<br>(1)就绪时间<br>(2)开始截止时间和完成截止时间<br>(3)处理时间<br>(4)资源要求<br>(5)优先级  </li>
+<li>系统处理能力强  </li>
+<li>采用抢占式调度机制  </li>
+<li>具有快速切换机制<br>(1)对中断的快速响应能力<br>(2)快速的任务分派能力  <h3 id="实时调度算法的分类"><a href="#实时调度算法的分类" class="headerlink" title="实时调度算法的分类"></a>实时调度算法的分类</h3></li>
+<li>非抢占式调度算法</li>
+</ol>
+<ul>
+<li>非抢占式轮转调度算法  </li>
+<li>非抢占式优先调度算法  </li>
+</ul>
+<ol start="2">
+<li>抢占式调度算法  </li>
+</ol>
+<ul>
+<li>基于时钟中断的抢占式优先级调度算法</li>
+<li>立即抢占的优先级调度算法  </li>
+</ul>
+<h3 id="最早截止时间优先算法-EDF"><a href="#最早截止时间优先算法-EDF" class="headerlink" title="最早截止时间优先算法(EDF)"></a>最早截止时间优先算法(EDF)</h3><p>任务的截止时间愈早，其优先级愈高，具有最早截止时间的任务排在队列的队首。  </p>
+<h3 id="最低松弛度优先算法-LLF"><a href="#最低松弛度优先算法-LLF" class="headerlink" title="最低松弛度优先算法(LLF)"></a>最低松弛度优先算法(LLF)</h3><p>松弛度 = 必须完成的时间 - 其本身的运行时间 - 当前时间<br>松弛度低的先运行  </p>
+<h3 id="优先级倒置-priority-inversion-problem"><a href="#优先级倒置-priority-inversion-problem" class="headerlink" title="优先级倒置(priority inversion problem)"></a>优先级倒置(priority inversion problem)</h3><p>低优先级和高优先级的共享一临界资源，就会导致如果低优先级的<strong>先执行</strong>，高优先级在得到处理机后，因为临界资源被<strong>占用</strong>而被<strong>堵塞</strong>，导致低优先级的先执行  </p>
+<ul>
+<li>解决方法：<br>1 低优先级在进入临界区后不允许被抢占<br>2 低优先级继承高优先级的优先级，率先执行完  </li>
+</ul>
+<h2 id="死锁概述"><a href="#死锁概述" class="headerlink" title="死锁概述"></a>死锁概述</h2><h3 id="资源问题"><a href="#资源问题" class="headerlink" title="资源问题"></a>资源问题</h3><ol>
+<li>可重用资源和消耗性资源  </li>
+</ol>
+<ul>
+<li>可重用资源：一种可供用户重复使用多次的资源，有如下性质：<br>(1)每一个可重用资源中的单元只能分配给一个进程使用，不能共享<br>(2)进程在使用可重用性资源时，必须先请求再使用<br>(3)数目固定，进程在运行期间既不能创建也不能删除  </li>
+<li>可消耗资源：在进程运行期间，由进程动态创建和消耗  </li>
+</ul>
+<ol start="2">
+<li>可抢占性资源和不可抢占资源  </li>
+</ol>
+<h3 id="计算机中的死锁"><a href="#计算机中的死锁" class="headerlink" title="计算机中的死锁"></a>计算机中的死锁</h3><ul>
+<li>竞争不可抢占性资源引起死锁</li>
+<li>竞争可消耗资源引起死锁</li>
+<li>进程推进顺序不当引起死锁  </li>
+</ul>
+<h3 id="死锁的定义、必要条件和处理方法"><a href="#死锁的定义、必要条件和处理方法" class="headerlink" title="死锁的定义、必要条件和处理方法"></a>死锁的定义、必要条件和处理方法</h3><ol>
+<li>定义：如果一组进程中的每一个进程都在等待仅有该组进程中的其他进程才能引发的事件，那么该组进程是死锁的</li>
+<li>产生死锁的必要条件<br>(1)互斥条件。进程对所分配道德资源进行排他性使用<br>(2)请求和保持条件。进程已经保持了至少一个资源，但又提出了新的资源请求，而该资源已被其他进程占有<br>(3)不可抢占条件<br>(4)循环等待条件  </li>
+<li>处理死锁的方法<br>(1)预防死锁：通过设置某些限制条件，去破坏一个进程<br>(2)避免死锁：用某种方法防止系统进入不安全状态，从而可以避免发生死锁<br>(3)检测死锁：通过检测机构及时检测出死锁发生，采取适当措施<br>(4)解除死锁：撤销进程，回收资源  </li>
+</ol>
+<h2 id="预防死锁"><a href="#预防死锁" class="headerlink" title="预防死锁"></a>预防死锁</h2><h3 id="破坏“请求和保持”条件"><a href="#破坏“请求和保持”条件" class="headerlink" title="破坏“请求和保持”条件"></a>破坏“请求和保持”条件</h3><ol>
+<li>第一种协议：所有进程在开始运行之前，必须一次性地申请其在整个运行过程中所需地全部资源。这样就避免了资源”请求”条件。</li>
+<li>第二种协议：允许一个进程只获得运行储器所需资源后，便开始运行。进程运行过程中在逐步释放已分给自己的、且已用毕地全部资源，然后再请求新的所需资源  <h3 id="破坏“不可抢占”条件"><a href="#破坏“不可抢占”条件" class="headerlink" title="破坏“不可抢占”条件"></a>破坏“不可抢占”条件</h3>当一个已经保持了某些不可被抢占资源地进程，提出新的资源请求而得不到满足时，它必须释放已经保持地所有资源，待以后需要时再重新申请  <h3 id="破坏“循环等待”条件"><a href="#破坏“循环等待”条件" class="headerlink" title="破坏“循环等待”条件"></a>破坏“循环等待”条件</h3>对系统所有资源类型进行线性排序，并赋予不同的序号。规定每个进程必须按序号递增地顺序请求资源。一个进程在开始时可以请求Ri的资源，以后当且仅当F(Rj)&gt;F(Ri)的时候才可以请求Rj的资源  </li>
+</ol>
+<h2 id="避免死锁"><a href="#避免死锁" class="headerlink" title="避免死锁"></a>避免死锁</h2><h3 id="系统安全状态"><a href="#系统安全状态" class="headerlink" title="系统安全状态"></a>系统安全状态</h3><ul>
+<li>安全状态<br>所谓的安全状态是指系统能按某种进程推进顺序(P1,P2,···,Pn)为每个进程Pi分配其所需资源，直至满足每个进程对资源的最大需求，使每个进程都可顺利地完成  <h3 id="银行家算法"><a href="#银行家算法" class="headerlink" title="银行家算法"></a>银行家算法</h3><a href="https://blog.csdn.net/qq_36260974/article/details/84404369" target="_blank" rel="noopener">银行家算法</a>  </li>
+</ul>
+<h1 id="存储器管理"><a href="#存储器管理" class="headerlink" title="存储器管理"></a>存储器管理</h1><h2 id="存储器的层次结构"><a href="#存储器的层次结构" class="headerlink" title="存储器的层次结构"></a>存储器的层次结构</h2><h3 id="多层结构的存储器结构"><a href="#多层结构的存储器结构" class="headerlink" title="多层结构的存储器结构"></a>多层结构的存储器结构</h3><p>可执行存储器：寄存器和主存储器<br>主存储器：内存或主存，用于保存进程运行时的程序和数据<br>寄存器：具有与处理机相同的速度  </p>
+<h2 id="程序的装入和链接"><a href="#程序的装入和链接" class="headerlink" title="程序的装入和链接"></a>程序的装入和链接</h2><p>程序要在系统中运行，必须先将它装入内存，然后再将其转变为一个可执行的程序，需经过如下步骤：</p>
+<ul>
+<li>编译，有编译程序对用户源程序进行编译，形成若干个目标模块  </li>
+<li>链接，由链接程序将编译后形成的一组目标模块以及他们所需要的库函数链接在一起，形成一个完整的装入模块  </li>
+<li>装入，由装入程序将装入模块装入内存  <h3 id="程序的装入"><a href="#程序的装入" class="headerlink" title="程序的装入"></a>程序的装入</h3>有三种装入方式：  </li>
+</ul>
+<ol>
+<li>绝对装入方式  </li>
+<li>可重定位装入方式  </li>
+<li>动态运行时的装入方式<br>装入程序把装入模块装入后，并不立即把装入模块中的逻辑地址转换为物理地址，而是等到运行时才进行  </li>
+</ol>
+<h3 id="程序的链接"><a href="#程序的链接" class="headerlink" title="程序的链接"></a>程序的链接</h3><ol>
+<li>静态链接方式<br>在程序运行之前，先将各目标模块及他们所需的库函数链接成一个完整的装配模块，以后不在拆开。<br>(1)对相对地址进行修改。在编译程序所产生的所有目标模块中，使用的都是相对地址。<br>(2)变换外部调用符号  </li>
+<li>装入时动态链接方式<br>指将用户源程序编译后所得到的一组目标模块，在装入内存时，采用边装入边链接的链接方式。<br>有以下优点：<br>(1)便于修改和更新<br>(2)便于实现对目标模块的共享  </li>
+<li>运行时动态链接<br>对某些模块的链接推迟到程序执行时才进行  <h2 id="连续分配存储管理方式"><a href="#连续分配存储管理方式" class="headerlink" title="连续分配存储管理方式"></a>连续分配存储管理方式</h2>为一个用户程序分配一个连续的内存空间，即程序中代码或数据的逻辑地址相邻，体现在内存空间分配时物理地址的相邻  <h3 id="单一连续分配"><a href="#单一连续分配" class="headerlink" title="单一连续分配"></a>单一连续分配</h3>把内存分为系统区和用户区两部分，系统区仅提供给OS使用，它通常时放在内存的低址部分。而在用户区中，仅装有一道用户程序  <h3 id="固定分区分配"><a href="#固定分区分配" class="headerlink" title="固定分区分配"></a>固定分区分配</h3>将整个用户空间划分为若干个固定大小的区域，在每个分区中只装入一道作业  </li>
+<li>划分分区的方法<br>(1)分区大小相等<br>(2)分区大小不等  </li>
+<li>内存分配<br>为了便于内存分配，通常将分区按其大小进行排队，并为之建立一张分区使用表，其中各表项包括每个分区的起始地址、大小及状态  </li>
+</ol>
+<h3 id="动态分区分配"><a href="#动态分区分配" class="headerlink" title="动态分区分配"></a>动态分区分配</h3><ol>
+<li>动态分区分配中的数据结构  </li>
+</ol>
+<ul>
+<li>空闲分区表：在系统中设置一张空闲分区表，用于记录每个空闲分区的情况。每个空闲分区占一个表目，表目中包括分区号，分区大小和分区始址等数据项  </li>
+<li>空闲分区链：每个分区的起始部分设置一些用于控制分区分配的信息，以及用于链接各分区所用的前向指针，在分区尾部则设置一后向指针  </li>
+</ul>
+<ol start="2">
+<li>分区分配操作  </li>
+</ol>
+<ul>
+<li>分配内存</li>
+<li>回收内存  </li>
+</ul>
+<h3 id="基于顺序搜索的动态分区分配算法"><a href="#基于顺序搜索的动态分区分配算法" class="headerlink" title="基于顺序搜索的动态分区分配算法"></a>基于顺序搜索的动态分区分配算法</h3><ol>
+<li>首次适应算法(FF)<br>FF算法要求空闲分区链以地址递增的次序链接。在分配内存时，从链首开始顺序查找，直至找到一个大小能满足要求的空闲分区为止，然后再按作业大小，从该分区划出一块内存空间，分配给请求者，余下的空闲分区仍留在空闲链中<br>该算法倾向于优先利用内存中的低址部分的空闲分区，从而保留高址部分的大空闲区  </li>
+<li>循环首次适应算法(NF)<br>为了避免低址部分留下许多很小的空闲分区，以及减少查找可用空闲分区的开销，循环首次适应算法在为进程分配内存空间时，不再是每次都从链首开始查找，而是从上次找到的空闲分区的下一个空闲分区开始查找  </li>
+<li>最佳适应算法(BF)<br>将所有空闲分区按其容量以从小到大的顺序形成一空闲分区链  </li>
+<li>最坏适应算法(WF)<br>将所有空闲分区按其容量以从大到小顺序形成一空闲分区链，每次挑选最大的从中分割一部分给作业使用  </li>
+</ol>
+<h3 id="基于索引搜索的动态分区分配算法"><a href="#基于索引搜索的动态分区分配算法" class="headerlink" title="基于索引搜索的动态分区分配算法"></a>基于索引搜索的动态分区分配算法</h3><ol>
+<li>快速适应算法(QF)<br>分类搜索法，是将空闲分区根据其容量大小进行分类，对于每一类具有相同容量的所有空闲分区，单独设立一个空闲分区链表。同时，在内存中设立一张管理索引表，其中的每一个索引表项对应了一种空闲分区类型，并记录了该类型空闲分区链表表头的指针<br>搜索时分为两步：(1)根据进程长度，从索引表中寻找能容纳它的最小空闲区链表;(2)从链表中取下第一块进行分配即可<br>缺点是在分区归还主存时算法复杂，一个分区只给一个进程容易浪费  </li>
+<li>伙伴系统(buddy system)<br>无论已分配分区或空闲分区，其大小均为2的k次幂。分配时找2的i次方，合并时一样  </li>
+<li>哈希算法<br>利用哈希快速查找的优点，以及空闲分区在可利用空闲区表中的分布规律，建立哈希函数，构造一张一空闲分区大小为关键字的哈希表，该表的每一个表项记录了一个对应的空闲分区链表表头指针  </li>
+</ol>
+<h3 id="动态可重定位分区分配"><a href="#动态可重定位分区分配" class="headerlink" title="动态可重定位分区分配"></a>动态可重定位分区分配</h3><ol>
+<li>动态重定位<br>程序在执行时，真正访问的内存地址时相对地址与重定位寄存器中的低址相加而形成的，动态重定位分区与动态分区算法除了增加了”紧凑”功能外基本上相同  </li>
+</ol>
+<h2 id="对换-Swapping"><a href="#对换-Swapping" class="headerlink" title="对换(Swapping)"></a>对换(Swapping)</h2><h3 id="多道程序环境下的对换技术"><a href="#多道程序环境下的对换技术" class="headerlink" title="多道程序环境下的对换技术"></a>多道程序环境下的对换技术</h3><ol>
+<li>对换技术：<br>在系统中设置一个对换进程，由它将内存中暂时不能运行的进程调出到磁盘的对换区;同样也由该进程将磁盘上已具备运行条件的进程调入内存  </li>
+<li>对换的类型：  </li>
+</ol>
+<ul>
+<li>整体对换:以整个进程为单位对换  </li>
+<li>页面(分段)对换:以一个”页面”或”分段”为单位进行对换  <h3 id="对换空间的管理"><a href="#对换空间的管理" class="headerlink" title="对换空间的管理"></a>对换空间的管理</h3></li>
+</ul>
+<ol>
+<li>对换空间管理的主要目标<br>(1)对文件区管理的主要目标<br>提高文件存储空间的利用率，然后提高对分及的访问速度，因此，对文件区空间的管理采取离散分配方式<br>(2)对对换空间管理的主要目标<br>提高进程换入和换出速度，然后提高文件存储空间的利用率，因此对对换空间的管理采取连续分配方式  </li>
+<li>对换区空闲盘块管理中的数据结构<br>可以用空闲分区表或空闲分区链，每个表目中包含两项:对换区的首地址及其大小，分别用盘块号和盘块数表示  </li>
+<li>对换空间的分配与回收<br>与动态分区一样  <h3 id="进程的换出与换入"><a href="#进程的换出与换入" class="headerlink" title="进程的换出与换入"></a>进程的换出与换入</h3></li>
+<li>进程的换出<br>(1)选择被换出的进程<br>(2)进程换出过程  </li>
+<li>进程的换入<br>对换进程将定时执行换入操作，首先查看PCB集合中所有进程的状态，从中找出”就绪”状态但已换出的进程。当有许多这样的进程时，它将选择其中已换出到磁盘上时间最久的进程作为换入进程  </li>
+</ol>
+<h2 id="分页存储管理方式"><a href="#分页存储管理方式" class="headerlink" title="分页存储管理方式"></a>分页存储管理方式</h2><h3 id="分页存储管理的基本方法"><a href="#分页存储管理的基本方法" class="headerlink" title="分页存储管理的基本方法"></a>分页存储管理的基本方法</h3><ol>
+<li><p>页面与物理块<br>(1)页面<br>分页存储管理将进程的逻辑地址空间分成若干页，并为各页加以编号，内存的物理低址空间分为若干块，同样也为它们加以编号。为进程分配内存时，以块为单位，将进程中的若干个页分别装入到若干个可以不相邻接的物理块中。<br>(2)页面大小  </p>
+</li>
+<li><p>地址结构<br>分页地址包含两部分内容：前一部分为页号P，后一部分为位(偏)移量W，即页内地址  </p>
+</li>
+<li><p>页表<br>分页系统中，允许将进程的各个页离散地存储在内存的任一物理块中，为保证进程仍然能够正确运行，即能在内存中找到每个页面所对应的物理块，系统又为每个进程建立了一张页面映像表，简称页表  </p>
+</li>
+</ol>
+<h3 id="地址变换机构"><a href="#地址变换机构" class="headerlink" title="地址变换机构"></a>地址变换机构</h3><p>地址变换机构的任务实际上只是将逻辑地址中的页号转换为内存中的物理块号  </p>
+<ol>
+<li>基本的地址变换机构<br>当进程要访问某个逻辑地址中的数据时，分页地址变换机构会自动地将有效地址(相对地址)分为页号和页内地址两部分，再以页号为索引去检索页表。在执行检索之前，先将页号与页表长度进行比较，如果页号大于或等于页表长度，则表示本次所访问的地址已超越进程的地址空间，若未出现错误，则将页表始址与页号和页表项长度的成绩相加，则得到该表项在页表中的位置  </li>
+<li>具有快表的地址变换机构<br>为了提高地址变换速度，可在地址变换机构中增设一个具有并行查寻能力的特殊高速缓冲寄存器，又称为”联想寄存器”，或称为”快表”<br>在CPU给出有效地址后，由地址变换机构自动地将页号P送入高速缓冲寄存器，并将此页号与高速缓存中的所有页号进行比较，若其中有与此相匹配的页号，便表示所要访问的页表项在快表中  </li>
+</ol>
+<h3 id="访问内存的有效时间"><a href="#访问内存的有效时间" class="headerlink" title="访问内存的有效时间"></a>访问内存的有效时间</h3><p>从进程发出指定逻辑地址的访问请求，经给地址变换，到在内存中找到对应的实际物理地址单元并取出数据，所需要花费的总时间，称为内存的有效访问时间(EAT)  </p>
+<h3 id="两级和多级页表"><a href="#两级和多级页表" class="headerlink" title="两级和多级页表"></a>两级和多级页表</h3><p>32位系统中页表可能会很大，所以有两个方法解决问题:<br>(1)对于页表所需的内存空间，可采用离散分配方式，以解决难以找到一块连续的大内存空间的问题<br>(2)只将当前需要的部分页表项调入内存，其余的页表项仍驻留在磁盘上，需要时再调入  </p>
+<ol>
+<li>两级页表<br>将页表进行分页，使每个页面的大小与内存物理块的大小相同，并为它们进行编号，然后离散地将各个页面分别存放在不同的物理块中<br>为离散分配的页表再建立一张页表，称为<strong>外层页表</strong>，在每个页表项中记录了页表页面的物理块号  </li>
+<li>多级页表  </li>
+</ol>
+<h3 id="反置页表"><a href="#反置页表" class="headerlink" title="反置页表"></a>反置页表</h3><p>为每一个物理块设置一个页表项，并将它们按物理块的序号排序，其中的内容则是页号和其所隶属进程的标识符<br>在利用反置页表进行地址变换时，是根据进程标识符和页号，取检索反置页表。如果检索到与之匹配的页表项，则该页表项(中)的序号i便是该页所在的物理块号，可用该块号与页内地址一起构成物理地址送内存地址寄存器  </p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android逆向学习</title>
     <url>/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/</url>
     <content><![CDATA[<p>这是TG:HACK2020的一道比赛题目<br>题目给的hint很误导人…反正我没看出来  </p>
@@ -204,18 +539,13 @@
   <entry>
     <title>Diary</title>
     <url>/2020/03/21/kittener&#39;s%20blog/</url>
-    <content><![CDATA[<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<div id="hbe-security">
+    <content><![CDATA[<div id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
   <div class="hbe-input-container">
-  <input type="password" class="hbe-form-control" id="pass" placeholder="{{message}}" />
-    <label for="pass">{{message}}</label>
+  <input type="password" id="hbePass" placeholder="" />
+    <label for="hbePass">Hey, password is required here.</label>
     <div class="bottom-line"></div>
   </div>
-</div>
-<div id="decryptionError" style="display: none;">{{decryptionError}}</div>
-<div id="noContentError" style="display: none;">{{noContentError}}</div>
-<div id="encrypt-blog" style="display:none">
-{{content}}
+  <script id="hbeData" type="hbeData" data-hmacdigest="290e199acad66200eb3d0022e9e7606322a286a1095b6deec02f71a0ebdc78b4">638d200a7a6cc82e36cc5fe4837307bf2f1b2c0e755fa0341ce2aa62d621334ca03f47f0d1d23791e3c383e9c3c5299c0699a0325d9275d45ad0615f9d79a1f456850b84327df89dac6eb7ec5bc8f05b25879971126fb0b3e37254699e1af27abe27d0c4fda4d1e2d1454366e96bc8616f2a9b700ee381de8cebdf7490123091716a07b0ff8ad54771aa2f99a6e48e9d1e60afe0c4fdc77e1e4742363a0200716163f991198267ffcb3052e34c4ccb749051d227eb21eec619f09e9269cf606c22470e1eb0cd6811843959bb4c155136863ab6685af267a4849dec7688b3b6399deb9ec86eefdc1e70d086c9dab34d391010deac696aee1b4d38c6d18e1942dd3695290d9ce96ce24b883ba31bd49e439e0144324d81b27a9e20b08975fb3f79475e9a9d3ea1b650fc139abd05971fc89c353c784490d09fd67dcaea2bc8d1556d35cffa37bd4937a8ab872036b3fc90291448fa41049b965f32b10afb4df7e550b8a6b2d3dc52c2d6c26f6401e4df353f01e3ef97b6e594e09579e794c9e21ed99e9d4b71e90a535c8820e8bdd2e03ea93c9468ca6b99a6d28d1583c0799787cda60074849e0e3446e032de1fc4d474db50c7818be62e4baf892c413371effd03c5c65a7ebc7e439179a6754e05719b9e01fa5cae26523dfa4ea64b57d7a486c6a023596b0330ce2cefc0f566f03a6d451ebc41e3dd88ef4d9b860608128954dff88086364e9574a21655a975d7857130fdbc9bae6fc23902154f3ba47f40bc0f4349165bea34e57aa19f88bd72d6719393397aca9ecb7d0c54fb505ad5d5a5aba9d9a8ca92cffe4af76ad62e093e879b56d138a5d7b53e55ef7d24fbecc534031422708e6f678dcdb082de4b33e542fdc9325152bad46f65ffce0e0c94d4c7aae301cb5fca3ce99307eb39ad6f163e9918a689e1f2086af73b792bee815fdb03ede02ccfc5f84786227440a318b66b3890f3b793bcdf7dfd7439aaa269d3f0c02770c92cd662de08ef98839db2ba60cdfd491056c2ba094175bdf1cd5308b53113486e0ef93a3594a9bf29792bfcab4ba10b0dc816fa7e9ce6c2a0b25db76856a3da698968823b1eb8039e7b126823dc3badbbc6c7a022e0b6677a370907262a74ab3b4a930b82cce6a7ccef9fa2fcfc8269c2cb557884ba8adce1eb17430b1aae55bad0cff501a07b2203558d17bcd5564bb16706f0a13faa89ca79f7c416301a33c47259d548758c820e9532ec426b06c4af781a2efff58acb74ed504493584c0e087c59e80934b5004c5897c41bebd3d3d2bfe0aabb9fb38214dfb7229560e3616c25e4d066fa48ca197583ee4ae50ef6afa37b21084f049b36181c33200953172bd26d863d344eff7a1c975f1a0f28af0d989b89bf4bd565405e7b273222551b942b18e4fcc29ece69132c9fe2c78f844ef1ab40ab1167ad2797089d4aa5793952cfed4296ab8e488f7a4e70bf0c6b2e3f1b4939c9f5caf27ea6facbcd94419018eb1543488b853ca96d28e5f5e0c8c4b3652ca931c7877b591933fea338a8e8ec6aeaa38eb84b46c89fcf92291d1c7274d0382c5d586f019d05785a1a48e6e61511e28e361cb2174b532b8cd9b5156a66d036e4e188e840242ca4f91f9210f4c56d8148cb3a4475a09e2537a29cc7d0fc0a621f1a52a01166e074f5213eab1e951dc654a600c570e911d675ada4c0da88c88681486d946ea21786e26d9e04b657bb5bf114e6151941cd771771af082d80f9839f0a29888d39db4cc6205e7eab242027709aad2bff5513f704cf60a331b89c727458e68aee1f4598ff1ad826bdfdeaf507b038fab2b2bdfaaae14137cd633f58fd3c6bbe8b390792114a666b6b0f7cbb0b27e8c605914b3561b42fc469d680d8c12c9b95d57e3a05bbc1c994479ff64a4b39bbe74e5d1f261caf596255f144fd45de662254b84c316946ff5c439babf95ec79ce1e3d7c67d92d975369ea4b3ee53e8be0c7156df5b7e8ae7969044f28f7f338e81d05564df252ada33c5c9f114cfc238271fc2e95881e2d658897af7ba97021d1ed60fc6a710c17361975b2199252b6426f3ff8614c9c2da70a09176bba02f715ae72af18e337c0a216bb6bcd2ce49675322a170000a772778e60f2bce645a5c03209dd8ff373849e9373507637a8de5833cc9ea3bc078d5d3513f50ed9b86028c4ba9be43e840b6c3cbd17f8faa95ac2e211787452d191906e35577a141cb044424b03df6f208a24c4533cbb1a30c19c2bbccc753b4f6d698ba94ee5fee0d51af608c266aa9dd8de21a5f7b01a0e4264c798f2faba1d29eb972f4e3895d3d91f7c72399af449cda1e140c8ecd7e907e9a258fa2ccba15b271ac3f4e23bc6a2b7a77306070c2a508587b41ca684b8312fcc710bc0d7796eede8e954b8303b0d9a564d963a965bb494b558e8c5ad9c4f158e07858f94c7a5895a3541648d98a317ea115c2901da7dec9d401ea8cc0c0ad746ee9b7253e666f7dd768d8a0a0ce935b7241931d51dbdc0944b355ff09dd41b6848464136c16470ea117837be4115dcac6d31347b04518f1fa2adc08492bd5dfb4d10cb84b2a0e814772737e2c9e814466e62efa40ac3bb6d0df9e61769f48eca2aeac5542dc3d2066e0a21a944db5b314d9c22980a7bd482b7ff79544a0034e0c5849b6c591d579926459ca7e8114d206a58817d88803d834b4e7ede5d7611bf8a122b3bee581171dca2d0dc2bf6e3f963710fa3834f2f2375a66167489aeea159613d9d8cfa5651c7aeee13e9dc5e0b4bd0dc681422a2d182c41ab21eec77e2bfde40ca2241c14e63548df95e630bc0f670aec926dfffba04f558aefc5d9b9113b505e3836e0797b9df41fefc0db2d24ee9abffd7bae940ccb4e1a4c03cddd0f06763ee536bf48055e877e357d1b6f00e4645d5a4d04e6c371bb48ebdfc9afec146c93e0526300a2dc0012840bb6d661f216b28d8174237e9ae5b8fbb2e9aab04a259d774955b0fc84fd36dfec49978b8607981acb7d047b3d240b38b9236357931973ece042d5ce2041c81a94b36b0717458d6e411e3f9bf4bb0700547c8e3ec5360ab216b46e6f4552cc62685bc87ae73e9e85f128ab6de424a45413d2704bea3b3c4b8de38dcc2a82aa40124cd8cc40d8d97119b9664a31929dfa3bc85a8e838198a8299df9a732a00fff268342b3d04d5455987f61a115056639b64688a54c04f3f09cf59f8a737c73b0c6e9fb12383b800c537d9142d9774fa1a656331ab3aee794362e76b5bd92fb1b4b86ceb59b792e44986a28f1ac6f4321753ec7dcadae498eedd4d461960b0bdf187570081192b13f145f067ae392d7512bd5a4acf614ca037ec89838fb61fbbce3007786b75ad2bc9fc9f766c5da345134cb541bb102b5725fe96177cfd97bf82b11e95616c6c813a01f9623eff58e61a54214eeb80a9708f31aeef989492898ff2de5b8b16b92b6e8c154411e1f67b395b6df099c60ca6bd140a619a6a687cab3ea6c7563739a243a9f339e7321e4a425a99eda623d95a2b50b55ae7a0b0da9d0ab504349fb6d48a48205a61da8d99a38e531e564ed05c45cb4116892b2b14cef9772f7d45c5f93f6aa54bd0b9813528de423ea6a6bf1e1f497690d9e1e3c92826c306f09bf0c0ca7f32c08e156b9d55f23ca90ecc3161de234a8d44b480b74d6d9836fba55cd13b5ca981999ad3107f564cbd85fde400e009b49bb2bcc5183b0c17e1ebb56e6741349364439f177fd953fba10093274013a71edb155fa192ee8997e18b90e91c60cb69edd1dcd0a6fca670230e31895aba355fa73680be8bb89b642d35dea91c4b329b0f83551793e63f223e7bcb4b316b2ec5fd925e24e351aa1cbc66ccb58b5b8d62b4439eeb3ba134fd0acaf994ef696dd3731e605b36766a1a3892102d0895e8c02919044a244e188bce4c27d19d64ba0f42b4aa2e4a2ca7d87a7284e2833ec78cd5a54f827123469954df58a419b2e96f5ef702efcacfc366d6e9c41673635679a6d3aae52ee9ef0360f074910cd288cc7585028200affac4a457dd9d1cc2b2183eacf320fb416ec0aa28f48ca7db9c79c95fbf9a36fdb0b2bef7693048cb662e8db1351f9d75083d080c5374a0e9af302c7906702ba0f4d58ffd7fdff5e5fae483c9834b8c1915ebf5ba1015f8baafa09b3bd285e63c0bd6925e8defff9bc23e4435f302ca26686458c7a66e0d01da1c0d7aa7401543956b889e0b2e800428a8c5179d8707ae1e22523928c656a27fc96182771cfef7c6e3414d165671a28b77262374035183cb3848e9c97b3ffa41ba8cd4f331049f4d24e6d1617bad452f8ba7eb2cfb3b0ea3c847e5b5bdf893448e70e9ae749acb14e84a7c1c4d0e75666a8d291b972bfa2ab0d50b0049108092762b93e6114b13a5d93850712954f809dd81a774d31f6b7b2ba114580930cc4bbd22b1abddb2f342aeef9dee7f1fd727acbe6abae0722f1f0b690e3958948744319ab6f750f708654df740ba52c7d190c775d23a068800bc856d0238544f2ba3ef81aec2cc11962824d2436d08e05873ce3c3fbd4921c16d1356a9f5984abe3a4256c93a261836db169d6b2d17034581a2ba1decea7d512ebd1a0ff2bfc5415028607366d59a35f948ebc3c9b0c3ce2573723d8bed58050abb55c1c1b7be5f6f24eb24b8c53dcb38c26cec46fbae3467b44bcc93acdd8f2ec90af8e8f6b3048fa635e13c28aa55b6c2fc03c849a9961433fe714dc7695df9bd4a8c6ea075f7d384e7fabf2400c14c1e8df4d0d7a4a257aac418ac52acd698687ed67122e90d6aa1b32a878908b56802564ef458e7be471b0ce2cb90fa91d5de15233e4584f8ccab0a8d2fb2bbf631eb55c1898c76f469431c33b58fedd664e8d078fe833325b2c2d35c92a12ef015855c2a6024cd1b32c9e82dcce4d16bd0be5f4721943807df19ecc71a6fce792b16b2289e077bb62bf5828ac4246b6e87e11fa45fb8dd1be7eb10b6c9bc9e6500b04045483eba52eec239f18214e6877386723dd6883cdba1df32512933b67acc29fb27fb0f33210042c90496f6ed840d0343727befdf910808cae04fcf14f10d1e05e5b6e0fa12b03c367bd6045ea32d729bd711fda3725e11504f479676f66a144ee56d3a4b156ad4f26bc54f05653bcf2e4cb05e1ab13afa4ce68e6f6e8212e08bbdb5c2b8db2f6ee80ffe8423762244aead3639cb85b416245c4d0668920739a32ca2ce7e75f5be02c5d0afc55db3ce7ddb0b53a3b3fef8b52ae8043b40de4745fe88afa2b3c2bbc3ca35a8f625a146764b236b42af25bcc74cf95e1e39a4f880be4a2864402bae7bafb3303988a627ac3888e5c02ebd432afecf96abd930d85d251bd52521034164402960a5fb41cd6b26590b8f05d86f37b677674fb87ee5861e607963c5e17f0d95edfc01a6c289c9672f3f24e5a97b7e288e65f93bc00375aebd859845c6dba644ae9d4fed84818b560c2f67f47f3376433dee20a9fafc1ad2cf512288dec08170875f029486ff3b0785835db85c01300f2c1149ce6a813c63cf182b5cc37a839ba65bc938f71fe3d3b9343a9d7a1c72c87dc9a76b237961ffe2a7c4d2a2d7cfb8a88db6be6f898aa67fcf2f64c5bc83243b83c8cbbed370eef6f6fd00f19ca9fa1f07792deb46ca01c1f256e1f67227fa5909b3a2fa53d87fd9e6a3d5a4ec972a36e5486fc5a1d75a5a3cc1ca3611991b59751c570d6cdc71ac3b66d2adc83a764c746b86ce100a0a7893f944f43423901762f5fa8048741b89c45fe6e237900eca9d694490fba267782344d86e56a60fedb574f57605319cdc37b7cfee444707328055e002d89008607f73eb96f19f8dcd19627116d73ff414371fe26cfbd3e4e0d56a544e584bb8a05478041abb31a9d499c4daae107e56fb0d31d720a396c6cfdb5866195b19ecc2f949f403a10914d0dec35cabc51ad95dd3f26e09663b1d3a1241a631da8b9b0a6139c2f62dc6ed69809d9535f52a7761b07ba35a71635028d06dbbf1f375cb8ed13f8ce69641102eeff3b1d5ff67badee5696cadd6bacbbe2b666f3177bb91ab508eb137cc210b970ce4447ffe7b673f67453c820b75f88b7c985bcb8be930b38fadc502a5046d019d7cec1e3137eb3f4d2bf6a405680608c1ae528aeec61ee2568ae6e8fa11f1c827181ea007a6907cee6d897ade99f71db6ec029a95afadec2e8bce96476ab410676f2eec73d1c461d4a6d67e9f92ecf731e3d59b8a3de49bcd643ba805d9fed0bc974ccb51f47ba67327a14cf517fcc62173fe238f186d88d86d0aecc1e88491d7fa391b9b66f516948e11fea9a42461a8b92a9f9df27602e083e4cd06d5d0ea2302e462a91d30792cbdf8558b990f9d2b9ba4a85c4be449641935dd9a2679ada3d9828e805e9e4d5aa4c805861f3e367664418d948ccb66d2149ceb181f0817d74aba9cdfbdd790d089cc22f8c8273ed359d92562a144897b03b8c478dde3a0b386cfe38cbbab9253cf83dc1f51071a8a1b10dbc26a183e5bc983c297f299bffe96a75bd13f90c7f1cb6c1a099f47de3070d196416a58bd9186e381a10055fae79740b7c9b7d5916a4aac840cd1fddb12de19a7f808bb7c5802fb60dd6f5040a4facdf7d4a6b668ff3004a4e86a888f418a279c724296f5e705e50798076c623c5352ecab5ed5df08d5712e07c707ab1c6cf28b4a485de7c34169ab885692a11a5cfdbc87723b3949da69a60129a7a5dca22ad2d22ba6f3af4f4322331aa044484d2844e83120a44be99d0df1d7d1168306794d5388388b0e85be3221e6c7eb00e55df7714146681079a2e2a97b88d72678cb77666d27dc50c52d439af5fd4e389e4b521cf86c0530280dc50cc98f0c9f1be79049a5e372405b850aab61d7d7909e472e39c7a11781d6f45ea12275011089030ab21f6a44e0d3cfeaf318537a31739449afdad76171d2d16f1ec08b0b1d0c580a73ce89cfb1d61b8211e9a0fe64d5f425537b336acfcb752e159c49d3e12093e9b00b1ffe2de5dea43db4073541d0fd5adcd44110163a73e1c66625a60264be2d529f4d63bc3d3170ebbc61919c06c61e5deb9b77f7abb8af770c7688361ea6c2b8eb7b68f4bec3144095a2b5447acbee2b87d50494b8312c7aecfecd1978dee81ffa70dc84ea18bb585f77472f44ade7c4ad1af67ed3e05a6a4b8759791548f9380330e946298ca89ad3e576a4fc25e7b2d67a441ff750e7c8e85fe64725bc3bb682464a39ac4330dfbdc83300225fcf15875367a6d451d91b443bcd4da5f86096f059662eaeef2032db348ea1726b4a744421aa98bac454b6450460c32f1ca46be9c6848ce65cfc748c7d81726cdef6fae338e7d9cab52aaf894df46295ab662cfe876b5cafee6b01b7b1fc9bec00b72bc81c7e0c60dc7062a9241aab81144acd4717fc947bcbb24f2bf912be944f7ad4190cb1053074eefef60bdc2d15c6d6b74c819f311afcf75eb176eefc6593ae693adb1d4b528f728a6ad426ca345bcdf0248a959687a96304f721abb320ed9a4fc28d09dfea77b65bba88f1523772158883f3911657c987e917b0f81726368514a77be78ef27da7593f8b5de440c7707322acb7822fb709c4375095549a53c023bf77a33dbafd7e2e6f4035bf42bcb966b14291cb5c98112db56590e90c62759f6c658c9476aa01ec0a782ecf80d9429b3645349378e9434e405e0707fe7d0cfbb296f867107d8784f8110f6437817c48693a290883e58b845b7af406ab8d85f18debe121e311eb6cf91234117bdea2ef6647d4e4c0d1c75a5503e591a2ec773b0349c8fec256556e97e9ca624c71ca719501b7bf9fbb8c0492412a495872b5c21814048f2871efffff070a677a3aef0e2b14fbef2a66cb098a4549d85f9922b66ad5c63754bd976ae06ee92db8701ee244cfc998fb16fecb2c81db0b02b92768bf5cef4d4a19078cf082359b255ef5c494546ed5aa4266a8657f9daa3d7e68453ccbf2115bb94d884afa2f41acd0b0a14a12883e4005e51e1d2317a27f15b4dc96dc88b891acf73719cf4a66395c83b08b74e511ab9dfd8231a70500b0a742dd04d0543409100c67a8d42a074894a104fcdab75ac5f6c0727184b42baebbc75c341744ad5b90ab85b9ab873870ae71ad6db2220693cc7a2ec73c7a293df3b2dc1b2e7298edfe0f7d400f92c7fbb3b0b655ddebc2ce7694057748d131f3840b6e96092af16ac123c2644afb84b32a4ba8c92f88ea803d001e622ce69946101b069efac352a77146e3f7dfde5b9656fc0597e530183556bb9c33d3e4beaba4b6eb71294eb43e5130da7c4f7080c74636d9d414631ed5f34fc14e3f09a4e9364cca1794409047daeb7ff2ee8f4bc838c2d3ebafad4591395784f011c0e059ee0513607c5997965b9a14e7492ec5001bb37c0bb6336b1e22ec867aa2d0a73e12d4cb15d2b41cf7f1b0cc24ae4ae2d64f102ba98a0f27706d10a94c3ad6d12bc75fbd195c9bfdc11f72b6bd3fdad1fc83adf6cdcfe84b069ea19cc510902207ad8baeb98a6dc16b6cf18683a7ef213c1523afcbccd79f6302c3227c4046a977a0657e6e24455c720ad9e8379b7b3cb2492f8523a7733d8ca68e7fea1ee8ff5c124a25da1ccf9a673158c536d78c699511da81fb4c1a0d05bb4b104305bd853d6fc883605e8020bb1a3cdcd4637473e7b7405d448f01ecc5d4cc5f697f2b6d0af2bcabfa7a67c79a8758ecf554b7d233e6209805de7a8834d44e6420214997586634dfd4f846ad2dffa4122ac130f4ce80cdba07ca2e97e0d29063e5f5272ea6136174030dcbe9b9c898ca203c6558a50fd45adbc6c0b7acdba50d1f3e2385ffb2dc7d5823b4475106ae99a660d54607c47a6b24254ba2df3d4dde6734e4870b9b40b19238b2d440dd447ded19048565ea43821af246d23e05d3cb5761a528789c012f3bda475b1a15dae91bcba9155ccd2212e8782cd2e70e722e21442c41614d2d1e7a39bbd6a9104e1d5339007ed6557dd358f6bd864d1ac23e068c1d9f4bac48d4b798c8f630dc451f453126849ce25bae4285e726ad97ee2df57c1eacc602e967e39feb27685f4853ab8e90ace5405d5f94071f111cbf6b26366d44ca854edc4be87c64953819185e694a77cc3902da11737f0d1b7b932232ad24f5843b9f31e61f2be118311653967ae857e1232fa3e341f473e284ae013ea589d0c22ee5ab263debc8187f52dfe123f8d9abe0d6ce274c78a8854651a24a5a028df9c00e7a650e4550d963d9bbcbf446182b0253f513fac141ca76de23dd4a6ef9554f8a635d02a9fcbb59a296f64027db69ad458282584bba180dcc10bec00edc9bb331053c9c884437c44ef3c6780c52696e77a07b3132fae1bb927566ade4b367e06eddd6b538e0ffebae9641da1c805b384ffe05215ba72ec98206e68e003113d7ff58b0cbdfe8e5aa012f884486f8058eac3e8fd86ca91886989355bdba08a11d066805ca1a56e7edef56c49f19480ffd84357420152e7845d3e9d1a96dd8fcc2be020c60bdbb7878d5a8d3e7f69cf0ba673eb5a671d1fee64af191aa5b78847e1944bc27905541a691a0e0f9d0d4f297a6e3d7ac6a84aeec84045024b71a7db75a50b8388cc03c51c4b780f186c266814ceac50f648ddb178c3a4f4c9a0a290ad8660ec990d6445314168c52f9103e6da24cd0349234796a978aea0a3eaa852be86fb504c13664cf947bb070febeca103fb15a96325e98e050f6fb373d18265cf586c77ce51c97a252eadfbd01405464037a29f1f222ba1899250f3387e9a31fe8ea477d4a45f9d5e86fa05f8d258df879e79b56fa20ee2e6e03baf9c622cfabdf7c217453a075c33c21f293c4282c0a916d15e3e7ce53bcb3255840e8035029dcc1f76055053e2286bb3953c58f0dcda3c8aac8eebf8a7863b27c34627ee2536562a3ea1942294da5afdf1e8dac15e0efa8af1b12af1550506796636fcc9c2b6296249a05fa9f97454008d0490e0958ab0ec7f3b2468557d0639df9bf8e172143beb256cf4a973920e40c5c88cfa5f02ac53b07c3fc620231640252b73ab8b99940da14dbe62c21161879c1dce2bfd6bca3239f07a8589a2acd22693e0a5a12560b354061408e8910ae22f99c88e7921c3dc0aecc7cc6ec7ef71a51fad10ac4834d9053e529fea9a76117c058f71881b567dc0ffba7d3c33d93e24082e131e602b6b35e55b0027925814442b7361a838142bcc6ef3e37f67c4038bec3e19d3d2e425e82d4f10d8914cd630f0f3a24dd21abbf71902e34ba3633c753aaa32403685134b1d5c993d2bcb86403f32cdac9026ee0fd949d411843987a663b422d3d744d533149b5b6cdd0ed69e0f5f3274ad23e085dc31bae2021687a6fade2214f101447e3cdc149358add34d90958c27b1bf7475f3261375e5c394a860ffa1be2975f61d946a3ceafa560c7271c7fcdb3dcddce13836cd05af5ec0330365d2805995defe5b77906bcbbefe8ed3fe19d8fdd4ffd282bf15088f07106fa49010b1ce5590fddd08a7cb367bf3c0d09b284f52409fb886e88318ed6fb8fa771460b8bf88fec34fec7bc68db9a15b46d29aefc2340c71ba9427e1bd33978c82465b3e093b1cfbe327d427ef95634d3964c3d9f20ad8c200d0ee7bfec241887b5e80fd2205327cf6d7c7b98577f6b5502e8ff710083d77f70cb62aee8ae34064c1ac83c20b4e92cadbb67e467fd0380b7c4b15834f76918740bcb53aac08aa40234acbf9e8e31b5d0634303b0b62f2a38b19623fe801dc83e13a7c678fbb7dda67a5abcd538155cb7b5f41cb707092ff69171c9f878ad26826b19b751ec043a0fe3cc832aa61be6c13da42fde7c40fecc29607040f4269324c2e7cf1dde6884c3e29481b23043d03dd577a7d47f548e0c82971d68b4be23cb8cb5d89f9715cdf90cedc2d5cfd4557daad2af2f7bf7a01156703a280731b03b09432f82684ecedd854477e022402fba09792d5f644b20f897209c2e61920e932075390808323b8a295a3cfeb4cdee6c3f529d7bf30c40c06297b7ce0a92595acbf09f79de661e4faa02f2a3d36e4228da1cc5105b761a710a25de050edf3d42d821eb4999a34f3218a83b2cf41de28e964653e37dda7927f5ad9f792ada323e761bcb20f945e6bd7ae86edb2afec98f02f67378d494b74cd8b71d2fc8ffae2023ab341cb491173fb283ba6d7dc2f2b291fe83464604b5b9ff0ccb9522051c286d14a9c778a71bc1df4200a6713dc6442346f9621aaf09bc5412099a2a6d03d2537335e3bdbc11e31a3014876d7c4d46785816042b8b64d60b63e7075f8a3bde933ff7dba418302c4a86eb7a2a6ffb9e07ea2008a9362c4aefed5769774765af55f8b3080202ffc490553204b051d2c0007d7c3af4b6e457d55046e41e274e2115d265f1f0d6e9e53f3b2d4e4df0115161ebebaf56757b1790cb64bba20875a6ba3d89c2a02e6e3b0fd8d4513d3ba0ea42dd20e1582f0b4497c6944807b92020e92ba0c6881b7758b14eda6ba3e308a4804abc20cee8a1a4bf7abb4269c180055f4ab4b9530688dbfaf6b81e75c45741e03fd4c30e2540d4f581fe0b58a5dffded2b3fde5063e7a14b290f02601b2a307679520bd3666bf301e1ca5f721e56e2e69de2605226141cde73eb8cbd6a468179d5c3d446def051220fea311311ff0205de820862aa457413cb5dad6ac78090b27a93f267c67857097cf635e46bc9f2e5e9ff4737ef187bef9ab19557379e5aa930c88ddccc353ff5471d7a0d83ea1d18167bc73f2a1d76a34bd31348fb8dae13b1a66670b272bf1bcfc7f55b1f7c339aefd4ef1e0c9ba71ec4e11408af6972a92e015eaa8d67e8dd1028a7c1907521f91ba339dd16f6cb37e05348c76f1212f184a452c15b7cb7232ec2c8bbeba2110c3ade5d68f3dfa46ddb2ad66e133c6c58810822aeaf968525f1a9245db4f7b4dfa7041e5c3df5bc74542fd4c5127def0a59ad40177e956cea0dd3da8b428eb60086fdb082f206e8db262ad01be7798ad3ac718d1c7d6fc34ad6ef34d6c976c02a5cd15bb523374aba81c1d0b6e121929fe3bec23c127f59bc1e74c55266b5bd6d39bae8a9ed61e2f6ba937f9c025274e5b5b3d02c3c3802eae89cba7100b6a355d7726d81c39614e2659cb2a57760d882b90f21f77d735cd8164ab9d2acdcdb1927ca5f03a74f00d818d32efbff02c8aa20b12f9747553c9c3fea7e82f4829ed8d15fe0fd26386f062970838a28198bae6bd4272c75e52364fd5d6b1b5f50d954e762ac93e88794c6c3188006e0d828855890ad0fa9b012a67e98e327ed4e0493dcf14d1b9f3cd1621932211037af656f4c91408280e6271a59b19615fce7f2a699c144436ad2fe6863539e4bf05eff054796f14dfdf377773380ac74dcdcb9e2a6e7aaa2b2bb3287f559f6253261886ee744f6cf0b4d61a76652433614b2f839a0b6daa9a8f165133328e62f80a870c9770368702cb4a64cc394f690ff3a840c6b491c167021eb5590f4da7119510afcc45e1298f8530dff69051cbeb82a691f56964f32180e0bbdecd11cc27ee0c1aece0b4318c6c366ae0f1038ad679da9f53612eea1ee8c01b1b655b76f6f9c1fac0f895da651fedd1f5d83775fc636772ef76c211aae954414e8ca70d5aa5e58d513ca9630302829cc915f73d93b7266d705b66de45723fa9a35b4952190740f72376222d90fc174520422dd0b2a2e061014b787bca2c5ef2c57edc28fb21bbabd63e1f8dd68c8b5f439c80d711a315f77c6c7dd61771e0d4cb18c4c5327d49d597e93edcfac6b1dc3446d8b0a6d261569c1eece03dfe43fa3951ab514f6088629e092f05239c4189bfd08e6a3a8a1dabaf0b41574d6496a77d7ec922bc0a9f6cc164e4e16d35c805387f630e4fbe58770b76fd163f0d5cbd038979750d35d25da5ec589fcb69256f923dce301d612164f02fdde0b5dcc144ef3d4d625423106747ce7d59bcd65ca6252c5de870803dff2610aac929d48c19fc49b42f11694e2e816f8f12d868e1c72e5c30a1260bb24360ea61314e700d24ec7ca94111a0428d26f9affb609f1f853e9d5b599f46ce0123c475bd1ad780ad322d86cbbc363b34b2a88ecc1343337609f09dce361bb8c6d5d8b5a89d894d3c6a83fa9775ae0582c00e00216107499edcb094d115c7556d5a9eca7c547e6ff5266db5b728999fb131e5964013c0f7d4d17d89159ff56fb5bb91bb7983c8b239f216b16b4473e99e95866d4d0bbf5720b48f0e423e29b2798b5da419650c240ad6e8589caf0c12a4ce2ed15d33d3e81122b3a92cb62ba2b725a2c951535cc4264827deaff6f04b87df7f3e8f38d6c4425a9872f63a94c8005e043f4a9ab54a8586f3799729be84ee67cf0ebaa7b5c418f3c900a61a608032587bbcc4424bf2961d9905ef0e81269a8e6d1eef7b88b76b0a71c59f636958e052cd0570d168db142ff42738ce6705b179007d98e9e46ae524e83f1e370ee948b7137b67db32ec555f742983cacd853447817ebc1227ca652b79e6a2c6291539b1018c793681ba19b494ca573754721389864accfc1a91e957f8a2495e04b501cf3b1632afba9b14b6c7a809944e73f134c9285fc2b4d9ca67dfd11628607f0ca3cf43ffc1707adba2d39e2420bc163a4d4c9e31925abd43e0e811d0ed2c3ae0fa8a81ed26d3f9f3fd8febc6b2be594574f98706725bae6685d73cf59f481deb5940588b9778e02584dd650a4b7cbfea5f5ea241f9ce73689e92605ca689f1f83a3d8d9b2dabcaba60ce6b0efc40356fec3ccc75d5fb86c7a2218d84f05a81f6d1ffa33800cad49afe39a752e13a8b6867f85e6600f4d7bd111f7d5d10a891f1a72436d2ba0e883238f505255dccec7a0dcfe9a1fc5efec7e583725cec6a3dbed636a62b110109acf610a7cae001b538d29e80be8e858ec0f4636c5f3e1d19ba8644c47aee848b00be927e7229e9d7bd0a8728b34d902aee04d740356d7ef21795b88ea0e3342167d2c7af484f475c36c1c486cf39b60089a080b4df8693eb4529735ce164fd3f91018c222213769d766d12d6fedea4358845185868e4b9eb5a27c2fff7d7d69db5a5485aff0026ad30ce4e6a0ffadbbcdc20278eb12b3c777f630ecda3c920e48da65dec467e3f12599f69fe7bae1dfeee7f64d32b6770d355d837fcaa26f748caacc55012c105d1450df53d94da527c3237df69bf4b5d8ff51b97e1de95534e97644aab6e935da135b0e2058f46e5432da8a85ffdfd893d67def3ffbf9bb3f056dcdbe6c0fd07778b0bc46a749a37c8e598f98d352b47fa069b4b843eac1608d06f2912dedf6b0bfa5520e81e83ded882410d50a7a216eb2298b0f14e116019b013a853d0db6a8fefcd2eb07b57643975b2143c0bd7427e9c1cfb2dc93fe73846dd4b23cc6b9f5f64a98a1efb488eb0073971cce4d014503f4a1be2a7284582735d4d99842274c521228fc062ad570f58b26030372ccddcd3dc548c9d7208b9d1be7834ab4f1a72f4529d57ea7eee2f8762611e26d15c0efcde65a0f4d1ee06f988064c76da4532b6fdb8d7d446d9d5a72b0d2d48b8d68caba75289307513c1739cb38be302dc45fc3b7e499b23bfbf3f35e85d57d8a88be4774e857f5c148ff9285b5fe79c2bc3ba3a23959d760ff19dff4f3e86a8b4099b702434459c04b7d0536d7b9cdb3d9afa3e7a03086d7044619aa6c8cff448399b18fcdd19709614513868484b8bdce193a3e047c16f4f1b9cd826d4986a8a0f12cb98d598a4751e30b1c6c23100db34bc2e2aff9d232d9df146225f8851b5cfc54456fd4fa1e28101f169b9c86a35aa60d48ca41105ca7369e41bbd71cc1b72c17bbfaa3055e523e96ece30a1140518200865e6fc6e62a613333ef21a45f48b8dd98dd3827bc0ae773014bc6e5883c2245b98fe8b64145be49ae72ee1d88705fbdd4cd3055ff15ddaf623ea6ee6550cfff399b02276123fb207ae84f8a99586391717fa85d185a6495b54b75ccb37c9f5c1ca9b23788554d6d7777cf83ab06e613faeef966cfc050fc7a9e4cb2d19ac8a0c84a1109aa276face2f24d790c80ef92cfd1efbe0078ba37e8e1c11257542f683fd23f1eb3b9607f2d1ba9e77f4e6b140deed7eb10e1a09817ac3f09ce9e1dce627c3c3e4068c69c5015434409a1bcaf3455e005341c67d86b15c26c705d724fa037c451face49de3ecbc6f175150c666106edd8a5232abf50cfcc3c2523119796f5dc42837610576db703f82ec53f5a59eddecce592570ad0e3fd9670f1c3bed29b346abdc836824d8e85cd31297e75db233fe18674d9346eb4076d8daf7d76388a61315f022294ae23485f78f0755439a8836a4022b3de4d628a85e8100d17987e3cb1806e13fdfbc41a7300dadf4ab0071608753dffbcfffd21b3eecedae6142ebde5ffd1a1a1b6f807b7a1620aada48d755148de06b73dd3a2165423a7e2b7c739d7fe0ca095e039d3fd5ae861c80329b446665fed8ef7978507930b0e0a20ba37d7fbeaaefefb1836464aad7658567a549c106e13017fdd4774cddc9b4234a774945a0cdcd7d752f7f2c2317a955af43232f931d1720d07dd102fc5adba7c91f66899f4ff7abf33931b876e94d561a488649e5d32af304e4ac35436dd83e380c72cf6bf8a072a4104b64e56a6df3cdedba2fa2ba8fcefac7548fc3c8ce0db8620990678641149f67218e0e6457d8178fb3a0d2ed29ae4bcf39e06936223792f8a2dc7e8390e0fc7374092ff102c5c4711ef812092c58b6fab2a409b60177bf54b75d94dac1465fe15bc1f535fd738d5a3e8d7bdf4c152da072911996d37c33ed90f70401d0db13ec216c0525ca42217282a9f991debdcf7c73811ab7f3b27a55ffb725213f620ca1b3a6c3c2a7cd31498751b09c11b630d0f6da775b5e3ec849491bfa24f6a703314e64dea3e161795c42ba3fb5a0cfb855621dc5ed3849f2235c208e959d339b1d421a01d6184f064c46e63858cfe04fafcb34c7ae90db39aa3f06bf3bd254d5ad7a93d91d17b17a7f8707824a1b88103b34b23fbacb5453182ecee3240d9fc6f55a738041417b1dc558fff46c5c54e63ff4d3182026241a180f783d41165f1f06891b4d5bbb3348e414df0273c21cb7e93e66020f8ffb82c7f716a49a9e5f413426549e401e4412eccd30b6bc591d67d051b5c82684d2f85a9020c4b297fa1294030f865ae2ea86d500b483fba3dd46f7653d97941fafbfcd06280c6ac3074cfe7ae7e15bbe914757779132808ec32000c8cc21cbf3679dd0715c4eae7b86bd1020d00b6f94c274ae2a28e8f48cac6f029a73fc165e1f8ee62133a84572c4e5c6ed052a2e31430713df6c67f6817b07b8b823fb6325751191e4518101527b21242b62d5a2ac2d207536886476afd099ef1f13d21633286816352279b5ffd0a9c67a32a694cbc266ad4d9968f7b2375a65f19cbe3681ed15dab04116ae8ca64573800d544bafaf76aa66abf817173340b505fc080f48c667e673fed4d6b93c920a8aa03327ed6433dc369e815244b7cfc34197783c9289ad778e48eeb5b68c69094f62001f8a87f2e88554fc827b8921ef79fd25ebb7cbd30d6641030bd8258c36e3501a6b5fca1ba685b2ce913d6bf60fbe862a0b1295564bd4c49e560efff9509507d7cf7a39e942b45b78ee045b7610551572117c63191e5ef201c075120e22de0498d4d9516819c8d19b2331a476c8404197ab7763061e959fca974e5054f8ea182d41f1477b74157a79397d3baf04b184201dddef7114da97747f609484202f989a319cb2aa76032c8f2261df0e60549814a81a1c2524f72ca73b27f2334d2cc20ab0ffc9c85966f0b12188bacb8a5021a41eb0635ef6ee</script>
 </div>
 <script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">]]></content>
       <tags>
