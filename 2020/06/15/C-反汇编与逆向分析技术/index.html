@@ -103,9 +103,8 @@
 <meta property="og:image" content="http://www.kittener.top/2020/06/15/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF/%E5%9B%BE3.jpg">
 <meta property="og:image" content="http://www.kittener.top/2020/06/15/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF/%E5%9B%BE4.jpg">
 <meta property="og:image" content="http://www.kittener.top/2020/06/15/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF/%E5%9B%BE6.jpg">
-<meta property="og:image" content="http://www.kittener.top/2020/06/15/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF/%E5%9B%BE7.jpg">
 <meta property="article:published_time" content="2020-06-15T08:22:46.000Z">
-<meta property="article:modified_time" content="2020-06-18T07:13:30.231Z">
+<meta property="article:modified_time" content="2020-06-19T15:32:29.617Z">
 <meta property="article:author" content="Kittener">
 <meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
@@ -361,8 +360,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-06-18T15:13:30+08:00">
-                2020-06-18
+              <time title="更新于" itemprop="dateModified" datetime="2020-06-19T23:32:29+08:00">
+                2020-06-19
               </time>
             
           </span>
@@ -483,35 +482,202 @@
 </ul>
 <h2 id="基本的浮点数指令"><a href="#基本的浮点数指令" class="headerlink" title="基本的浮点数指令"></a>基本的浮点数指令</h2><p>浮点寄存器是通过栈结构来实现的，由ST(0)~ ST(7)共8个栈空间组成，每个浮点寄存器占8字节。每次使用浮点寄存器都是率先使用ST(0)，而不能越过ST(0)直接使用ST(1)。浮点寄存器的使用就是压栈、出栈的过程。当ST(0)存在数据时，执行压栈操作后，ST(0) 中的数据将装入ST(1)中，如无出栈操作，将顺序地向下压栈，直到将浮点寄存器占满。常用浮点数指令的介绍如表2-1所示，其中，IN表示操作数人栈，OUT 表示操作数出栈  </p>
 <p><img src="%E5%9B%BE6.jpg" alt="常用浮点数指令表">  </p>
-<pre><code>类型转换函数_ftol的实现  
-;保存环境，预留语句变量空间
-0040E688  push  ebp
-0040E689  mov   ebp,esp
-0040E68B  add   esp,0f4h  
-;浮点异常检查、CPU与FPU的同步工作
-0040E68E  wait
-0040E68E  fnstcw  word ptr [ebp-2]
-0040E692  wait
-0040E693  mov   ax,word ptr [ebp-2]
-0040E697  or    ah, 0Ch
-0040E69A  mov   word ptr [ebp-4] ,ax
-0040E69E  fldcw  word ptr [ebp-4]
-;从ST(0)中取出8字节数据转换成整型并存入ebp-0Ch中
-;将ST(0)从栈中弹出
-0040E6A1  fistp  qword ptr [ebp-0Ch]
-0040E6A4  fldcw  word ptr [ebp-2]
-;使用eax保存整型数据的低4字节，用于返回
-0040E6A7  mov   dword ptr [ebp-0ch]
-;使用edx保存整型数据的高4字节，用于返回
-0040E6AA  mov   edx,dword ptr [ebp-8]
-;释放栈
-0040E6AD  leave
-0040E6AE  ret</code></pre><h2 id="字符和字符串"><a href="#字符和字符串" class="headerlink" title="字符和字符串"></a>字符和字符串</h2><p>ASCII使用GB2312-80，又叫汉字国标码，保存了6763个常用汉字编码，用两个字节来表示一个汉字。在GB2312-80中用区和位来定位，第一个字节保存每个区，共94个区;第二个字节保存每个区中的位，共94位。详细信息可查看GB2312-80编码的说明  </p>
-<p>Unicode使用UCS-2编码格式，最多可存储65536个字符。汉字博大精深，其中有简体字、繁体字，以及网络中流行的火星文，它们的总和远远超过了UCS-2的存储范围，所以UCS-2编码格式中只保存了常用字。为了将所有的汉字都容纳进来，Unicode也采用了与ASCII类似的方式一用 两个Unicode编码解释一个汉字，称之为UCS-4编码格式。UCS-2编码表的使用和ASCII码表的使用是一样的。每个数字编号在表中对应-一个汉字，从0x4E00到0x9520为汉字编码区。例如，在UCS-2中，“烫”字的编码为0x70EB  </p>
-<p>C++使用结束符\O’作为字符串结束标志。ASCII编码使用一个字节“0’,Unicode编码使用两个字节\0’。需要注意的是，<strong>不能使用处理ASCII编码的函数对Unicode编码进行处理</strong>，因为如果Unicode编码中出现了只占用1字节的字符，就会发生解释错误  </p>
-<h2 id="地址、指针和引用"><a href="#地址、指针和引用" class="headerlink" title="地址、指针和引用"></a>地址、指针和引用</h2><h3 id="指针和地址的区别"><a href="#指针和地址的区别" class="headerlink" title="指针和地址的区别"></a>指针和地址的区别</h3><p>在32位操作系统下，地址是一个由32位二进制数字组成的值。为了便于查看，转换成十六进制数字进行显示，用于标识内存编号。指针是用于保存这个编号的-种变量类型，它包含在内存中，所以可以取出指针类型变量在内存中的位置一地址。 由于指针保存的数据都是地址，所以<strong>无论什么类型</strong>的指针都占据<strong>4字节</strong>的内存空间，如图  </p>
-<p><img src="%E5%9B%BE7.jpg" alt="指针和地址">  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">    类型转换函数_ftol的实现  </span><br><span class="line"></span><br><span class="line">    ;保存环境，预留语句变量空间</span><br><span class="line">    0040E688  push  ebp</span><br><span class="line">    0040E689  mov   ebp,esp</span><br><span class="line">    0040E68B  add   esp,0f4h  </span><br><span class="line"></span><br><span class="line">    ;浮点异常检查、CPU与FPU的同步工作</span><br><span class="line">    0040E68E  wait</span><br><span class="line">    0040E68E  fnstcw  word ptr [ebp-2]</span><br><span class="line">    0040E692  wait</span><br><span class="line">    0040E693  mov   ax,word ptr [ebp-2]</span><br><span class="line">    0040E697  or    ah, 0Ch</span><br><span class="line">    0040E69A  mov   word ptr [ebp-4] ,ax</span><br><span class="line">    0040E69E  fldcw  word ptr [ebp-4]  </span><br><span class="line"></span><br><span class="line">    ;从ST(0)中取出8字节数据转换成整型并存入ebp-0Ch中</span><br><span class="line"></span><br><span class="line">    ;将ST(0)从栈中弹出</span><br><span class="line"></span><br><span class="line">    0040E6A1  fistp  qword ptr [ebp-0Ch]</span><br><span class="line">    0040E6A4  fldcw  word ptr [ebp-2]</span><br><span class="line"></span><br><span class="line">    ;使用eax保存整型数据的低4字节，用于返回</span><br><span class="line">    0040E6A7  mov   dword ptr [ebp-0ch]</span><br><span class="line"></span><br><span class="line">    ;使用edx保存整型数据的高4字节，用于返回</span><br><span class="line">    0040E6AA  mov   edx,dword ptr [ebp-8]</span><br><span class="line"></span><br><span class="line">    ;释放栈</span><br><span class="line">    0040E6AD  leave</span><br><span class="line">    0040E6AE  ret</span><br><span class="line">&#96;&#96;&#96;  </span><br><span class="line"></span><br><span class="line">## 字符和字符串  </span><br><span class="line"></span><br><span class="line">ASCII使用GB2312-80，又叫汉字国标码，保存了6763个常用汉字编码，用两个字节来表示一个汉字。在GB2312-80中用区和位来定位，第一个字节保存每个区，共94个区;第二个字节保存每个区中的位，共94位。详细信息可查看GB2312-80编码的说明  </span><br><span class="line"></span><br><span class="line">Unicode使用UCS-2编码格式，最多可存储65536个字符。汉字博大精深，其中有简体字、繁体字，以及网络中流行的火星文，它们的总和远远超过了UCS-2的存储范围，所以UCS-2编码格式中只保存了常用字。为了将所有的汉字都容纳进来，Unicode也采用了与ASCII类似的方式一用 两个Unicode编码解释一个汉字，称之为UCS-4编码格式。UCS-2编码表的使用和ASCII码表的使用是一样的。每个数字编号在表中对应-一个汉字，从0x4E00到0x9520为汉字编码区。例如，在UCS-2中，“烫”字的编码为0x70EB  </span><br><span class="line"></span><br><span class="line">C++使用结束符\O&#39;作为字符串结束标志。ASCII编码使用一个字节“0&#39;,Unicode编码使用两个字节\0&#39;。需要注意的是，**不能使用处理ASCII编码的函数对Unicode编码进行处理**，因为如果Unicode编码中出现了只占用1字节的字符，就会发生解释错误  </span><br><span class="line"></span><br><span class="line">## 地址、指针和引用  </span><br><span class="line"></span><br><span class="line">### 指针和地址的区别  </span><br><span class="line"></span><br><span class="line">在32位操作系统下，地址是一个由32位二进制数字组成的值。为了便于查看，转换成十六进制数字进行显示，用于标识内存编号。指针是用于保存这个编号的-种变量类型，它包含在内存中，所以可以取出指针类型变量在内存中的位置一地址。 由于指针保存的数据都是地址，所以**无论什么类型**的指针都占据**4字节**的内存空间，如图  </span><br><span class="line"></span><br><span class="line">![指针和地址](图7.jpg)  </span><br><span class="line"></span><br><span class="line">指针可以根据指针类型对地址对应的数据进行解释。而一个地址值无法单独解释数据,对于图中0x0012FF68这个地址值，仅仅凭借它自己无法说明该地址处对应数据的信息。如果是在一个int 类型的指针中保存这个地址，就可以将0x0012FF68这个地址值看做是int类型数据的起始地址，向后数4字节到0x0014FF6C处。将0x0012FF68 ~0x0014FF6C中的数据按整型存储方式解释  </span><br><span class="line"></span><br><span class="line">![指针和地址之间的不同点](图8.jpg)  </span><br><span class="line">![指针和地址之间的不同点](图9.jpg)  </span><br><span class="line">![指针和地址之间的共同点](P10.jpg)  </span><br><span class="line"></span><br><span class="line">### 各类指针的工作方式  </span><br><span class="line"></span><br><span class="line">不同指针的源码：</span><br></pre></td></tr></table></figure>
+<pre><code>// C++源码对比，定义int类型变量，初始化为0x12345678
 
+int nVar = 0x12345678;
+;为地址赋值4字节数据12345678h
+0040EB1D  mov   dword ptr [ebp-10h],12345678h
+
+// C++源码对比，定义int类型指针变量，初始化为变量nVar地址
+int *pnVar = &amp;nVar;
+0040EB24  lea   ecx,[ebp-10h]
+0040EB27  mov   dword ptr [ebp-14h],ecx  
+
+// C++ 源码对比，定义char类型指针变量， 初始化为变量nvar地址
+char *pcVar = (char*) &amp;nVar;
+0040EB2A  lea   edx,[ebp-10h]
+0040EB2D  mov   dword ptr [ebp-1ch],eax  
+
+// C++源码对比，定义short类型的指针变量，初始化为变量nVar地址
+short *psnVar = { short*) &amp;nVar ;
+0040EB30  lea   eax,[ebp-10h]  
+0040EB33  mov   dword ptr [ebp-1Ch],eax  
+
+//C++源码对比，取出指针pnVar指向的地址内容并显示
+printf(&quot;%08x \r\n&quot;，*pnVar) ;
+
+;取出pnVar中保存的地址值并放入ecx中
+0040EB36  mov   ecx,dword ptr [ebp-14h]
+
+;从ecx保存的地址中，以4字节方式读取数据，存入edx中
+0040EB39  mov   edx,dword ptr [ecx]
+
+pcVar 以1字节的方式读取数据存入ecx中
+psnVar 以2字节的方式读取存入eax中</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">指针类型只支持加法和减法，指针进行运算后，指针内保存的地址值的增加或减少取决于**指针类型**，如int类会使地址值的变换是4  </span><br><span class="line"></span><br><span class="line">type *P;&#x2F;&#x2F;这里用type泛指某类型的指针s  </span><br><span class="line">p+n的目标地址&#x3D;首地址+ sizeof( 指针类型type) * n  </span><br><span class="line"></span><br><span class="line">两指针相减可以得到数组长度  </span><br><span class="line"></span><br><span class="line">### 引用  </span><br><span class="line"></span><br><span class="line">C++将指针操作进行了封装，产生了引用类型  </span><br><span class="line">引用通过编译器寻址，而指针需要手动寻址</span><br></pre></td></tr></table></figure>
+<pre><code>void Add (int &amp;nVar) {
+;在Debug版中添加汇编代码略
+
+nVar++;     // C++源码对比，对引用类型nVar执行++操作
+;取出参数nVar中的内容放入eax中
+00401078  mov   eax,dword ptr [ebp+8]  
+
+;对eax执行取内容操作
+0040107B  mov   ecx,dword ptr [eax]
+0040107D  add   ecx,1
+00401080  mov   edx,dword ptr [ebp+8]
+00401083  mov   dword ptr [edx],ecx
+
+}</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## 常量  </span><br><span class="line"></span><br><span class="line">###  #define和const的区别  </span><br><span class="line"></span><br><span class="line">#define是一个真常量，而const是由**编译器判断**的假常量，实际上，const定义的变量，终究还是一个变量，只是在编译器内进行了检查，发现有修改则报错  </span><br><span class="line"></span><br><span class="line">所以可以修改const常量，通过指针获取const常量的地址，强制将指针的const修饰去掉，就可以修改对应的数据内容</span><br></pre></td></tr></table></figure>
+<pre><code>// C++源码对比，将变量nConst修饰为const
+const int nConst = 5;
+;将地址ebp-4赋值给4字节数据5
+004010B8  mov   dword ptr [ebp-4],5
+
+// C++源码对比，定义int类型的指针，保存nConst地址
+int *pConst = (int*) &amp;nConst ; 
+;获取ebp-4地址并存入eax中
+004010BF  lea   eax,[ebp-4]
+
+;将eax中的数据赋值到地址ebp-8处
+004010C2  mov   dword ptr [ebp-8],eax
+
+// C++源码对比，修改指针pConst并指向地址中的数据
+*pConst = 6;
+;荻取地址ebp-8中的数据并存入ecx
+004010C5  mov   ecx,dword ptr [ebp-8]
+
+;将地址ebp-8中保存的数据修改为6
+004010C8  mov   dword ptr [ecx],6
+
+// C++源码对比，将修饰为const的变量nConst腻值给nVar
+int nVar = nConst ;
+
+;将5赋值到地址ebp-0Ch处
+00401OCE  mov   dword ptr [ebp-0ch],5</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">最后的直接赋值5是编译器做出了优化</span><br><span class="line"></span><br><span class="line">![#define与const的区别](P11.jpg)</span><br><span class="line"></span><br><span class="line"># 第三章 认识启动函数，找到用户入口  </span><br><span class="line"></span><br><span class="line">## 程序真正入口  </span><br><span class="line">main或WinMain函数应该是“语法规定的用户入口”，而不是“应用程序入口”。在应用程序被操作系统加载时，操作系统会分析执行文件内的数据，分配相关资源，读取执行文件中的代码和数据到合适的内存单元，然后才是执行入口代码，入口代码其实**并不是main或WinMain**，通常是**mainCRTStartup、wmainCRTStartup、 WinMainCRTStartup 或wWinMainCRTStartup**，具体视编译选项而定。其中**mainCRTStartup和wmainCRTStartup**是控制台环境下多字节编码和Unicode编码的启动函数，而**WinMainCRTStartup和wWinMainCRTStartup**则是Windows环境下多字节编码和Unicode编码的启动函数。在开发过程中，VC++也允许程序员自己指定入口  </span><br><span class="line"></span><br><span class="line">## VC++6.0的启动函数  </span><br><span class="line"></span><br><span class="line">VC++6.0在控制台和多字节编码环境下的启动函数为**mainCRTStartup**，由系统库**KERNEL32.dll**负责调用。在mainCRTStartup中再调用main函数。使用VC++ 6.0进行调试时，入口断点总是停留在main函数的首地址处</span><br></pre></td></tr></table></figure>
+<pre><code>void mainCRTStartup (
+#endif /* WPRFLAG */
+#endif /* _WINMAIN_ */
+    void
+)
+
+{
+    //荻取版本信息
+    _osver = GetVersion();
+    _winminor = (_osver &gt;&gt; 8) &amp; 0x00FF;
+    _winmajor = _ osver &amp; 0x00FF;
+    _winver = (_ winmajor &lt;&lt; 8) + _winminor;
+    _osver = (_osver &gt;&gt; 16) &amp; 0x00FFFF;
+
+    // 堆空间初始化过程，在此函数中，指定了程序中堆空间的起始地址
+    // _MT是多线程标记
+
+#ifdef _MT
+    if ( ! _heap_ init(1) )
+#else /* _MT */
+    if ( !_ heap_ init(0) )
+#endif /* _MT */
+    fast_error_ exit(_RT_HEAPINIT);
+
+    //初始化多线程环境
+#ifdef _MT
+    if( !_ mtinit() )
+        fast_error_exit(_RT_THREAD);
+#endif /* _MT */
+    _try {
+        // 宽字符处理代码略
+
+        // 多字节版荻取命令行
+        _acmdln = (char *) GetCommandLineA();
+
+    // 多字节版获环境变量信息
+    _aenvptr = {char *)__crtGetEnvironmentStringsA();
+
+    // 多字节版获取命令行信息
+    _setargv();
+
+    // 多字节版荻取环境变量信息
+    _setenvp();
+
+#endif /* WPRFLAG */
+    // 初始化全局数据和浮点寄存器
+    _cinit();
+
+    // 窗口程序处理代码略
+
+    // 宽字符处理代码略
+
+    // 获取环境变量信息
+    _initenv = _environ;
+
+    // 调用main函数，传递命令行参数信息
+    mainret = main(_argc, _argv, _environ);
+
+#endif /* WPRFLAG */
+
+#endif /* _WINMAIN_ */
+    // 检查main函数返回值执行析构函数或atexit注册的函数指针，并结束程序
+    exit (mainret);
+}
+// 退出结束代码略</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- **GetVersion函数**:获取当前运行平台的版本号。控制台程序运行在Windows模拟的DOS下，因此这里获取的版本号为MS-DOS的版本信息</span><br><span class="line">- **_ heap_ init函数**:用于初始化堆空间。在函数实现中使用HeapCreate申请堆空间，申请空间的大小由_heap_init传递的参数决定。_sbh_heap_init函数用于初始化堆结构信息  </span><br><span class="line">- **GetCommandLineA函数**:获取命令行参数信息的首地址  </span><br><span class="line">- **_crtGetEnvironmentStringsA函数**:获取环境变量信息的首地址  </span><br><span class="line">- **_setargv函数**:此函数根据GetCommandLineA获取命令行参数信息的首地址并进行参数分析，将分离出的参数的个数保存在全局变量_arge中，将分析出的每个命令行参数的首地址存放在数组中，并将这个字符指针数组的首地址保存在全局变量_argv中。这样就得到了命令行参数的个数，以及命令行参数信息  </span><br><span class="line">- **_ setenvp 函数**:此函数根据__crtGetEnvironmentStringsA 函数获取环境变量信息的首地址并进行分析，将得到的每条环境变量字符串的首地址存放在字符指针数组中，并将这个数组的首地址存放在全局变量env中  </span><br><span class="line"></span><br><span class="line">得到main函数所需的三个参数信息之后，当调用main函数时，便可以将_ _argc、 _argv、 env这三个全局变量作为参数，以栈传参方式传递到main函数中  </span><br><span class="line"></span><br><span class="line">- **_cinit函数**:用于全局数据和浮点寄存器的初始化。全局对象和I&#x2F;O流等的初始化都是通过这个函数实现的。利用函数 _itterm 进行数据链初始化，这个函数由两个参数组成，类型为“_PVFV*”,这是一个函数指针数组，其中保留了每个初始化函数的地址。初始化函数的类型为_PVFV, 其定义原型如下:  </span><br><span class="line">typedef void (_ cdec1 * _PVFV) (void);  </span><br><span class="line">也就是说，这个初始化函数是无参数也无返回值的，C++ 规定全局对象和静态对象必须在main函数前构造，在main函数返回后析构。所以，这里的_PVFV函数指针数组就是用来代理调用构造函数的，具体如下所示：</span><br></pre></td></tr></table></figure>
+<pre><code>// 用于初始化寄存器
+if (_FPinit != NULL)  
+(*_ FPinit) (); //初始化浮点寄存器
+
+// 用于初始化C语法中的数据
+_initterm( _xi_a, _xi_z );
+
+// 用于初始化C++语法中的数据
+_initterm( _XC_a, _XC_z );</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">**FPinit** 是一个全局函数指针，类型也是_PVFV, 如果编译器扫描代码时发现有浮点计算，则此指针保存了初始化浮点寄存器的代码地址，否则为0值。如果浮点寄存器未被初始化而进行浮点计算，程序会产生异常或错误，这类错误应属于VC++ 6.0自身设计的Bug,在VC++6.0以后的版本中已将其修复。一般而言，第一个_initterm 初始化的都是C支持库中所需的数据。参数_xi_a 为函数指针数组的起始地址，_xi_z为结束地址。 _initterm 的实现：</span><br></pre></td></tr></table></figure>
+<pre><code>static void__ cdec1 initterm (
+    _PVFV * pfbegin,
+    _PVFV * pfend
+)
+{
+    // 遍历数组的各元素
+    while ( pfbegin &lt; pfend )
+    {
+        // 若函数指针不为空，则执行该函数
+        if ( *pfbegin != NULL )
+            (**pfbegin) () ;
+
+        ++pfbegin;
+    }
+}</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">在默认情况下，入口函数为main,这时会从mainCRTStartup启动，再传入main所需要的三个参数，最后调用main函数。重新指定入口函数后，将直接从KERNEL32中调用重新指定的入口函数，而不会经过mainCRTStartup。通过修改编译选项，重新设置人口函数，依次选择菜单Procject→Settings →Link→Output,在Enty-pointsymbol中填写需要重新指定新入口的函数名称。编译后调试程序，结果如图所示  </span><br><span class="line"></span><br><span class="line">![重设入口函数](P12.jpg)  </span><br><span class="line"></span><br><span class="line">由于没有调用mainCRTStartup函数，所以**堆空间没有被初始化**，当使用堆空间时，程序会报错崩溃  </span><br><span class="line"></span><br><span class="line">## 识别main函数  </span><br><span class="line"></span><br><span class="line">main函数有如下特征是:它有3个参数，分别为命令行参数个数、命令行参数信息和环境变量信息，而且它是启动函数中唯一的具有3个参数的函数。同理，WinMain 也是启动函数中唯一的具有4个参数的函数</span><br></pre></td></tr></table></figure>
+<pre><code>;省略部分代码
+
+; O1lyDBG识别出的函数名称为GetCommandLineA
+00401210  |. FF15 38514200   call dword ptr ds: [&lt; &amp;KERNEL32.GetCommand&gt;
+
+;得到命令行参数
+00401216  |. A3 444F4200    mov dword ptr ds: [424F44] , eax
+
+;根据main函数特性，此处为函数_crtGetEnvironmentStringsA() 调用
+0040121B  |. E8 E0240000    call ProgramE.00403700
+00401220  |. A3 BC354200    mov dword ptr ds: [4235BC] , eax
+
+;根据main函数特性，此处为函数_setargv()调用
+00401225  |. E8 C61F0000    call ProgramE.004031F0
+
+;根据main函数特性，此处为函数cinit()调用
+0040122F  |. E8 8C1A0000    call ProgramE.00402CC0
+00401234  |. 8B0D 00364200  mov ecx, dword ptr ds: [423600]
+0040123A  |. 890D 04364200  mov dword ptr ds: [423604] , ecx
+00401240  |. 8B15 00364200  mov edx, dword ptr ds: [423600] 
+
+;压栈传参，环境变量信息
+00401246  |. 52             push edx
+00401247  |. Al F8354200    mov eax, dword ptr ds: [4235F8]
+
+;压栈传参，命令行参数信息
+0040124C  |. 50             push eax
+0040124D  |. 8BOD F4354200  mov ecx, dword ptr ds; [4235F4]
+
+;压栈传参，命令行参数个数
+00401253  |. 51             push ecx
+
+;此处为main函数的调用处，跟进到函数中便是main函数的实现代码流程
+00401254  |. E8 ACFDFFFF    call ProgramE.00401005</code></pre><pre><code></code></pre>
       
     </div>
     
@@ -723,7 +889,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章"><span class="nav-number">1.</span> <span class="nav-text">第一章</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IDA函数识别"><span class="nav-number">1.1.</span> <span class="nav-text">IDA函数识别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反汇编引擎的工作原理"><span class="nav-number">1.2.</span> <span class="nav-text">反汇编引擎的工作原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二章-C-反汇编揭秘"><span class="nav-number">2.</span> <span class="nav-text">第二章 C++反汇编揭秘</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#浮点数的编码方式"><span class="nav-number">2.1.</span> <span class="nav-text">浮点数的编码方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本的浮点数指令"><span class="nav-number">2.2.</span> <span class="nav-text">基本的浮点数指令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字符和字符串"><span class="nav-number">2.3.</span> <span class="nav-text">字符和字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#地址、指针和引用"><span class="nav-number">2.4.</span> <span class="nav-text">地址、指针和引用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#指针和地址的区别"><span class="nav-number">2.4.1.</span> <span class="nav-text">指针和地址的区别</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#第一章"><span class="nav-number">1.</span> <span class="nav-text">第一章</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IDA函数识别"><span class="nav-number">1.1.</span> <span class="nav-text">IDA函数识别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#反汇编引擎的工作原理"><span class="nav-number">1.2.</span> <span class="nav-text">反汇编引擎的工作原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#第二章-C-反汇编揭秘"><span class="nav-number">2.</span> <span class="nav-text">第二章 C++反汇编揭秘</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#浮点数的编码方式"><span class="nav-number">2.1.</span> <span class="nav-text">浮点数的编码方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本的浮点数指令"><span class="nav-number">2.2.</span> <span class="nav-text">基本的浮点数指令</span></a></li></ol></li></ol></div>
             
 
           </div>
