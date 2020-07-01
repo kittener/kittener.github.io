@@ -1,6 +1,330 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>C++反汇编与逆向分析技术(二)</title>
+    <url>/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%8C/</url>
+    <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》(二)</p>
+<a id="more"></a>  
+<h1 id="第四章-各种表达式的求值过程"><a href="#第四章-各种表达式的求值过程" class="headerlink" title="第四章 各种表达式的求值过程"></a>第四章 各种表达式的求值过程</h1><p>单独的算术运算虽然可以编译通过，但是并不会生成代码。因为只进行计算而没有传递结果的运算不会对程序结果有任何影响，此时编译器将其视为无效语句，与空语句等价，不会有任何编译处理  </p>
+<h2 id="加法"><a href="#加法" class="headerlink" title="加法"></a>加法</h2><p>VC++ 6.0有两种常用的优化方案  </p>
+<ul>
+<li>O1方案，生成文件占用空间最小</li>
+<li>O2方案，执行效率最快</li>
+</ul>
+<p>在VC++ 6.0中，Release编译选项组的默认选项为<em>O2选项</em>，在Debug编译选项组中，使用的是<em>Od+ZI选项</em>，此选项使编译器产生的一切代码都以便于调试为最根本的前提，甚至为了便于单步调试，以及源码和目标代码块的对应阅读  </p>
+<pre><code>
+//C++源码说明：加法运算
+//无效语句，不参与编译
+15+20
+
+//变量定义
+int nVarOne = 0;
+int nVarTwo = 0;
+
+//变量加常量的加法运算
+nVarOne = nVarOne + 1;
+
+//两个常量加法的加法运算
+nVarOne = 1 + 2;
+
+//两个变量相加的加法运算
+nVarOne = nVarOne + nVarTwo
+printf(&quot;nVarOne = %d \r\n&quot;, nVarOne);
+
+//C++源码与对应汇编代码
+
+//C++源码对比，变量赋值
+int nVarOne = 0;
+
+//将立即数0，传入地址ebp-0x4中，即变量nVarOne所在的地址
+00401028 mov dword ptr [ebp-4],0
+
+//C++源码对比，变量赋值
+int nVarTwo = 0;
+0040102F mov dword ptr [ebp-8],0
+
+//C++源码对比，变量 + 常量
+nVarOne = nVarOne + 1;
+
+//取出变量nVarOne数据放入eax中
+00401036 mov eax,dword ptr [ebp-4]
+
+//对eax执行加等于1运算
+00401039 add eax,1
+
+//将结果返回变量nVarOne中，完成加法运算
+0040103C mov dword ptr [ebp-4],eax
+
+//C++源码对比，常量 + 常量
+nVarOne = 1 + 2;
+
+//这里编译器直接计算出了两个常量相加后的结构，放入变量nVarOne中
+0040103F mov dword ptr [ebp-4],3
+
+//C++源码对比，变量 + 变量
+nVarOne = nVarOne + nVarTwo;
+
+//使用ecx存放变量nVarOne
+00401046 mov ecx,dword ptr [ebp-4]
+
+//使用ecx对变量nVarTwo执行加等于操作
+00401049 add ecx,dword ptr [ebp-8]
+
+//将结果存入地址ebp-4处，即变量nVarOne
+0040104C mov dword ptr [ebp-4],ecx
+</code></pre><p>由上方代码可得：  </p>
+<ul>
+<li>在两常量相加的情况下，编译器在编译期间就计算出两常量相加后的结果，将这个结果值作为立即数参与运算，减少了程序在运行期的计算</li>
+<li>当有变量参与加法运算时，会先取出内存中的数据，放入通用寄存器中，再通过加法指令来完成计算过程得到结果，最后存回到变量所占用的内存空间中</li>
+</ul>
+<p>在开启O2选项后，编译出来的汇编代码会由于效率优先的编译选项而发生很大变化，编译器会将无用代码去除，并将可合并代码进行归并处理。例如，在代码清单4-1中，“nVarOne =<br>nVarOne+1;”这样的代码将被删除，因为在其后又重新对变量nVarOne进行了赋值操作，而在此之前没有对变量nVarOne的任何访问，所以编译器判定此句代码是可被删除的  </p>
+<p>O2选项后Release版代码如下：</p>
+<pre><code>
+; int _cdecl main(int argc, const char **argu, const char **enup)
+__main proc near
+push    3
+push    offset format   ;&quot;nVarOne = %d \r\n&quot;
+call    __printf
+add     esp,8
+xor     eax,eax
+retn
+__main endp
+</code></pre><ul>
+<li>常量传播</li>
+</ul>
+<pre><code>
+void main(){
+    int nVar = 1;
+    printf(&quot;nVarOne = %d  \r\n&quot;, nVar);
+}
+</code></pre><p>变量nVar是一个在编译期间可以计算出结果的变量。因此，在程序中所有引用到nVar的地方都会直接使用常量1来代替，于是代码等价于:   </p>
+<pre><code>
+void main(){
+    printf {&quot;nVarOne = %d \r\n&quot;，1) ;
+}</code></pre><ul>
+<li>常量折叠  </li>
+</ul>
+<p>当计算公式中出现多个常量进行计算的情况时，且编译器可以在编译期间计算出结果时，这样源码中所有的常量计算都将被计算结果代替，如下面的代码所示:   </p>
+<pre><code>void main(){
+    int nVar = 1 + 5 - 3 * 6;
+    printf(&quot;nVarOne = %d \r\n&quot;,nVar);
+}</code></pre><p>在这串算式被编译后会直接转化成常量-12，即”int nVar = -12;”  </p>
+<p>在给出的加法代码中，变量nVarOne和nVarTwo的初始化值是-一个常量， VC++编译器在开启02优化方案后，会尝试使用常量替换掉变量。如果在程序的逻辑中，声明的变量没有被修改过，而且上下文中不存在针对此变量的取地址和间接访问操作，那么这个变量也就等价于常量，编译器就认为可以删除掉这个变量，直接用常量代替。使用常量的好处是可以生成立即数寻址的目标代码，常量作为立即数成为指令的一-部分，从而减少了内存的访问次数  </p>
+<pre><code>int nVarOne = 0;    //常量化以后: int nVarOne = 0; nVarOne 用0代替了
+int nVarTwo = 0;    // int nVarTwo = 0; 同上，这句也没有了
+
+//变量加常量的加法运算
+nVarOne = nVarOne + 1;      //nVarOne=0+1;
+
+//两常量相加的加法运算
+nVarOne = 1 + 2;    //nVarOne=1+2;
+nVarOne = nVarOne + nVarTwO;    // nVarOne = nVarOne + 0;
+printf (&quot;nVarOne = %d \r\n&quot;, nVarOne);</code></pre><p>经过转化后，直接变成”printf(“nVarOne = %d \r\n”);”<br>将代码修改为：  </p>
+<pre><code>int main(int argc, char* argv[]) {
+    int nVarOne = argc;      //修改处
+    int nVarTwo = argc;      //修改处
+
+    nVarOne = nVarOne + 1 ;
+    nVarOne = 1 + 2;
+    nVarOne = nVarOne + nVarTwo;
+    printf {&quot;nVarOne = %d \r\n&quot;， nVarOne) ;
+    return 0;
+}
+</code></pre><p>这里初始化nVarOne和nVarTwo的时候用命令行参数argc，故在编译期间无法确定，程序中的变量就不会被常量替换掉，汇编代码为  </p>
+<pre><code>; int_ cdec1 main(int argc, const char **argu, const char **envp)
+__main proc near  
+
+arg_0 = dword ptr 4
+
+mov  eax, [esp+arg_0]
+add  eax, 3  
+push  eax  
+push  offset Format     ; &quot;nVarOne = 0 \r\n&quot;
+
+call  printf
+add  esp,8
+xor  eax, eax
+retn
+
+__main endp</code></pre><p>这里还是被删除了一个变量，优化过程如下：  </p>
+<pre><code>int main(int argc, char* argv[]) {
+    // int nVarOne = argc;在后面的代码中被常量代替
+    // int nVarTwo = argc;虽然不能用常量代替，但是由于之后没有对nVarTwo进行修改，所以引用nVarTwo等价于引用argc, nVarTwo 则被删除掉，这种方法称为”复写传播”
+
+    // nVarOne = nVarOne + 1;其后即刻重新对nVarOne赋值，这句被删除了
+    // nVarOne = 1+2;常量折叠，等价于nVarOne=3;
+
+    // nVarOne = nVarOne + nVarTwo; 常量传播和复写传播，等价于nVarOne = 3 + argc ;
+    // printf (&quot;nVarOne = %d \r\n&quot;, nVarOne) ;
+
+    //其后nVar0ne没有被访问，可以用3 + argc代替
+    printf (&quot;nVarOne = %d \r\n&quot;, 3 + argc) ;
+
+    return 0;
+}</code></pre><h2 id="减法"><a href="#减法" class="headerlink" title="减法"></a>减法</h2><p>减法运算对应于汇编指令sub，计算机是通过补码将减法转变为加法形式来完成转换，有公式  </p>
+<p>设有二进制数Y，其反码记为Y(反)，假定其二进制长度为8位，有:  </p>
+<ul>
+<li>Y + Y(反) = 1111 1111B  </li>
+<li>Y + Y(反) + 1 = 0(进位丢失)  </li>
+</ul>
+<p>根据以上两点，可推出  </p>
+<ul>
+<li>Y(反) + 1 = 0 - Y&lt;==&gt;Y(反) + 1 = -Y &lt;==&gt; Y(补} = -Y  </li>
+</ul>
+<pre><code>//C++源码说明：减法运算
+//变量定义
+int nVarOne = argc;
+int nVarTwo = 0;
+
+//获取变量nVarTwo的数据，使用scanf防止被常量化
+scanf(&quot;%d&quot;,&amp;nVarTwo);
+
+//变量减常量的减法运算
+nVarOne = nVarOne - 100;
+
+//减法与加法混合运算
+nVarOne = nVarOne + 5 - nVarTwo;
+printf(&quot;nVarOne = %d \r\n&quot;,nVarOne);
+
+//C++源码对应汇编代码讲解
+//C++源码对比，变量 - 常量
+nVarOne = nVarOne - 100;
+
+//取变量nVarOne的数据到eax中
+00401125    mov    eax,dword ptr [ebp-4]
+
+//是用减法指令sub，对eax执行减等于100操作
+00401128    sub    eax,64h
+
+//将结果赋值回nVarOne中
+0040112B    mov dword ptr [ebp-4],eax
+
+//C++源码对比，减法与加法混合运算
+nVarOne = nVarOne +5 - nVarTwo;
+
+//按照自左向右顺序依次执行
+0040112E    mov    ecx,dword ptr [ebp-4]
+00401131    add    ecx,5
+00401134    sub    ecx,dword ptr [ebp-8]
+00401137    mov    dword ptr [ebp-4],ecx
+//printf函数调用显示略
+</code></pre><p>Release与加法相同，就不赘述了  </p>
+<h2 id="乘法"><a href="#乘法" class="headerlink" title="乘法"></a>乘法</h2><p>乘法运算对应的汇编指令有有符号<strong>imul</strong>和无符号<strong>mul</strong>两种，由于乘法指令的执行周期较长，在编译过程中，编译器会先尝试将乘法转换成加法，或使用移位等周期较短的指令。当它们都不可转换时，才会使用乘法指令  </p>
+<p><strong>乘法转换——Debug版</strong>  </p>
+<pre><code>
+    //C++源码说明，乘法运算
+//防止被视为无效代码，将每条运算作为printf参数使用
+//变量定义
+int nVarOne = argc;
+int nVarTwo = argc;
+
+//变量乘常量(常量为非2的幂)
+printf(&quot;nVarOne*15 = %d \r\n&quot;,nVarOne * 15);
+
+//变量乘常量(常量值为2的幂)
+printf(&quot;nVarOne*16 = %d&quot;,nVarOne * 16);
+
+//两常量相乘
+printf(&quot;2*2 = %d&quot;,2 * 2);
+
+//混合运算
+printf(&quot;nVarTwo *4 +5 = %d&quot;,nVarTwo * 4 + 5);
+
+//两变量相乘
+printf(&quot;nVarOne * nVarTwo = %d&quot;,nVarOne * nVarTwo);
+
+//C++源码对应汇编
+//C++源码对比，变量 * 常量
+printf(&quot;nVarOne*15 = %d \r\n&quot;,nVarOne * 15);
+0040B8A4    mov    edx,dword ptr [ebp-4]
+//直接使用有符号乘法指令imul
+0040B8A7    imul    edx,edx,0Fh
+
+//C++源码对比 常量*常量(常量值为2的幂)
+printf(&quot;nVarOne*16 = %d&quot;,nVarOne * 16)
+0040B8B8    mov    eax,dword ptr [ebp-4]
+//使用左移运算代替乘法运算
+0040B8BB    shl    eax,4
+
+//C++源码对比，常量*常量
+printf(&quot;2*2 = %d&quot;,2 * 2);
+//在编译期间计算出2*2的结果，将表达式转换为常量值
+0040B8CC    push 4
+0040B8CE    push offest string &quot;2 * 2 = %d&quot;(0041ffac)
+0040B8D3    call printf(0040B750)
+0040B8D8    add esp,8
+
+//c++源码对比，变量*常量+常量(组合运算)
+printf(&quot;nVarTwo *4 +5 = %d&quot;,nVarTwo * 4 + 5);
+0040B8DB    mov    ecx,dword ptr [ebp-8]
+//利用lea指令完成组合运算
+0040B8DE    lea    edx,[ecx*4+5]
+
+//c++源码对比，变量*变量
+printf(&quot;nVarOne * nVarTwo = %d&quot;,nVarOne * nVarTwo);
+0040B90A    mov    ecx,dword ptr [ebp-4]
+//直接使用有符号乘法指令
+0040B90D    imul ecx,dword ptr [ebp-8]
+</code></pre><p>代码使用编译选项为Od+ZI。在这种侧重调试的编译方式下，有符号数乘以常量值，且这个常量非2的幂，会直接使用有符号乘法<strong>imul</strong>指令。当常量值为2的幂时，编译器会采用执行周期短的左移运算来代替执行周期长的乘法指令,而若乘数不等于2的幂次方，则会先拆分后用<strong>imul</strong>指令进行编译  </p>
+<p><strong>各类型的乘法转换示例——Release版</strong>  </p>
+<pre><code>    //IDA直接将参数作为局部变量使用
+arg_0 = dword ptr 4  
+
+//保存环境
+push esi
+//取出参数变量存入esi中
+mov esi,[esp+4+arg_0]
+//经过优化后，将nVarOne*15先转化为 乘2加自身，相当于乘3
+//eax = esi*2+esi = 3*esi
+lea    eax,[esi+esi*2]
+
+//将上一步操作结果乘4加自身，等同于乘15
+//eax = eax * 4 + eax = 5 * eax = 5 * (3*esi)
+lea    eax,[eax+eax*4]
+push eax
+push offset aNvaronel15D; &quot;nVarOne * 15 = %d&quot;
+call _printf
+
+// esi中的数据传送到ecx，esi中保存的为参数数据
+mov    ecx,esi
+//将ecx中的数据左移4为，ecx乘以2^4
+shl    ecx,4
+push ecx
+push offset aNvarone15D; &quot;nVarOne * 16 = %d&quot;
+call _printf
+
+//两常量相乘直接转换常量值
+push 4
+push offset a22D;    &quot;2*2 = %d&quot;
+call _printf
+//这句话等等同于lea edx,[esi*4+5]都是混合运算
+lea    edx,ds:5[esi*4]
+push edx
+push offset aNvartwo45D;    &quot;nVarTwo * 4 +5 =%d&quot;
+call _printf
+
+//此处为乘数不等于2 4 8 情况，编译优化9进行分解：(nVarTwo*1+nVarTwo*8),这样就可以使用lea了
+lea eax,[esi+esi*8+5]
+push eax
+push _offset aNvartwo95D;    &quot;nVarTwo * 9 +5 =%d&quot;
+call _printf
+//此处为两个变量相乘，都是未知数，无忧化
+mov    ecx,esi
+imul ecx,esi
+push ecx
+push offest aNvaroneNvartwo;    &quot;nVarOne * nVarTwo = %d&quot;
+call _printf
+add    esp,30h
+pop    esi
+</code></pre><h2 id="除法"><a href="#除法" class="headerlink" title="除法"></a>除法</h2><h2 id="自增和自减"><a href="#自增和自减" class="headerlink" title="自增和自减"></a>自增和自减</h2>]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>C++反汇编与逆向分析技术</title>
     <url>/2020/06/15/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF/</url>
     <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》</p>
