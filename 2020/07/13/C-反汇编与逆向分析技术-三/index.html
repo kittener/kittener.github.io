@@ -77,7 +77,7 @@
 
 
 
-  <meta name="keywords" content="技术," />
+  <meta name="keywords" content="笔记," />
 
 
 
@@ -92,22 +92,19 @@
 
 
 
-<meta name="description" content="这是TG:HACK2020的一道比赛题目题目给的hint很误导人…反正我没看出来">
+<meta name="description" content="记录一下《C++反汇编与逆向分析技术》(三)">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Android逆向学习">
-<meta property="og:url" content="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:title" content="C++反汇编与逆向分析技术(三)">
+<meta property="og:url" content="http://www.kittener.top/2020/07/13/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89/index.html">
 <meta property="og:site_name" content="Kittener&#39;s blog">
-<meta property="og:description" content="这是TG:HACK2020的一道比赛题目题目给的hint很误导人…反正我没看出来">
-<meta property="og:image" content="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/1.jpg">
-<meta property="og:image" content="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/2.jpg">
-<meta property="og:image" content="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/3.jpg">
-<meta property="og:image" content="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/4.jpg">
-<meta property="article:published_time" content="2020-04-17T09:52:25.000Z">
-<meta property="article:modified_time" content="2020-04-17T15:07:20.189Z">
+<meta property="og:description" content="记录一下《C++反汇编与逆向分析技术》(三)">
+<meta property="og:image" content="g:%5Cblog%5Cblog%5Csource_posts%5CC-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89%5CP1.jpg">
+<meta property="article:published_time" content="2020-07-13T04:42:35.000Z">
+<meta property="article:modified_time" content="2020-07-18T10:11:40.800Z">
 <meta property="article:author" content="Kittener">
-<meta property="article:tag" content="技术">
+<meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/1.jpg">
+<meta name="twitter:image" content="g:%5Cblog%5Cblog%5Csource_posts%5CC-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89%5CP1.jpg">
 
 
 
@@ -137,13 +134,13 @@
 
 
 
-  <link rel="canonical" href="http://www.kittener.top/2020/04/17/Android逆向学习/"/>
+  <link rel="canonical" href="http://www.kittener.top/2020/07/13/C-反汇编与逆向分析技术-三/"/>
 
 
 
 
 
-  <title>Android逆向学习 | Kittener's blog</title>
+  <title>C++反汇编与逆向分析技术(三) | Kittener's blog</title>
   
 
 
@@ -314,7 +311,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/">
+    <link itemprop="mainEntityOfPage" href="http://www.kittener.top/2020/07/13/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Kittener">
@@ -331,7 +328,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Android逆向学习</h1>
+          <h1 class="post-title" itemprop="name headline">C++反汇编与逆向分析技术(三)</h1>
         
 
         <div class="post-meta">
@@ -343,8 +340,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-17T17:52:25+08:00">
-                2020-04-17
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-13T12:42:35+08:00">
+                2020-07-13
               </time>
             
 
@@ -359,8 +356,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-04-17T23:07:20+08:00">
-                2020-04-17
+              <time title="更新于" itemprop="dateModified" datetime="2020-07-18T18:11:40+08:00">
+                2020-07-18
               </time>
             
           </span>
@@ -378,8 +375,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index">
-                    <span itemprop="name">Android</span>
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
                   </a>
                 </span>
 
@@ -396,8 +393,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2020/04/17/Android逆向学习/" itemprop="commentCount"></span>
+                <a href="/2020/07/13/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2020/07/13/C-反汇编与逆向分析技术-三/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -430,65 +427,23 @@
       
 
       
-        <p>这是TG:HACK2020的一道比赛题目<br>题目给的hint很误导人…反正我没看出来  </p>
-<a id="more"></a>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>Hint<br>Random title?  </p>
-</blockquote>
-</blockquote>
-</blockquote>
-<p>这是题目描述：Someone found this very old game lying around. Apparently there is an extremely funny joke in there somewhere.</p>
-<p>之前没怎么做过安卓题目，所以这次真是学到了很多<br>题目的名字叫Bad intentions<br>上Google搜索之后发现是一堆歌曲，好吧这肯定跟题目没啥关系<br>当搜索apk intentions的时候就出现了有用的信息：<br><img src="1.jpg" alt="google搜索结果">  </p>
-<p>所谓的apk intentions就是指这个程序能不能被外部访问，或者进行数据交换  </p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>Intent的中文意思是“意图，意向”，在Android中提供了Intent机制来协助应用间的交互与通讯，Intent负责对应用中一次操作的动 作、动作涉及数据、附加数据进行描述，Android则根据此Intent的描述，负责找到对应的组件，将 Intent传递给调用的组件，并完成组件的调用。Intent不仅可用于应用程序之间，也可用于应用程序内部的Activity/Service之间的 交互。因此，可以将Intent理解为不同组件之间通信的“媒介”专门提供组件互相调用的相关信息。  </p>
-</blockquote>
-</blockquote>
-</blockquote>
-<p>然后就是如何查看这个apk包中有没有调用intent这个类了<br><code>aapt dump xmltree gaiainvaders.apk AndroidManifest.xml</code></p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>aapt即Android Asset Packaging Tool，在SDK的build-tools目录下。该工具可以查看，创建， 更新ZIP格式的文档附件(zip, jar, apk)。  </p>
-</blockquote>
-</blockquote>
-</blockquote>
-<p>关于AndroidManifest.xml这个文件的介绍<a href="https://www.jianshu.com/p/3b5b89d4e154" target="_blank" rel="noopener">点这</a></p>
-<p>就会输出如下信息  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">E: activity (line&#x3D;19)  </span><br><span class="line">    A:android:name(0x01010003)&#x3D;&quot;no.tghack.gaiainvaders.GaiaInvadersActivity&quot; (Raw: &quot;no.tghack.gaiainvaders.GaiaInvadersActivity&quot;)</span><br><span class="line">        E: intent-filter (line&#x3D;20)</span><br><span class="line">          E: action (line&#x3D;21)</span><br><span class="line">            A: android:name(0x01010003)&#x3D;&quot;android.intent.action.MAIN&quot; (Raw: &quot;android.intent.action.MAIN&quot;)</span><br><span class="line">          E: category (line&#x3D;23)</span><br><span class="line">            A: android:name(0x01010003)&#x3D;&quot;android.intent.category.LAUNCHER&quot; (Raw: &quot;android.intent.category.LAUNCHER&quot;)</span><br><span class="line">    E: activity (line&#x3D;26)</span><br><span class="line">        A: android:name(0x01010003)&#x3D;&quot;no.tghack.gaiainvaders.JokeActivity&quot; (Raw: &quot;no.tghack.gaiainvaders.JokeActivity&quot;)</span><br><span class="line">        E: intent-filter (line&#x3D;27)</span><br><span class="line">          E: action (line&#x3D;28)</span><br><span class="line">            A: android:name(0x01010003)&#x3D;&quot;android.intent.action.MAIN&quot; (Raw: &quot;android.intent.action.MAIN&quot;)</span><br><span class="line">          E: category (line&#x3D;30)</span><br><span class="line">            A: android:name(0x01010003)&#x3D;&quot;android.intent.category.LAUNCHER&quot; (Raw: &quot;android.intent.category.LAUNCHER&quot;)</span><br></pre></td></tr></table></figure>
+        <p>记录一下《C++反汇编与逆向分析技术》(三)  </p>
+<a id="more"></a>  
 
-<p>可以看出了是调用了intent类的，而且发现一个JokeActivity的类。联想到题目描述觉得应该是这个文件了，用jeb打开看一下(我当时做这道题的时候没想到这，被其他地方误导了)  </p>
-<p><img src="2.jpg" alt=""></p>
-<p>这是JokeActivity方法，我当时被这个给迷惑了…  </p>
-<p><img src="3.jpg" alt=""></p>
-<p>到这可以看出来是个AES加密，写出脚本就可以跑出来了(大概，我没试)<br>还有一种更简单的方法<br>学习一下<br>上述提到了intent这个包，它是对于Android程序安全性相关性很大的包，有了它之后我们就可以对这个APK进行调试<br><code>adb install gaiainvaders.apk</code>  </p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>adb全称Android Debug Bridge，是一个通用命令行工具，其允许您与模拟器实例或连接的 Android 设备进行通信。它可为各种设备操作提供便利，如安装和调试应用，并提供对 Unix shell（可用来在模拟器或连接的设备上运行各种命令）的访问。说直白一点就是通过adb可以实现<strong>用命令行控制设备。</strong></p>
-</blockquote>
-</blockquote>
-</blockquote>
-<p>使用adb有两种方法  </p>
-<ol>
-<li>需要安装安卓手机模拟器，这里我选择了网易的mumu模拟器，安装之后在<strong>platform-tools</strong>下运行adb程序<br><code>adb connect 127.0.0.1:7555</code><br>每个模拟器默认的端口不一样，具体的<a href="https://www.cnblogs.com/HakunaMatata-/p/10609307.html" target="_blank" rel="noopener">看这</a><br>等它显示success之后就表示连接上了，之后执行安装命令就好了  </li>
-<li>用安卓手机之间连接，手机进入开发者模式，cmd中输入<br><code>adb devices</code><br>之后就安装就可以了  </li>
-</ol>
-<p>然后我们只需要运行JokeActivity这个类就能得到flag了，这里用<br><code>adb shell am start -n &quot;no.tghack.gaiainvaders/.JokeActivity&quot;</code>  </p>
-<blockquote>
-<blockquote>
-<blockquote>
-<p>在Android中，除了从界面上启动程序之外，还可以从命令行启动程序，使用的是命令行工具am.</p>
-</blockquote>
-</blockquote>
-</blockquote>
-<p>启动的方法为</p>
-<p><code>adb shell am start -n ｛包(package)名｝/｛包名｝.{活动(activity)名称}</code>  </p>
-<p>然后就得到了flag<br><img src="4.jpg" alt=""></p>
+<h1 id="流程控制语句的识别"><a href="#流程控制语句的识别" class="headerlink" title="流程控制语句的识别"></a>流程控制语句的识别</h1><h2 id="if语句"><a href="#if语句" class="headerlink" title="if语句"></a>if语句</h2><p>if 语句只能判断两种情况:“0”为假值，“非0”为真值。如果为真值，则进人语句块内执行语句;如果为假值，则跳过if语句块，继续运行程序的其他语句。要注意的是，if语句转换的条件跳转指令与if语句的判断结果是相反的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;C++源码说明：if语句结构组成</span><br><span class="line">if( argc &#x3D;&#x3D; 0 )&#123;</span><br><span class="line">	printf(&quot;%d \r\n&quot;, argc);</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;C++源码对应汇编</span><br><span class="line">&#x2F;&#x2F;如果argc &#x3D; 0的情况，为真</span><br><span class="line">if( argc &#x3D;&#x3D; 0 )</span><br><span class="line">&#x2F;&#x2F;使用cmp指令，将ebp+8地址的4字节和0相减</span><br><span class="line">&#x2F;&#x2F;结果argc不改变，淡水会改变CF,ZF,OF,AF和PF</span><br><span class="line">00401028	cmp	dword ptr [ebp+8],0</span><br><span class="line">&#x2F;&#x2F;JNE看ZF，如果等于0跳转，表示现在的argc不等于0</span><br><span class="line">&#x2F;&#x2F;跳转到0x40103F</span><br><span class="line">&#x2F;&#x2F;这个地址为if的结束地址，之后跳转出if</span><br><span class="line">0040102C	jne	main+2F(0040103f)</span><br><span class="line">&#123;</span><br><span class="line">&#x2F;&#x2F;printf略</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;函数返回</span><br><span class="line">return 0;</span><br><span class="line">0040103F	xor	eax,eax</span><br></pre></td></tr></table></figure>
+
+<p>出现这种情况是因为汇编语言的条件跳转是满足某条件则跳转，绕过某些代码块，这一点是与C语言<strong>相反</strong>的，而C语言编译器不将else语句块提到if语句块前面是因为C语言是根据<strong>代码行的位置来决定编译后的二进制代码的地址高低的</strong>，也就是说，低行数对应低地址，高行数对应高地址</p>
+<p>根据这一特性，如果将if语句中的比较条件 “argc==0” 修改为 “if(argc &gt; 0)”，则其对应的汇编语言所使用的条件跳转指令会是“小于等于0”</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;C++源码说明: if语句大于0比较</span><br><span class="line">if( argc &gt; 0 )&#123;</span><br><span class="line">	printf(&quot;%d \r\n&quot;,argc);</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;C++源码对应汇编代码</span><br><span class="line">&#x2F;&#x2F;C++源码对比，如果参数argc大于0，结果为真，进入执行语句</span><br><span class="line">if(argc &gt; 0)</span><br><span class="line">&#x2F;&#x2F;使用cmp，将ebp+8地址的4字节数据和0进行减法</span><br><span class="line">0040103F	cmp dword ptr [ebp+8],0</span><br><span class="line">00401043	jle	MyIf + 42h (00401052)</span><br><span class="line">&#123;</span><br><span class="line">&#x2F;&#x2F;printf略</span><br><span class="line">&#125;</span><br><span class="line">00401052	pop edi</span><br></pre></td></tr></table></figure>
+
+<p>在分析过程中，表达式短路(上一篇blog的内容)和if语句这两种分支结构的实现结构都是一样的，蛮难区分的</p>
+<p><strong>总结：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">；先执行各类影响标志位的指令</span><br><span class="line">；其后是各种条件跳转指令</span><br><span class="line">jxx		xxxx</span><br></pre></td></tr></table></figure>
+
+<p>如果遇上以上指令序列，大概率是一个if语句组成的单分支结构</p>
+<h2 id="if···else···语句"><a href="#if···else···语句" class="headerlink" title="if···else···语句"></a>if···else···语句</h2><p>if和if···else···的流程对比</p>
+<p><img src="G:%5Cblog%5Cblog%5Csource_posts%5CC-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89%5CP1.jpg" alt="结构对比"></p>
 
       
     </div>
@@ -506,7 +461,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+            <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
           
         </div>
       
@@ -519,8 +474,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/" rel="next" title="关于python2的encode('hex')在python3上的解决">
-                <i class="fa fa-chevron-left"></i> 关于python2的encode('hex')在python3上的解决
+              <a href="/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%8C/" rel="next" title="C++反汇编与逆向分析技术(二)">
+                <i class="fa fa-chevron-left"></i> C++反汇编与逆向分析技术(二)
               </a>
             
           </div>
@@ -528,10 +483,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/05/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="prev" title="操作系统">
-                操作系统 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -562,8 +513,8 @@
 
   
     <div class="comments" id="comments">
-      <div class="ds-thread" data-thread-key="2020/04/17/Android逆向学习/"
-           data-title="Android逆向学习" data-url="http://www.kittener.top/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/">
+      <div class="ds-thread" data-thread-key="2020/07/13/C-反汇编与逆向分析技术-三/"
+           data-title="C++反汇编与逆向分析技术(三)" data-url="http://www.kittener.top/2020/07/13/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89/">
       </div>
     </div>
 
@@ -590,8 +541,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -686,6 +646,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#流程控制语句的识别"><span class="nav-number">1.</span> <span class="nav-text">流程控制语句的识别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#if语句"><span class="nav-number">1.1.</span> <span class="nav-text">if语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#if···else···语句"><span class="nav-number">1.2.</span> <span class="nav-text">if···else···语句</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
