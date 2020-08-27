@@ -77,7 +77,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="笔记," />
 
 
 
@@ -92,12 +92,22 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Kittener&#39;s blog">
-<meta property="og:url" content="http://www.kittener.top/archives/2020/index.html">
+<meta name="description" content="关于构造函数和析构函数构造函数：常用来完成对象生成时的数据初始化工作。 析构函数：常用于在对象销毁时释放对象中所申请的资源 构造函数与析构函数都是类中特殊的成员函数，构造函数支持函数重载，而析构函数只能是一个无参函数。它们不可定义返回值，调用构造函数后，返回值为对象首地址，也就是this指针。 构造函数出现的时机 局部对象： 当对象产生时就可能引发构造函数的调用。来个栗子~ 12345678910">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++反汇编与逆向分析技术(五)">
+<meta property="og:url" content="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/index.html">
 <meta property="og:site_name" content="Kittener&#39;s blog">
+<meta property="og:description" content="关于构造函数和析构函数构造函数：常用来完成对象生成时的数据初始化工作。 析构函数：常用于在对象销毁时释放对象中所申请的资源 构造函数与析构函数都是类中特殊的成员函数，构造函数支持函数重载，而析构函数只能是一个无参函数。它们不可定义返回值，调用构造函数后，返回值为对象首地址，也就是this指针。 构造函数出现的时机 局部对象： 当对象产生时就可能引发构造函数的调用。来个栗子~ 12345678910">
+<meta property="og:image" content="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/P1.jpg">
+<meta property="og:image" content="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/P2.jpg">
+<meta property="og:image" content="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/P3.jpg">
+<meta property="og:image" content="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/P4.jpg">
+<meta property="article:published_time" content="2020-06-19T15:40:25.000Z">
+<meta property="article:modified_time" content="2020-08-09T10:25:05.906Z">
 <meta property="article:author" content="Kittener">
+<meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/P1.jpg">
 
 
 
@@ -127,13 +137,13 @@
 
 
 
-  <link rel="canonical" href="http://www.kittener.top/archives/2020/"/>
+  <link rel="canonical" href="http://www.kittener.top/2020/06/19/C-反汇编与逆向分析技术-五/"/>
 
 
 
 
 
-  <title>归档 | Kittener's blog</title>
+  <title>C++反汇编与逆向分析技术(五) | Kittener's blog</title>
   
 
 
@@ -152,7 +162,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -290,411 +300,232 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-      <span class="archive-page-counter">
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Kittener">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kittener's blog">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
+          <h1 class="post-title" itemprop="name headline">C++反汇编与逆向分析技术(五)</h1>
         
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-19T23:40:25+08:00">
+                2020-06-19
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2020-08-09T18:25:05+08:00">
+                2020-08-09
+              </time>
+            
+          </span>
+
           
-        
-        嗯..! 目前共计 11 篇日志。 继续努力。
-      </span>
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
 
-      
-
-        
-        
-        
-
-        
+                
+                
+              
+            </span>
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2020">2020</h1>
-          </div>
-        
-        
 
-        
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2020/06/19/C-反汇编与逆向分析技术-五/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/07/13/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%B8%89/" itemprop="url">
-              
-                <span itemprop="name">C++反汇编与逆向分析技术(三)</span>
-              
-            </a>
-        
-      </h2>
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-07-13T12:42:35+08:00"
-              content="2020-07-13" >
-          07-13
-        </time>
-      </div>
+          
 
-    </header>
-  </article>
+          
 
+        </div>
+      </header>
+    
 
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%8C/" itemprop="url">
-              
-                <span itemprop="name">C++反汇编与逆向分析技术(二)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-06-19T23:40:25+08:00"
-              content="2020-06-19" >
-          06-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E5%9B%9B/" itemprop="url">
-              
-                <span itemprop="name">C++反汇编与逆向分析技术(四)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-06-19T23:40:25+08:00"
-              content="2020-06-19" >
-          06-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
+      
+        <h1 id="关于构造函数和析构函数"><a href="#关于构造函数和析构函数" class="headerlink" title="关于构造函数和析构函数"></a>关于构造函数和析构函数</h1><p><strong>构造函数</strong>：常用来完成对象生成时的数据初始化工作。</p>
+<p><strong>析构函数</strong>：常用于在对象销毁时释放对象中所申请的资源</p>
+<p>构造函数与析构函数都是类中特殊的成员函数，构造函数支持函数重载，而析构函数只能是一个无参函数。它们不可定义返回值，调用构造函数后，返回值为对象首地址，也就是this指针。</p>
+<h2 id="构造函数出现的时机"><a href="#构造函数出现的时机" class="headerlink" title="构造函数出现的时机"></a>构造函数出现的时机</h2><ol>
+<li><p><strong>局部对象：</strong></p>
+<p>当对象产生时就可能引发构造函数的调用。来个栗子~</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;无参构造函数的调用过程</span><br><span class="line">class CNumber&#123;</span><br><span class="line">	public:</span><br><span class="line">		CNumber()&#123;</span><br><span class="line">			m_nNumber &#x3D; 1;</span><br><span class="line">		&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;</span><br><span class="line">void main()&#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解</span><br><span class="line">void main()&#123;</span><br><span class="line">CNumber Number;</span><br><span class="line">0040B468	lea		ecx,[ebp-4]				;取得对象首地址,传入ecx中作为参数</span><br><span class="line">0040B46B	call	@ILT+5 (CNumber::CNumber) (0040100a) ; 调用构造函数</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;构造函数CNumber分析</span><br><span class="line">CNumber();</span><br><span class="line">;函数入口分析略</span><br><span class="line">0040B4A9	pop		ecx						;还原ecx,ecx中保存对象的首地址</span><br><span class="line">0040B4AA	mov		dword ptr [ebp-4],ecx 	;[ebp-4] 就是this指针</span><br><span class="line">&#123;</span><br><span class="line">m_nNumber &#x3D; 1;</span><br><span class="line">0040B4AD	mov		eax,dword ptr [ebp-4]	;eax中保存了对象的首地址</span><br><span class="line">0040B4B0	mov		dword ptr [eax],1		;将数据成员m_nNumber设置为1</span><br><span class="line">&#125;</span><br><span class="line">0040B4B6	mov		eax,dword ptr [ebp-4] 	;将this指针存入eax中，作为返回值</span><br><span class="line">0040B4B9	pop		edi</span><br><span class="line">0040B4BA	pop		esi</span><br><span class="line">0040B4BB	pop		ebx</span><br><span class="line">0040B4BC	mov		esp,ebp</span><br><span class="line">0040B4BE	pop		ebp</span><br><span class="line">0040B4BF	ret</span><br></pre></td></tr></table></figure>
 
-        
-        
+<p>当在进人对象的作用域时，编译器会产生调用构造函数的代码。由于构造函数属于成员函数，因此在调用的过程中同样需要传递this指针。构造函数调用结束后，会将this指针作为返回值。总结一下局部对象构造函数的<strong>必要条件</strong>：</p>
+<ul>
+<li>该成员函数是这个对象在作用域内调用的第一个成员函数，根据this指针即可以区分</li>
+<li>返回this指针</li>
+</ul>
+</li>
+<li><p><strong>堆对象</strong>：</p>
+<p>堆对象的识别重点在于识别堆空间的申请与使用。在C++的语法中，堆空间的申请需要使用malloc函数、new运算符或者其他同类功能的函数。因此，识别堆对象有了重要的依据。来个栗子！</p>
+<p>(从这里开始我有的代码部分要直接截图了，👴就是懒狗！)</p>
+<p><img src="P1.jpg" alt="构造函数返回值的使用——Debug版"></p>
+<p><img src="P2.jpg" alt="构造函数返回值的使用——Debug版"></p>
+<p>在使用了new申请了堆空间之后，需要调用构造函数，用来完成数据成员的初始化。相应的，如果没有申请成功，则会避开构造函数的调用。对此，编译器会产生一个<strong>双分支结构来根据不同的结果采取相应的行为</strong>。这是检查的重点。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;圆括号是调用有参构造函数，最后只申请了一个int类型的堆变量并赋初值10</span><br><span class="line">int *pInt &#x3D; new int (10);</span><br><span class="line">&#x2F;&#x2F;方括号才是申请了10个int元素的堆数组</span><br><span class="line">int *pInt &#x3D; new int [10];</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>参数对象</strong>：</p>
+<p>参数对象属于局部对象中的–种特殊情况。当对象作为函数参数时，调用一个特殊的构造函数——拷贝构造函数。该构造函数只有一个参数，类型为对象的引用。</p>
+<p>当对象为参数的时候触发此类对象的拷贝构造函数。在函数调用时传递参数会进行复制，形参是实参的副本。两个对象的复制过程会在拷贝构造函数中完成。如果没有定义拷贝构造函数，编译器会对原对象与拷贝对象中的各数据成员直接进行数据复制，称为默认拷贝构造函数，这种拷贝方式属于浅拷贝：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">class CNumber &#123;</span><br><span class="line">public:</span><br><span class="line">	CNumber() &#123;</span><br><span class="line">		m_nNumber &#x3D; 1;</span><br><span class="line">	&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;;</span><br><span class="line">void main() &#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">	CNumber number(Number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/" itemprop="url">
-              
-                <span itemprop="name">C++反汇编与逆向分析技术(五)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-06-19T23:40:25+08:00"
-              content="2020-06-19" >
-          06-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+<p>但是这种函数在有析构函数的情况下会出错，那么就需要深拷贝来救场了。<strong>源对象中的数据成员间接访问到的其他资源并制作副本的拷贝构造函数称为深拷贝</strong>。</p>
+<p>来个栗子！</p>
+<p><img src="P3.jpg" alt="栗子"></p>
+<p><img src="P4.jpg" alt="栗子"></p>
+</li>
+</ol>
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/06/15/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF/" itemprop="url">
-              
-                <span itemprop="name">C++反汇编与逆向分析技术</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-06-15T16:22:46+08:00"
-              content="2020-06-15" >
-          06-15
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/05/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url">
-              
-                <span itemprop="name">操作系统</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-05-19T21:49:04+08:00"
-              content="2020-05-19" >
-          05-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/04/17/Android%E9%80%86%E5%90%91%E5%AD%A6%E4%B9%A0/" itemprop="url">
-              
-                <span itemprop="name">Android逆向学习</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-04-17T17:52:25+08:00"
-              content="2020-04-17" >
-          04-17
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/04/07/python2%E4%B8%8E3%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%BC%E5%AE%B9%E9%97%AE%E9%A2%98/" itemprop="url">
-              
-                <span itemprop="name">关于python2的encode('hex')在python3上的解决</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-04-07T22:34:38+08:00"
-              content="2020-04-07" >
-          04-07
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/03/24/%E9%9D%99%E6%80%81%E7%BC%96%E8%AF%91/" itemprop="url">
-              
-                <span itemprop="name">静态编译</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-03-24T20:20:32+08:00"
-              content="2020-03-24" >
-          03-24
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-tags" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2020/03/21/kittener's%20blog/" itemprop="url">
-              
-                <span itemprop="name">Diary</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2020-03-21T19:45:42+08:00"
-              content="2020-03-21" >
-          03-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/15/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF/" rel="next" title="C++反汇编与逆向分析技术">
+                <i class="fa fa-chevron-left"></i> C++反汇编与逆向分析技术
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E5%9B%9B/" rel="prev" title="C++反汇编与逆向分析技术(四)">
+                C++反汇编与逆向分析技术(四) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/2020/page/2/">2</a><a class="extend next" rel="next" href="/archives/2020/page/2/">&lt;i class&#x3D;&quot;fa fa-angle-right&quot;&gt;&lt;&#x2F;i&gt;</a>
-  </nav>
+  </article>
 
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -702,6 +533,17 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+      <div class="ds-thread" data-thread-key="2020/06/19/C-反汇编与逆向分析技术-五/"
+           data-title="C++反汇编与逆向分析技术(五)" data-url="http://www.kittener.top/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/">
+      </div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -722,8 +564,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -818,6 +669,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#关于构造函数和析构函数"><span class="nav-number">1.</span> <span class="nav-text">关于构造函数和析构函数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#构造函数出现的时机"><span class="nav-number">1.1.</span> <span class="nav-text">构造函数出现的时机</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -978,6 +845,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
