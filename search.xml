@@ -33,7 +33,7 @@
 <p>vector的使用方法参见<a href="https://blog.csdn.net/weixin_41743247/article/details/90635931" target="_blank" rel="noopener">这篇blog</a></p>
 <h2 id="2020-11-18"><a href="#2020-11-18" class="headerlink" title="2020-11-18"></a>2020-11-18</h2><h4 id="134-加油站"><a href="#134-加油站" class="headerlink" title="134. 加油站"></a><a href="https://leetcode-cn.com/problems/gas-station/" target="_blank" rel="noopener">134. 加油站</a></h4>]]></content>
       <categories>
-        <category>知识点</category>
+        <category>WP</category>
       </categories>
       <tags>
         <tag>刷题日记</tag>
@@ -498,6 +498,9 @@
 <p>​                        params = { “moeny!100”}，表示请求参数中money不能是100。</p>
 <p>​        headers:用于指定限制请求消息头的条件。</p>
 <p>​        以上属性出现两个或以上的时候是与的关系</p>
+<h2 id="RequestParam注解"><a href="#RequestParam注解" class="headerlink" title="RequestParam注解"></a>RequestParam注解</h2><h3 id="使用说明"><a href="#使用说明" class="headerlink" title="使用说明"></a>使用说明</h3><h4 id="作用："><a href="#作用：" class="headerlink" title="作用："></a>作用：</h4><p>​        把请求中指定名称的参数给控制器中的形参赋值。</p>
+<h4 id="属性"><a href="#属性" class="headerlink" title="属性:"></a>属性:</h4><p>​        value:请求参数中的名称。</p>
+<p>​        required:请求参数中是否必须提供此参数。默认值: true。表示必须提供，如果不提供将报错。</p>
 ]]></content>
       <categories>
         <category>知识点</category>
