@@ -130,6 +130,9 @@
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">char</span> *<span class="title">getenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span>;		<span class="comment">//若存在则返回指向value的指针，若无匹配的，则返回NULL</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name, <span class="keyword">const</span> <span class="keyword">char</span> *newvalue,<span class="keyword">int</span> overwrite)</span></span>;	<span class="comment">//若成功返回0，失败返回-1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">unsetenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span></span><br></pre></td></tr></table></figure>
 
 <h1 id="8-5-信号"><a href="#8-5-信号" class="headerlink" title="8.5 信号"></a>8.5 信号</h1><p>信号就是小消息，它通知进程系统中发生了一个某种类型的事件。</p>
+<p>一个发出而没有被接收的信号叫做待处理信号(pending signal)。在任何时候，一种类型至多只会有一个待处理信号。再来的直接被丢弃。</p>
+<p>进程可以自行选择阻塞某种信号，信号被阻塞后依然可以被发送，但除非进程取消阻塞，否则一直不会被接收。</p>
+<p>内核为每个进程在pending位向量中维护着待处理信号的集合，在blocked位向量中维护着被阻塞的信号集合。传送就设置，接收就清除。</p>
 <h2 id="发送信号"><a href="#发送信号" class="headerlink" title="发送信号"></a>发送信号</h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">getpgrp</span><span class="params">(<span class="keyword">void</span>)</span></span>;	<span class="comment">//返回调用进程的进程组PID</span></span><br></pre></td></tr></table></figure>
 
 <p>一个子进程和它的父进程都属于一个进程组，一个进程可以通过使用setpgid函数来改变自己或其他进程的进程组</p>
@@ -138,15 +141,40 @@
 <p>如果进程15213是调用进程，那么setpgid(0,0)则会创建一个新的进程组，进程组ID为15213，并把进程15213加入到这个新的进程组中。</p>
 <p><strong>还可以用/bin/kill发送信号(Linux终端)</strong></p>
 <p>用kill函数发送信号：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">kill</span><span class="params">(<span class="keyword">pid_t</span> pid,<span class="keyword">int</span> sig)</span></span>;	<span class="comment">//成功返回0，若错误返回-1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">kill</span><span class="params">(<span class="keyword">pid_t</span> pid,<span class="keyword">int</span> sig)</span></span>;	<span class="comment">//成功返回0，若错误返回-1如果pid&gt;0：kill函数发送sig给进程pid</span></span><br></pre></td></tr></table></figure>
 
-<p>如果pid&gt;0：kill函数发送sig给进程pid</p>
 <p>如果pid=0：kill函数发送信号给调用进程所在进程组中的每个进程</p>
 <p>如果pid&lt;0：kill函数发送信号给进程组|PID|(PID的绝对值中的每个进程)</p>
 <p>用alarm发送信号：</p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">alarm</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> secs)</span></span>;	<span class="comment">//返回前一次闹钟剩余的描述，若没有设置闹钟，则返回0</span></span><br></pre></td></tr></table></figure>
 
-<h2 id=""><a href="#" class="headerlink" title=""></a></h2>]]></content>
+<h2 id="接收信号"><a href="#接收信号" class="headerlink" title="接收信号"></a>接收信号</h2><p>当内核把进程p从内核模式切换到用户模式时，会检查p的未被阻塞的待处理信号的集合(pending &amp; ~blocked)。</p>
+<p>每个信号都有默认行为，但是可以通过<em>signal函数</em>修改这种行为，但是，<strong>SIGSTOP和SIGKILL</strong>不能被修改。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*<span class="keyword">sighandler_t</span>)</span><span class="params">(<span class="keyword">int</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">sighander_t</span> <span class="title">signal</span><span class="params">(<span class="keyword">int</span> signum, <span class="keyword">sighander_t</span> handler)</span></span>;	<span class="comment">//若成功返回指向前次处理程序的指针，若失败返回SIG_ERR</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果handler是SIG_IGN，那么忽略的类型为signum的信号</li>
+<li>如果handler是SIG_DFL，那么类型为signum的信号行为恢复为默认行为</li>
+<li>否则，handler就是用户定义的函数的地址，这个函数被称为<em>信号处理程序</em>，只要进程就收到一个类型为signum的信号，就会调用这个程序。通过把处理程序的地址传递到signal函数从而改变默认行为，这叫做<em>设置信号处理程序</em>。调用信号处理程序被称为<em>捕获信号</em>。执行信号处理程序被称为<em>处理信号</em>。</li>
+</ul>
+<h2 id="阻塞和解除阻塞信号"><a href="#阻塞和解除阻塞信号" class="headerlink" title="阻塞和解除阻塞信号"></a>阻塞和解除阻塞信号</h2><p>应用程序可以使用sigprocmask函数和它的辅助函数，明确地阻塞和解除阻塞选定的信号。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigprocmask</span><span class="params">(<span class="keyword">int</span> how, <span class="keyword">const</span> <span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">sigset_t</span> *oldset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigemptyset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigfillset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaddset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">int</span> signum)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigdelset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">int</span> signum)</span></span>;	</span><br><span class="line">											<span class="comment">//成功返回0，否则-1</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigismember</span><span class="params">(<span class="keyword">const</span> <span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">int</span> signum)</span></span>;	<span class="comment">//若signum是set地成员则为1，不是则为0，出错返回-1</span></span><br></pre></td></tr></table></figure>
+
+<p>how的值可以为：</p>
+<ul>
+<li><p>SIG_BLOCK：把set中的信号添加到blocked中(blocked=blocked | set)。</p>
+</li>
+<li><p>SIG_UNBLOCK：把blocked中删除set中的信号(blocked=blocked &amp;~set)。</p>
+</li>
+<li><p>SIG_SETMASK：block=set</p>
+</li>
+</ul>
+<p>各个函数的作用：</p>
+<p>sigemptyset初始化set集合为空。</p>
+<p>sigfillset函数把每个信号都添加到set中。</p>
+<p>sigaddset函数把signum添加到set。</p>
+<p>之后就是关于并发编程的了，看的模模糊糊的，准备看完12章再来复习一下吧。</p>
+]]></content>
       <categories>
         <category>读书笔记</category>
       </categories>
@@ -948,263 +976,6 @@
       </tags>
   </entry>
   <entry>
-    <title>C++反汇编与逆向分析技术(五)</title>
-    <url>/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/</url>
-    <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》(五)  </p>
-<a id="more"></a>  
-<h1 id="关于构造函数和析构函数"><a href="#关于构造函数和析构函数" class="headerlink" title="关于构造函数和析构函数"></a>关于构造函数和析构函数</h1><p><strong>构造函数</strong>：常用来完成对象生成时的数据初始化工作。</p>
-<p><strong>析构函数</strong>：常用于在对象销毁时释放对象中所申请的资源</p>
-<p>构造函数与析构函数都是类中特殊的成员函数，构造函数支持函数重载，而析构函数只能是一个无参函数。它们不可定义返回值，调用构造函数后，返回值为对象首地址，也就是this指针。</p>
-<h2 id="构造函数出现的时机"><a href="#构造函数出现的时机" class="headerlink" title="构造函数出现的时机"></a>构造函数出现的时机</h2><ol>
-<li><p><strong>局部对象：</strong></p>
-<p>当对象产生时就可能引发构造函数的调用。来个栗子~</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;无参构造函数的调用过程</span><br><span class="line">class CNumber&#123;</span><br><span class="line">	public:</span><br><span class="line">		CNumber()&#123;</span><br><span class="line">			m_nNumber &#x3D; 1;</span><br><span class="line">		&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;</span><br><span class="line">void main()&#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解</span><br><span class="line">void main()&#123;</span><br><span class="line">CNumber Number;</span><br><span class="line">0040B468	lea		ecx,[ebp-4]				;取得对象首地址,传入ecx中作为参数</span><br><span class="line">0040B46B	call	@ILT+5 (CNumber::CNumber) (0040100a) ; 调用构造函数</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;构造函数CNumber分析</span><br><span class="line">CNumber();</span><br><span class="line">;函数入口分析略</span><br><span class="line">0040B4A9	pop		ecx						;还原ecx,ecx中保存对象的首地址</span><br><span class="line">0040B4AA	mov		dword ptr [ebp-4],ecx 	;[ebp-4] 就是this指针</span><br><span class="line">&#123;</span><br><span class="line">m_nNumber &#x3D; 1;</span><br><span class="line">0040B4AD	mov		eax,dword ptr [ebp-4]	;eax中保存了对象的首地址</span><br><span class="line">0040B4B0	mov		dword ptr [eax],1		;将数据成员m_nNumber设置为1</span><br><span class="line">&#125;</span><br><span class="line">0040B4B6	mov		eax,dword ptr [ebp-4] 	;将this指针存入eax中，作为返回值</span><br><span class="line">0040B4B9	pop		edi</span><br><span class="line">0040B4BA	pop		esi</span><br><span class="line">0040B4BB	pop		ebx</span><br><span class="line">0040B4BC	mov		esp,ebp</span><br><span class="line">0040B4BE	pop		ebp</span><br><span class="line">0040B4BF	ret</span><br></pre></td></tr></table></figure>
-
-<p>当在进人对象的作用域时，编译器会产生调用构造函数的代码。由于构造函数属于成员函数，因此在调用的过程中同样需要传递this指针。构造函数调用结束后，会将this指针作为返回值。总结一下局部对象构造函数的<strong>必要条件</strong>：</p>
-<ul>
-<li>该成员函数是这个对象在作用域内调用的第一个成员函数，根据this指针即可以区分</li>
-<li>返回this指针</li>
-</ul>
-</li>
-<li><p><strong>堆对象</strong>：</p>
-<p>堆对象的识别重点在于识别堆空间的申请与使用。在C++的语法中，堆空间的申请需要使用malloc函数、new运算符或者其他同类功能的函数。因此，识别堆对象有了重要的依据。来个栗子！</p>
-<p>(从这里开始我有的代码部分要直接截图了，👴就是懒狗！)</p>
-<p><img src="P1.jpg" alt="构造函数返回值的使用——Debug版"></p>
-<p><img src="P2.jpg" alt="构造函数返回值的使用——Debug版"></p>
-<p>在使用了new申请了堆空间之后，需要调用构造函数，用来完成数据成员的初始化。相应的，如果没有申请成功，则会避开构造函数的调用。对此，编译器会产生一个<strong>双分支结构来根据不同的结果采取相应的行为</strong>。这是检查的重点。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;圆括号是调用有参构造函数，最后只申请了一个int类型的堆变量并赋初值10</span><br><span class="line">int *pInt &#x3D; new int (10);</span><br><span class="line">&#x2F;&#x2F;方括号才是申请了10个int元素的堆数组</span><br><span class="line">int *pInt &#x3D; new int [10];</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>参数对象</strong>：</p>
-<p>参数对象属于局部对象中的–种特殊情况。当对象作为函数参数时，调用一个特殊的构造函数——拷贝构造函数。该构造函数只有一个参数，类型为对象的引用。</p>
-<p>当对象为参数的时候触发此类对象的拷贝构造函数。在函数调用时传递参数会进行复制，形参是实参的副本。两个对象的复制过程会在拷贝构造函数中完成。如果没有定义拷贝构造函数，编译器会对原对象与拷贝对象中的各数据成员直接进行数据复制，称为默认拷贝构造函数，这种拷贝方式属于浅拷贝：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CNumber &#123;</span><br><span class="line">public:</span><br><span class="line">	CNumber() &#123;</span><br><span class="line">		m_nNumber &#x3D; 1;</span><br><span class="line">	&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;;</span><br><span class="line">void main() &#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">	CNumber number(Number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是这种函数在有析构函数的情况下会出错，那么就需要深拷贝来救场了。<strong>源对象中的数据成员间接访问到的其他资源并制作副本的拷贝构造函数称为深拷贝</strong>。</p>
-<p>来个栗子！</p>
-<p><img src="P3.jpg" alt=""></p>
-<p><img src="P4.jpg" alt=""></p>
-<p><img src="P.jpg" alt=""></p>
-<p><img src="P5.jpg" alt=""></p>
-<p><img src="P6.jpg" alt=""></p>
-</li>
-<li><p><strong>返回对象</strong></p>
-<p>与参数对象的区别是：当对象作为参数时，在进入函数前使用拷贝构造函数，而返回对象则在函数返回时使用拷贝构造函数。</p>
-<p>来个栗子~</p>
-<p><img src="P7.jpg" alt=""></p>
-<p><img src="P8.jpg" alt=""></p>
-<p>这种返回对象的函数和返回对象指针类型的函数在汇编中的区别就是：<strong>返回值和参数为对象指针类型的函数，不会使用以参数为目标的拷贝构造函数，而是直接使用指针保存对象首地址。</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;函数的返回类型与参数类型都是对象的指针类型</span><br><span class="line">CMyString* GetMyString (CMyString* pMyString) &#123;</span><br><span class="line">CMyString MyString;			&#x2F;&#x2F;定义局部对象</span><br><span class="line">MyString.SetString (&quot;World&quot;);</span><br><span class="line">pMyString &#x3D; &amp;MyString;</span><br><span class="line">00401589	lea		eax,[ebp-10h]		;直接保存对象首地址</span><br><span class="line">0040158C	mov		dword ptr [ebp+8],eax</span><br><span class="line">return &amp;MyString;</span><br><span class="line">0040158F	lea		ecx,[ebp-10h]</span><br><span class="line">00401592	mov		dword ptr [ebp-14h],ecx </span><br><span class="line">00401595	mov		dword ptr [ebp-4],0FFFFFFFFh</span><br><span class="line">0040159C	lea		ecx,[ebp-10h]		;将局部对象作为返回值</span><br><span class="line">0040159F	call	@ILT+35 (CMyString::-CMyString) (00401028)</span><br><span class="line">004015A4	mov		eax,dword ptr [ebp-14h]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>全局对象与静态对象</strong></p>
-<p>这两类对象的构造时机相同，它们的构造函数的调用被隐藏在深处，但是识别过程很容易。因为程序中所有的全局对象将会在同一地点调用构造函数来初始化数据。</p>
-<p>构造函数需要传递对象的首地址作为this指针,而且构造函数可以带各类参数，因此编译器将为每个全局对象生成一段传递this指针和参数的代码，然后使用无参的代理函数去调用构造函数。</p>
-<p>如何跟踪？</p>
-<ul>
-<li><p>直接定位初始化函数</p>
-</li>
-<li><p>利用栈回溯</p>
-<p>如果反汇编代码中出现了全局对象，由于全局对象的地址固定(对于有重定位表的执行文件中的全局对象，也可以在执行文件被加载后至执行前计算得到全局对象的地址)，因此可以在对象的数据成员中设置读写断点，调试运行程序，等待构造函数调用的到来。利用栈回溯窗口，找到程序的执行流程，依次向上查询即可找到构造函数调用的起始处。</p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="每个对象都有默认的构造函数吗"><a href="#每个对象都有默认的构造函数吗" class="headerlink" title="每个对象都有默认的构造函数吗"></a>每个对象都有默认的构造函数吗</h2><p>并不是。只有以下两种情况会有：</p>
-<ul>
-<li><p>本类、本类中定义的成员对象或者父类中有虚函数存在</p>
-<p>由于需要初始化虚表，且这个工作理应在构造函数中隐式完成，因此在没有定义构造函数的情况下，编译器会添加默认的构造函数用于隐式完成虚表的初始化工作</p>
-</li>
-<li><p>父类或本类中定义的成员对象带有构造函数</p>
-<p>在对象被定义时，由于对象本身为派生类，因此构造顺序是先构造父类再构造自身。当父类中带有构造函数时，将会调用父类构造函数，而这个调用过程需要在构造函数内完成，因此编译器添加了默认的构造函数来完成这个调用过程。成员对象带有构造函数的情况与此相同。</p>
-</li>
-</ul>
-<h2 id="析构函数出现的时机"><a href="#析构函数出现的时机" class="headerlink" title="析构函数出现的时机"></a>析构函数出现的时机</h2><p>对象何时被销毁取决于对象所在的作用域，当程序流程执行到作用域结束处时，便会将该作用域内的所有对象释放，释放的过程中会调用到对象的析构函数。</p>
-<p>析构函数的触发时机分为以下几种情况</p>
-<ul>
-<li>局部对象:作用域结束前调用析构函数</li>
-<li>堆对象:释放堆空间前调用析构函数</li>
-<li>参数对象:退出函数前，调用参数对象的析构函数</li>
-<li>返回对象:如无对象引用定义，退出函数后，调用返回对象的析构函数，否则与对象引用的作用域一致</li>
-<li>全局对象: main函数退出后调用析构函数</li>
-<li>静态对象:main函数退出后调用析构函数</li>
-</ul>
-<h3 id="堆对象"><a href="#堆对象" class="headerlink" title="堆对象"></a>堆对象</h3><p>书上给了几个代码👴觉得很有学习必要，截图了</p>
-<h4 id="堆对象析构函数的调用"><a href="#堆对象析构函数的调用" class="headerlink" title="堆对象析构函数的调用"></a>堆对象析构函数的调用</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(ubt argc,char* argv[])&#123;</span><br><span class="line">	CNumber * pNumber &#x3D; NULL;</span><br><span class="line">	pNumber &#x3D; new CNumber;</span><br><span class="line">	pNumber-&gt;m_nNumber &#x3D; 2;</span><br><span class="line">	printf(&quot;%d \r\n&quot;,pNumber-&gt;m_nNumber);</span><br><span class="line">	if(pNumber !&#x3D; NULL)&#123;</span><br><span class="line">		delete pNumber;</span><br><span class="line">		pNumber &#x3D; NULL;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="P8.jpg" alt=""></p>
-<p><img src="P9.jpg" alt=""></p>
-<p><img src="P10.jpg" alt=""></p>
-<p><img src="P11.jpg" alt=""></p>
-<p>多个堆对象的申请与释放</p>
-<p><img src="P12.jpg" alt=""></p>
-<p><img src="P13.jpg" alt=""></p>
-<p><img src="P14.jpg" alt=""></p>
-<h4 id="堆对象的构造代理函数"><a href="#堆对象的构造代理函数" class="headerlink" title="堆对象的构造代理函数"></a>堆对象的构造代理函数</h4><p><img src="P15.jpg" alt=""></p>
-<p><img src="P16.jpg" alt=""></p>
-<h4 id="堆对象释放函数分析"><a href="#堆对象释放函数分析" class="headerlink" title="堆对象释放函数分析"></a>堆对象释放函数分析</h4><p><img src="P17.jpg" alt=""></p>
-<h3 id="参数对象和返回对象"><a href="#参数对象和返回对象" class="headerlink" title="参数对象和返回对象"></a>参数对象和返回对象</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CMyString MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
-
-<p>这是把MyString的地址作为隐含的参数传递给GetMyString()，在GetMyString()内部完成拷贝构造的过程。函数执行完毕后，MyString 就已经构造完成了，所以析构函数由MyString的作用域来决定.</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
-
-<p>因为这样的代码不是MyString在定义时赋初值，所以不会触发MyString的拷贝构造函数，这时候会产生临时对象作为GetMyString()的隐含参数，这个临时对象会在GetMyString0内部完成拷贝构造函数的过程。函数执行完毕后，如果MyString的类中定义了“=”运算符重载，则调用之;否则就根据对象成员逐个赋值。如果对象内数据量过大，就会调用rep movs这样的串操作指令批量赋值，这样的赋值也属于浅拷贝。临时对象以一条高级语句为生命周期，它在函数调用时产生，在语句执行完毕时销毁。C和C++以分号作为语句的结束符，也就是说，- -旦分号出现，就会触发临时对象的析构函数。</p>
-<h3 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h3><p>全局对象与静态对象相同，其构造函数在函数 _cinit的第二个 _initterm调用中被构造。它们的析构函数的调用时机是在main函数执行完毕之后。既然构造函数出现在初始化过程中，对应的析构函数就会出现在程序结束处。</p>
-<p>在main函数调用结束后，由exit来结束进程，从而终止程序的运行。全局变量的析构函数的调用也在其中(exit函数的doexit实现)</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (__onexitbegin) &#123;					&#x2F;&#x2F;_onexitbegin 为函数指针数组的首地址</span><br><span class="line">	_PVFV * pfend &#x3D; _onexitend;			&#x2F;&#x2F;_onexitend为函数指针数组的尾地址</span><br><span class="line">	while (--pfend &gt;&#x3D;__onexitbegin)		&#x2F;&#x2F;从后向前依次释放全局对象</span><br><span class="line">		if (*pfend !&#x3D; NULL)</span><br><span class="line">			(**pfend)();				&#x2F;&#x2F;调用数组中保存的函数</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>__onexitbegin 指向一个指针数组，该数组中保存着各类资源释放时的函数的首地址。全局构造函数的调用是在  _cinit 函数的第二个 _initterm 函数内完成，而在第二个 _initterm函数中，会先执行 _onexitinit 函数的初始化函数指针数组。在执行每个全局对象构造代理函数时都会先执行对象的构造函数，然后使用atexit注册析构代理函数。</p>
-<h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><p>对于全局对象和静态对象，能不能取消代理函数而直接在main函数前调用其构造函数呢?</p>
-<p>不能。由于构造函数可以重载，因此其参数的类型、个数和顺序都无法预知，也就无法预先定义构造函数。函数参数如何匹配呢?如何保证栈顶平衡呢?最简洁的办法就是使用代理函数。</p>
-<p>编译器为每个全局对象分别生成构造代理函数，由代理函数去调用各类形形色色的参数和约定的构造函数。由于代理函数的类型被统一指定为PVFV，因此能通过数组统一地管理和执行。</p>
-<h1 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h1><p>对象的多态性需要通过虚表和虚表指针来完成，虚表指针被定义在对象首地址的前4字节处，因此虚函数必须作为成员函数使用。</p>
-<h2 id="虚函数的机制"><a href="#虚函数的机制" class="headerlink" title="虚函数的机制"></a>虚函数的机制</h2><p>在C++中，使用关键字virtual声明函数为虚函数。当类中定义有虚函数时，编译器会将该类中所有虚函数的首地址保存在一-张地址表中，这张表被称为虛函数地址表，简称虚表。同时，编译器还会在类中添加-一个隐藏数据成员，称为虚表指针。该指针中保存着虚表的首地址，用于记录和查找虚函数。</p>
-<p>来份代码！</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtual&#123;</span><br><span class="line">	public:</span><br><span class="line">		virtual int GetNumber()&#123;</span><br><span class="line">			return m_nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">		virtual void SetNumber(int nNumber)&#123;</span><br><span class="line">			m_nNumber &#x3D; nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">	private:</span><br><span class="line">		int m_nNumber;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个类的大小为8，多出的4个字节用于保存虚表指针。在虚表指针所指向的函数指针数组中，保存着虚函数GetNumber和SetNumber的首地址。对于开发者而言，虚表和虚表指针都是隐藏的，在常规的开发过程中感觉不到它们的存在。</p>
-<p>虚表指针和虚表的关系如图</p>
-<p><img src="P18.jpg" alt=""></p>
-<p>虚表指针初始化：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解;</span><br><span class="line">int main(int argc， char* argv[]) &#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">00401048	lea		ecx,[ebp-8]				;获取对象首地址</span><br><span class="line">;调用构造函数，类CVirtual中并没有定义构造函数，此调用为默认构造函数</span><br><span class="line">0040104B	call	@ILT+15 (CVirtual::CVirtual) (00401014)</span><br><span class="line">return 0;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;默认构造函数分析</span><br><span class="line">CVirtua1::CVirtual;</span><br><span class="line">;Debug初始化保存环境略</span><br><span class="line">00401089	pop		ecx						;还原this指针</span><br><span class="line">0040108A	mov		dword ptr [ebp-4],ecx;	;[ebp-4]存储this指针</span><br><span class="line">;取出this指针并保存到eax中，这个地址将会作为指针保存到虚表的首地址中</span><br><span class="line">0040108D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;取虚表的首地址，保存到虚表指针中</span><br><span class="line">00401090	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39; (0042201c) </span><br><span class="line">00401096	mov		eax, dword ptr [ebp-4]	;返回对象首地址</span><br><span class="line">00401099	pop		edi</span><br><span class="line">0040109A	pop		esi</span><br><span class="line">0040109B	pop		ebx</span><br><span class="line">0040109C	mov		esp,ebp</span><br><span class="line">0040109E	pop		ebp</span><br><span class="line">0040109F	ret</span><br></pre></td></tr></table></figure>
-
-<p>编译器为类CVirtual提供了默认的构造函数。该默认构造函数先取得虚表首地址再赋值到虚表指针中。</p>
-<p>对象的虚表指针初始化是通过编译器在构造函数内插入代码来完成的。由于虚表信息在编译后会被链接到对应的执行文件中，因此所获得的虛表地址是一个相对固定的地址。虛表中虛函数的地址的排列顺序依据虛函数在类中的声明顺序而定，先声明的虚函数的地址会被排列在虚表中靠前的位置。</p>
-<p>对于含有构造函数的类而言，其虚表初始化过程和默认构造函数相同，都是以对象首地址的前4字节数据保存虚表的首地址。如图</p>
-<p><img src="P19.jpg" alt=""></p>
-<p><strong>对于单线继承的类结构，在其某个成员函数中，将this的地址赋值为虛表首地址时，可以判定这个成员函数为构造函数。</strong></p>
-<p>析构函数分析：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; C++源码与对应汇编代码讲解</span><br><span class="line">int main(int argc,char* argv[])&#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">return 0;</span><br><span class="line">;构造函数分析略，直接看析构函数的调用</span><br><span class="line">00401060	mov		dword ptr [ebp-0Ch],0</span><br><span class="line">00401067	lea		ecx, [ebp-8]</span><br><span class="line">0040106A	call	@ILT+15 (CVirtual::~CVirtual) (00401014)	&#x2F;&#x2F;析构函数调用</span><br><span class="line">0040106F	mov		eax, dword ptr [ebp-0Ch]</span><br><span class="line">&#125;</span><br><span class="line">00401014	jmp		CVirtual::~CVirtual (00401100)</span><br><span class="line">&#x2F;&#x2F;析构函数分析</span><br><span class="line">~CVirtual()&#123;</span><br><span class="line">;函数入口代码略</span><br><span class="line">00401119	pop		ecx	</span><br><span class="line">0040111A	mov		dword ptr [ebp-4],ecx		;[ebp-4]保存this指针</span><br><span class="line">0040111D	mov		eax,dword ptr [ebp-4] 		;eax 得到this指针，这是虚表的位置</span><br><span class="line">;将当前类的虚表首地址赋值到虚表指针中</span><br><span class="line">00401120	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39;(00425024)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>析构函数中的填写虚表，是在还原虚表指针，让其指向自身的虚表首地址，防止在析构函数中调用虚函数时取到非自身虚表，从而导致函数调用错误。</p>
-<h2 id="虚函数的识别"><a href="#虚函数的识别" class="headerlink" title="虚函数的识别"></a>虚函数的识别</h2><p>有以下特征</p>
-<ul>
-<li>类中隐式定义了一个数据成员;</li>
-<li>该数据成员在首地址处，占4字节;</li>
-<li>构造函数会将此数据成员初始化为某个数组的首地址;</li>
-<li>这个地址属于数据区，是相对固定的地址;</li>
-<li>在这个数组内，每个元素都是函数指针;</li>
-<li>仔细观察这些函数，它们被调用时，第-个参数必然是this指针(要注意调用约定);</li>
-<li>在这些函数内部，很有可能会对this指针使用相对间接的访问方式。</li>
-</ul>
-<p>虚函数的识别最终转变成识别构造函数或者析构函数。构造函数与虛表指针的初始化有依赖关系。<strong>重点看对象首地址前4字节被赋予的值。</strong>来个栗子！</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">;具有成员函数特征，传递对象首地址作为this指针</span><br><span class="line">lea		ecx,[ebp-8]					;荻取对象首地址</span><br><span class="line">call	XXXXXXXXh					;调用函数</span><br><span class="line">;调用函数的实现代码</span><br><span class="line">pop		ecx							;this指针的还原，非Debug编译选项组在可能无此代码</span><br><span class="line">mov		eax,dword ptr [ecx]			;取出首地址前4字节数据</span><br><span class="line">;向对象首地址处写入4宇节数据，查看并确认此4字节数据是否为函数地址表的首地址</span><br><span class="line">mov		dword ptr [eax],XXXXXXXXh</span><br></pre></td></tr></table></figure>
-
-<h1 id="从内存角度看继承和多重继承"><a href="#从内存角度看继承和多重继承" class="headerlink" title="从内存角度看继承和多重继承"></a>从内存角度看继承和多重继承</h1><h2 id="识别类和类之间的关系"><a href="#识别类和类之间的关系" class="headerlink" title="识别类和类之间的关系"></a>识别类和类之间的关系</h2><p>在父类中声明为私有(private)的成员，虽然子类对象无法直接访问，但是在子类对象的内存结构中，父类私有的成员数据依然存在。</p>
-<p><strong>编译器在当子类中没有构造函数或析构函数，但是其父类却含有的情况下，编译器会为该父类的子类提供默认的构造函数与析构函数。</strong></p>
-<p>子类在初始化的时候，如果父类有构造函数会先执行父类的构造函数，在销毁的时候，为了调用父类的析构函数，编译器为子类提供了默认的析构函数。在子类的析构函数中，先执行自身的析构代码，再执行其父类的析构代码。</p>
-<p>如果子类中含有构造函数，但是父类中没有，那么编译器不会为父类提供默认的构造函数。但是如果父类中如果含有虚函数，则编译器为了初始化虚表，会提供默认的构造函数。</p>
-<p>在类对象初始化的过程中，构造的顺序如下：先构造父类，然后按声明顺序构造成员对象和初始化列表中指定的成员，最后才是自身的构造函数。</p>
-<p>在子类对象的内存布局中，低地址是用来存储父类数据成员的，高地址是存储自身数据成员。</p>
-<p>有了这样的内存结构，不但可以使用指向子类对象的子类指针间接寻址到父类定义的成员，而且可以使用指向子类对象的父类指针间接寻址到父类定义的成员。在使用父类成员函数时，传递的this指针也可以是子类对象首地址。所以子类指针的寻址范围不小于父类指针，这是个包含关系。在使用子类指针访问父类对象时，如果访问的成员数据是父类对象所定义的，那么不会出错;如果访问的是子类派生的成员数据，则会造成访问越界。</p>
-<p>来份代码！</p>
-<p><img src="P20.jpg" alt=""></p>
-<p><img src="P21.jpg" alt=""></p>
-<p>如使用对象或对象的指针调用成员函数，编译器可根据对象所属作用域来使用“名称粉碎法”，以实现正确匹配。在成员函数中调用其他成员函数时，可匹配当前作用域。</p>
-<p><a href="https://blog.csdn.net/lixiangminghate/article/details/79340775" target="_blank" rel="noopener">名称粉碎法</a></p>
-<p>虚函数的多态问题这本书写的一言难尽，一会说在构造函数中调用虚函数不彳亍，一会又说彳亍，给👴整懵逼了，草(一种植物)，可能是👴太菜了，但我感觉写的稀里糊涂，找了几篇blog看看算了</p>
-<p><a href="https://blog.csdn.net/weixin_30682415/article/details/101553704" target="_blank" rel="noopener"></a></p>
-<p><a href="https://blog.csdn.net/tianguiyuyu/article/details/104560102" target="_blank" rel="noopener"></a></p>
-<p><a href="https://blog.csdn.net/K346K346/article/details/49872023" target="_blank" rel="noopener"></a></p>
-<p>无内鬼，来、迷惑操作</p>
-<p><img src="P22.jpg" alt=""></p>
-<p><img src="P23.jpg" alt=""></p>
-<p>到底让不让我调用？书上的意思好像是在父类构造函数中调用虚函数会使虚表指针变成直接调用，无法构成多态，但是我实际写了写好像没多大影响，留个坑。</p>
-<p>来填坑，原来子类初始化的时候调用父类虚函数就叫虚函数失效，害，就这？</p>
-<h2 id="多重继承"><a href="#多重继承" class="headerlink" title="多重继承"></a>多重继承</h2><p>当子类拥有多个父类时，便构成多重继承关系。</p>
-<p>举个栗子</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CSofa &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nColor &#x3D; 2;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofa()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetColor() &#123;</span><br><span class="line">		return m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down and rest your legs\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">class CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nLength &#x3D; 4;</span><br><span class="line">		m_nWidth &#x3D; 5;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetArea() &#123;</span><br><span class="line">		return m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nLength;</span><br><span class="line">	int m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line">class CSofaBed : public CSofa, public CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight &#x3D; 6;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofaBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetHeight() &#123;</span><br><span class="line">		return m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在内存中的分布如图：</p>
-<p><img src="P24.jpg" alt=""></p>
-<p>占用的内存空间大小为0x18字节。除此之外，还有两个地址值，分别为0x00426198和0x0042501C，这两处地址的数据如图：</p>
-<p><img src="P25.jpg" alt=""></p>
-<p>这两个虚表中保存了子类的虚函数和父类的虚函数，父类的虚函数在子类中没有实现。由此可见，编译器将子类CSofaBed的虚函数制作了两份，康康编译器的操作</p>
-<p><img src="P26.jpg" alt=""></p>
-<p>在调用另-一个父类CBed时，并不是直接将对象的首地址作为this指针传递，而是向后调整了父类CSofa的大小，以调整后的地址值作为this指针，最后再调用父类CBed的构造函数。</p>
-<p>转换成父类指针的时候也是如此，如果转换成CBed，会调整首地址并跳过第一个父类所占用的空间，这样就不会错误寻址咯。</p>
-<p>看看析构过程：</p>
-<p><img src="P27.jpg" alt=""></p>
-<p><img src="P28.jpg" alt=""></p>
-<p>在析构的过程中，由于具有多个父类，当在析构的过程中调用各个父类的析构函数时，传递的首地址将有所不同，编译器会根据每个父类在对象中占用的空间位置，对应地传入各个父类部分的首地址作为this指针。</p>
-<p>在Debug版下，由于侧重调试功能，因此使用了两个临时变量来分别保存两个this指针，它们对应的地址分别为两个虚表指针的首地址。在Release版下，虽然会进行优化，但原理不变，子类析构函数调用父类的析构函数时，仍然会传人在对象中父类对应的地址，当做this指针。</p>
-<p>做个对比~</p>
-<ul>
-<li><strong>单继承类</strong><ul>
-<li>在类对象占用的内存空间中，只保存一份虚表指针。</li>
-<li>由于只有一个虚表指针，对应的也只有一个虚表。</li>
-<li>虚表中各项保存了类中各虚函数的首地址。</li>
-<li>构造时先构造父类，再构造自身，并且只调用一次父类构造函数。</li>
-<li>析构时先析构自身，再析构父类，并且只调用一-次父类析构函数。</li>
-</ul>
-</li>
-<li><strong>多重继承类</strong><ul>
-<li>在类对象所占用的内存空间中，根据继承父类的个数保存对应的虚表指针。</li>
-<li>根据所保存的虚表指针的个数，对应产生相应个数的虛表。</li>
-<li>转换父类指针时，需要跳转到对象的首地址。</li>
-<li>构造时需要调用多个父类构造函数。</li>
-<li>构造时先构造继承列表中第一个父类，然后依次调用到最后一个继承的父类构造函数。</li>
-<li>析构时先析构自身，然后以与构造函数相反的顺序调用所有父类的析构函数。</li>
-<li>当对象作为成员时，整个类对象的内存结构和多重继承很相似。当类中无虚函数时，整个类对象内存结构和多重继承完全一样，可酌情还原;当父类或成员对象存在虚函数时，通过观察虚表指针的位置和构造函数、析构函数中填写虚表指针的数目及目标地址，来还原继承或成员关系。</li>
-</ul>
-</li>
-</ul>
-<h2 id="虚基类"><a href="#虚基类" class="headerlink" title="虚基类"></a>虚基类</h2><p>直接来份代码康康</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show() &#x3D; 0;	    </span><br><span class="line">&#125;;</span><br><span class="line">class CVirtualChild : public CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show()&#123;</span><br><span class="line">        printf(&quot;虚基类分析\r\n&quot;);</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;;</span><br><span class="line">void main(int argc,char* argv[])&#123;</span><br><span class="line">    CVirtualChild VirtualChild;</span><br><span class="line">    VirtualChild.show();</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;反汇编代码分析，跟踪到虚基类构造函数中，查看其虚表信息</span><br><span class="line">CVirtualBase::CVirtualBase;				&#x2F;&#x2F;虚基类构造函数</span><br><span class="line">00401829	pop 	ecx</span><br><span class="line">0040182A	mov		dword ptr [ebp-4],ecx</span><br><span class="line">0040182D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;设置虚基类虚表指针，虚表地址在0x00425068处</span><br><span class="line">00401830	mov		dword ptr [eax],offset CVirtualBase::&#39;vftable&#39;(00425068)</span><br><span class="line">00401836	mov		eax,dword ptr [ebp-4]</span><br><span class="line">0040183F	ret</span><br><span class="line"></span><br><span class="line">;虚基类CVirtualBase中虚表信息的第一项所指向的函数首地址</span><br><span class="line">void _cdecl _purecall (void) &#123;</span><br><span class="line">00401E90	push	ebp</span><br><span class="line">00401E91	mov		ebp,esp</span><br><span class="line">_amsg_exit(_ RT_PUREVIRT);</span><br><span class="line">00401E93	push	19h							;压入错误编码</span><br><span class="line">00401E95	call	_amsg_exit (00401fd0)		;结束程序</span><br><span class="line">00401E9A	add		esp,4</span><br><span class="line">&#125;</span><br><span class="line">00401E9D	pop		ebp</span><br><span class="line">00401E9E	ret</span><br></pre></td></tr></table></figure>
-
-<p>如代码所示，在虚基类CVirtualBase的虚表信息中，由于纯虚函数没有实现代码，因此没有首地址。编译器为了防止误调用纯虚函数，将虛表中保存的纯虚函数的首地址项替换成函数_ purecall, 用于结束程序，并发出错误编码信息0x19。</p>
-<h2 id="菱形继承"><a href="#菱形继承" class="headerlink" title="菱形继承"></a>菱形继承</h2><p><img src="P29.jpg" alt=""></p>
-<p>来个栗子！</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CFurniture</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CFurniture() &#123;</span><br><span class="line">		m_nPrice = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CFurniture()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CFurniture()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nPrice;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nPrice;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofa</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nPrice = <span class="number">1</span>;</span><br><span class="line">		m_nColor = <span class="number">2</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofa()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetColor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down and rest your legs\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CBed</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nPrice = <span class="number">3</span>;</span><br><span class="line">		m_nLength = <span class="number">4</span>;</span><br><span class="line">		m_nWidth = <span class="number">5</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetArea</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nLength;</span><br><span class="line">	<span class="keyword">int</span> m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofaBed</span> :</span> <span class="keyword">public</span> CSofa, <span class="keyword">public</span> CBed &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight = <span class="number">6</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofaBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetHeight</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>子类结构如图所示</p>
-<p><img src="P30.jpg" alt=""></p>
-<p><img src="P31.jpg" alt=""></p>
-<p>对于CSofaBed_vt(new)和vt_offset的解释如下</p>
-<p><img src="P32.jpg" alt=""></p>
-<p><img src="P33.jpg" alt=""></p>
-<p>从代码的指针转换过程中可以看出来，vt_offset指向的内存地址中保存的数据为偏移数据，每个vt_offset对应的数据有两项：第一项为vt_offset所属类对应的虚表指针相对于vtoffset的偏移值;第二项保存的是父类虚表指针相对于vt_offset 的偏移值。</p>
-<p><img src="P34.jpg" alt=""></p>
-<p>三个虚表指针内容如下</p>
-<p><img src="P35.jpg" alt=""></p>
-<p>如图所示，这三个虚表指针所指向的虛表包含了子类CSofaBed含有的虚函数。有了这些记录就可以随心所欲地将虚表指针转换成任意的父类指针。在利用父类指针访问虚函数时，只能调用子类与父类共有的虚函数，子类继承自其他父类的虚函数是无法调用的，虚表中也没有相关的记录。</p>
-<p>来看一下构造</p>
-<p><img src="P36.jpg" alt=""></p>
-<p><img src="P37.jpg" alt=""></p>
-<p>子类构造的过程中，在调用时要传入一个参数，这个参数是一个标志信息。构造过程中先构造父类，然后再构造自己。当标记为1时，则构造父类；当标记为0时，则跳过构造函数。</p>
-<p>在析构的时候，并没有使用标记信息，而是将祖父类放在最后调用，先依次执行两个父类CBed和CSofa的析构函数，然后执行祖父类的析构函数。</p>
-<h2 id="思考题-1"><a href="#思考题-1" class="headerlink" title="思考题"></a>思考题</h2><p><strong>为什么编译器要在子类析构函数中再次将虚表设置为子类虚表呢?</strong>这个操作非常必要，因为编译器无法预知这个子类以后是否会被其他类继承，如果被继承，原来的子类就成了父类，析构函数执行时会先执行当前对象的析构函数，然后向祖父类的方向按继承线路逐层调用各类析构函数，当前对象的析构函数开始执行时，其虚表也是当前对象的，因此执行到父类的析构函数时，虚表必须改写为父类的虚表。编译器所产生的类实现代码，必须能够适应将来不可预知的对象关系，故在每个对象的析构函数内，要加入填写自己虚表的代码。</p>
-<h1 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h1><p>学习之前先看两个blog</p>
-<p><a href="https://www.cnblogs.com/yilang/p/11233935.html" target="_blank" rel="noopener">SEH1</a></p>
-<p><a href="https://www.cnblogs.com/yilang/p/11238201.html" target="_blank" rel="noopener">SEH2</a></p>
-<h2 id="异常处理的相关知识"><a href="#异常处理的相关知识" class="headerlink" title="异常处理的相关知识"></a>异常处理的相关知识</h2><ul>
-<li>try语句块负责监视异常。</li>
-<li>throw用于异常信息的发送，也称之为抛出异常。</li>
-<li>catch用于异常的捕获，并作出相应的处理。</li>
-</ul>
-<p>VC++在处理异常时会在具有异常处理功能的函数的人口处注册一个异常回调函数，当该函数内有异常抛出时，便会执行这个已注册的异常回调函数。所有的异常信息都会被记录在相关表格中，异常回调函数根据这些表格中的信息进行异常的匹配处理工作。</p>
-<p>关于异常的实现…说实话没大看懂，留个坑，等我学明白内核来填</p>
-<h2 id="识别异常处理"><a href="#识别异常处理" class="headerlink" title="识别异常处理"></a>识别异常处理</h2><p>通过对VC++异常处理的分析，可将其处理流程总结为以下9个步骤：</p>
-<ol>
-<li>在函数入口处设置异常回调函数，其回调函数先设置eax为FuncInfo数据的地址，然后跳往 ___CxxFrameHandler。</li>
-<li>异常的抛出由 CxxThrowException函数完成，该函数使用了两个参数，一个是抛出异常的关键字throw的参数的指针，另一个是抛出信息类型的指针(ThrowInfo*)。</li>
-<li>在异常回调函数中，可以得到异常对象的地址和对应ThrowInfo数据的地址以及FunInfo表结构的地址。根据所记录的异常类型，进行try块的匹配工作。</li>
-<li>如果没有找到try块，则析构异常对象，返回ExceptionContinueSearch，继续下一个异常回调函数的处理。</li>
-<li>当找到对应的try块时，通过TryBlockMapEntry表结构中的pCatch指向catch信息表，用 ThrowInfo表结构中的异常类型遍历查找与之匹配的catch块，比较关键字名称（如整型为.h，单精度浮点为.m)，找到有效的catch块。</li>
-<li>执行栈展开操作，并产生catch块中使用的异常对象（有4种不同的产生方法)。</li>
-<li>正确析构所有生命期己结束的对象。</li>
-<li>跳转到catch块，执行catch块代码。</li>
-<li>调用 JumpToContinuation函数，返回所有catch语句块的结束地址。</li>
-</ol>
-<p>有一个具体案例的分析，书上讲的很详细，懒得做笔记了，吸吸</p>
-<p>终于看完啦，完结撒花~</p>
-]]></content>
-      <categories>
-        <category>读书笔记</category>
-      </categories>
-      <tags>
-        <tag>笔记</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>C++反汇编与逆向分析技术(二)</title>
     <url>/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%8C/</url>
     <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》(二)</p>
@@ -1672,6 +1443,263 @@
 </li>
 </ol>
 <p>第四章记录完毕<del>~</del></p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++反汇编与逆向分析技术(五)</title>
+    <url>/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/</url>
+    <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》(五)  </p>
+<a id="more"></a>  
+<h1 id="关于构造函数和析构函数"><a href="#关于构造函数和析构函数" class="headerlink" title="关于构造函数和析构函数"></a>关于构造函数和析构函数</h1><p><strong>构造函数</strong>：常用来完成对象生成时的数据初始化工作。</p>
+<p><strong>析构函数</strong>：常用于在对象销毁时释放对象中所申请的资源</p>
+<p>构造函数与析构函数都是类中特殊的成员函数，构造函数支持函数重载，而析构函数只能是一个无参函数。它们不可定义返回值，调用构造函数后，返回值为对象首地址，也就是this指针。</p>
+<h2 id="构造函数出现的时机"><a href="#构造函数出现的时机" class="headerlink" title="构造函数出现的时机"></a>构造函数出现的时机</h2><ol>
+<li><p><strong>局部对象：</strong></p>
+<p>当对象产生时就可能引发构造函数的调用。来个栗子~</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;无参构造函数的调用过程</span><br><span class="line">class CNumber&#123;</span><br><span class="line">	public:</span><br><span class="line">		CNumber()&#123;</span><br><span class="line">			m_nNumber &#x3D; 1;</span><br><span class="line">		&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;</span><br><span class="line">void main()&#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解</span><br><span class="line">void main()&#123;</span><br><span class="line">CNumber Number;</span><br><span class="line">0040B468	lea		ecx,[ebp-4]				;取得对象首地址,传入ecx中作为参数</span><br><span class="line">0040B46B	call	@ILT+5 (CNumber::CNumber) (0040100a) ; 调用构造函数</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;构造函数CNumber分析</span><br><span class="line">CNumber();</span><br><span class="line">;函数入口分析略</span><br><span class="line">0040B4A9	pop		ecx						;还原ecx,ecx中保存对象的首地址</span><br><span class="line">0040B4AA	mov		dword ptr [ebp-4],ecx 	;[ebp-4] 就是this指针</span><br><span class="line">&#123;</span><br><span class="line">m_nNumber &#x3D; 1;</span><br><span class="line">0040B4AD	mov		eax,dword ptr [ebp-4]	;eax中保存了对象的首地址</span><br><span class="line">0040B4B0	mov		dword ptr [eax],1		;将数据成员m_nNumber设置为1</span><br><span class="line">&#125;</span><br><span class="line">0040B4B6	mov		eax,dword ptr [ebp-4] 	;将this指针存入eax中，作为返回值</span><br><span class="line">0040B4B9	pop		edi</span><br><span class="line">0040B4BA	pop		esi</span><br><span class="line">0040B4BB	pop		ebx</span><br><span class="line">0040B4BC	mov		esp,ebp</span><br><span class="line">0040B4BE	pop		ebp</span><br><span class="line">0040B4BF	ret</span><br></pre></td></tr></table></figure>
+
+<p>当在进人对象的作用域时，编译器会产生调用构造函数的代码。由于构造函数属于成员函数，因此在调用的过程中同样需要传递this指针。构造函数调用结束后，会将this指针作为返回值。总结一下局部对象构造函数的<strong>必要条件</strong>：</p>
+<ul>
+<li>该成员函数是这个对象在作用域内调用的第一个成员函数，根据this指针即可以区分</li>
+<li>返回this指针</li>
+</ul>
+</li>
+<li><p><strong>堆对象</strong>：</p>
+<p>堆对象的识别重点在于识别堆空间的申请与使用。在C++的语法中，堆空间的申请需要使用malloc函数、new运算符或者其他同类功能的函数。因此，识别堆对象有了重要的依据。来个栗子！</p>
+<p>(从这里开始我有的代码部分要直接截图了，👴就是懒狗！)</p>
+<p><img src="P1.jpg" alt="构造函数返回值的使用——Debug版"></p>
+<p><img src="P2.jpg" alt="构造函数返回值的使用——Debug版"></p>
+<p>在使用了new申请了堆空间之后，需要调用构造函数，用来完成数据成员的初始化。相应的，如果没有申请成功，则会避开构造函数的调用。对此，编译器会产生一个<strong>双分支结构来根据不同的结果采取相应的行为</strong>。这是检查的重点。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;圆括号是调用有参构造函数，最后只申请了一个int类型的堆变量并赋初值10</span><br><span class="line">int *pInt &#x3D; new int (10);</span><br><span class="line">&#x2F;&#x2F;方括号才是申请了10个int元素的堆数组</span><br><span class="line">int *pInt &#x3D; new int [10];</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>参数对象</strong>：</p>
+<p>参数对象属于局部对象中的–种特殊情况。当对象作为函数参数时，调用一个特殊的构造函数——拷贝构造函数。该构造函数只有一个参数，类型为对象的引用。</p>
+<p>当对象为参数的时候触发此类对象的拷贝构造函数。在函数调用时传递参数会进行复制，形参是实参的副本。两个对象的复制过程会在拷贝构造函数中完成。如果没有定义拷贝构造函数，编译器会对原对象与拷贝对象中的各数据成员直接进行数据复制，称为默认拷贝构造函数，这种拷贝方式属于浅拷贝：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CNumber &#123;</span><br><span class="line">public:</span><br><span class="line">	CNumber() &#123;</span><br><span class="line">		m_nNumber &#x3D; 1;</span><br><span class="line">	&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;;</span><br><span class="line">void main() &#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">	CNumber number(Number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是这种函数在有析构函数的情况下会出错，那么就需要深拷贝来救场了。<strong>源对象中的数据成员间接访问到的其他资源并制作副本的拷贝构造函数称为深拷贝</strong>。</p>
+<p>来个栗子！</p>
+<p><img src="P3.jpg" alt=""></p>
+<p><img src="P4.jpg" alt=""></p>
+<p><img src="P.jpg" alt=""></p>
+<p><img src="P5.jpg" alt=""></p>
+<p><img src="P6.jpg" alt=""></p>
+</li>
+<li><p><strong>返回对象</strong></p>
+<p>与参数对象的区别是：当对象作为参数时，在进入函数前使用拷贝构造函数，而返回对象则在函数返回时使用拷贝构造函数。</p>
+<p>来个栗子~</p>
+<p><img src="P7.jpg" alt=""></p>
+<p><img src="P8.jpg" alt=""></p>
+<p>这种返回对象的函数和返回对象指针类型的函数在汇编中的区别就是：<strong>返回值和参数为对象指针类型的函数，不会使用以参数为目标的拷贝构造函数，而是直接使用指针保存对象首地址。</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;函数的返回类型与参数类型都是对象的指针类型</span><br><span class="line">CMyString* GetMyString (CMyString* pMyString) &#123;</span><br><span class="line">CMyString MyString;			&#x2F;&#x2F;定义局部对象</span><br><span class="line">MyString.SetString (&quot;World&quot;);</span><br><span class="line">pMyString &#x3D; &amp;MyString;</span><br><span class="line">00401589	lea		eax,[ebp-10h]		;直接保存对象首地址</span><br><span class="line">0040158C	mov		dword ptr [ebp+8],eax</span><br><span class="line">return &amp;MyString;</span><br><span class="line">0040158F	lea		ecx,[ebp-10h]</span><br><span class="line">00401592	mov		dword ptr [ebp-14h],ecx </span><br><span class="line">00401595	mov		dword ptr [ebp-4],0FFFFFFFFh</span><br><span class="line">0040159C	lea		ecx,[ebp-10h]		;将局部对象作为返回值</span><br><span class="line">0040159F	call	@ILT+35 (CMyString::-CMyString) (00401028)</span><br><span class="line">004015A4	mov		eax,dword ptr [ebp-14h]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>全局对象与静态对象</strong></p>
+<p>这两类对象的构造时机相同，它们的构造函数的调用被隐藏在深处，但是识别过程很容易。因为程序中所有的全局对象将会在同一地点调用构造函数来初始化数据。</p>
+<p>构造函数需要传递对象的首地址作为this指针,而且构造函数可以带各类参数，因此编译器将为每个全局对象生成一段传递this指针和参数的代码，然后使用无参的代理函数去调用构造函数。</p>
+<p>如何跟踪？</p>
+<ul>
+<li><p>直接定位初始化函数</p>
+</li>
+<li><p>利用栈回溯</p>
+<p>如果反汇编代码中出现了全局对象，由于全局对象的地址固定(对于有重定位表的执行文件中的全局对象，也可以在执行文件被加载后至执行前计算得到全局对象的地址)，因此可以在对象的数据成员中设置读写断点，调试运行程序，等待构造函数调用的到来。利用栈回溯窗口，找到程序的执行流程，依次向上查询即可找到构造函数调用的起始处。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="每个对象都有默认的构造函数吗"><a href="#每个对象都有默认的构造函数吗" class="headerlink" title="每个对象都有默认的构造函数吗"></a>每个对象都有默认的构造函数吗</h2><p>并不是。只有以下两种情况会有：</p>
+<ul>
+<li><p>本类、本类中定义的成员对象或者父类中有虚函数存在</p>
+<p>由于需要初始化虚表，且这个工作理应在构造函数中隐式完成，因此在没有定义构造函数的情况下，编译器会添加默认的构造函数用于隐式完成虚表的初始化工作</p>
+</li>
+<li><p>父类或本类中定义的成员对象带有构造函数</p>
+<p>在对象被定义时，由于对象本身为派生类，因此构造顺序是先构造父类再构造自身。当父类中带有构造函数时，将会调用父类构造函数，而这个调用过程需要在构造函数内完成，因此编译器添加了默认的构造函数来完成这个调用过程。成员对象带有构造函数的情况与此相同。</p>
+</li>
+</ul>
+<h2 id="析构函数出现的时机"><a href="#析构函数出现的时机" class="headerlink" title="析构函数出现的时机"></a>析构函数出现的时机</h2><p>对象何时被销毁取决于对象所在的作用域，当程序流程执行到作用域结束处时，便会将该作用域内的所有对象释放，释放的过程中会调用到对象的析构函数。</p>
+<p>析构函数的触发时机分为以下几种情况</p>
+<ul>
+<li>局部对象:作用域结束前调用析构函数</li>
+<li>堆对象:释放堆空间前调用析构函数</li>
+<li>参数对象:退出函数前，调用参数对象的析构函数</li>
+<li>返回对象:如无对象引用定义，退出函数后，调用返回对象的析构函数，否则与对象引用的作用域一致</li>
+<li>全局对象: main函数退出后调用析构函数</li>
+<li>静态对象:main函数退出后调用析构函数</li>
+</ul>
+<h3 id="堆对象"><a href="#堆对象" class="headerlink" title="堆对象"></a>堆对象</h3><p>书上给了几个代码👴觉得很有学习必要，截图了</p>
+<h4 id="堆对象析构函数的调用"><a href="#堆对象析构函数的调用" class="headerlink" title="堆对象析构函数的调用"></a>堆对象析构函数的调用</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(ubt argc,char* argv[])&#123;</span><br><span class="line">	CNumber * pNumber &#x3D; NULL;</span><br><span class="line">	pNumber &#x3D; new CNumber;</span><br><span class="line">	pNumber-&gt;m_nNumber &#x3D; 2;</span><br><span class="line">	printf(&quot;%d \r\n&quot;,pNumber-&gt;m_nNumber);</span><br><span class="line">	if(pNumber !&#x3D; NULL)&#123;</span><br><span class="line">		delete pNumber;</span><br><span class="line">		pNumber &#x3D; NULL;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="P8.jpg" alt=""></p>
+<p><img src="P9.jpg" alt=""></p>
+<p><img src="P10.jpg" alt=""></p>
+<p><img src="P11.jpg" alt=""></p>
+<p>多个堆对象的申请与释放</p>
+<p><img src="P12.jpg" alt=""></p>
+<p><img src="P13.jpg" alt=""></p>
+<p><img src="P14.jpg" alt=""></p>
+<h4 id="堆对象的构造代理函数"><a href="#堆对象的构造代理函数" class="headerlink" title="堆对象的构造代理函数"></a>堆对象的构造代理函数</h4><p><img src="P15.jpg" alt=""></p>
+<p><img src="P16.jpg" alt=""></p>
+<h4 id="堆对象释放函数分析"><a href="#堆对象释放函数分析" class="headerlink" title="堆对象释放函数分析"></a>堆对象释放函数分析</h4><p><img src="P17.jpg" alt=""></p>
+<h3 id="参数对象和返回对象"><a href="#参数对象和返回对象" class="headerlink" title="参数对象和返回对象"></a>参数对象和返回对象</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CMyString MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
+
+<p>这是把MyString的地址作为隐含的参数传递给GetMyString()，在GetMyString()内部完成拷贝构造的过程。函数执行完毕后，MyString 就已经构造完成了，所以析构函数由MyString的作用域来决定.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
+
+<p>因为这样的代码不是MyString在定义时赋初值，所以不会触发MyString的拷贝构造函数，这时候会产生临时对象作为GetMyString()的隐含参数，这个临时对象会在GetMyString0内部完成拷贝构造函数的过程。函数执行完毕后，如果MyString的类中定义了“=”运算符重载，则调用之;否则就根据对象成员逐个赋值。如果对象内数据量过大，就会调用rep movs这样的串操作指令批量赋值，这样的赋值也属于浅拷贝。临时对象以一条高级语句为生命周期，它在函数调用时产生，在语句执行完毕时销毁。C和C++以分号作为语句的结束符，也就是说，- -旦分号出现，就会触发临时对象的析构函数。</p>
+<h3 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h3><p>全局对象与静态对象相同，其构造函数在函数 _cinit的第二个 _initterm调用中被构造。它们的析构函数的调用时机是在main函数执行完毕之后。既然构造函数出现在初始化过程中，对应的析构函数就会出现在程序结束处。</p>
+<p>在main函数调用结束后，由exit来结束进程，从而终止程序的运行。全局变量的析构函数的调用也在其中(exit函数的doexit实现)</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (__onexitbegin) &#123;					&#x2F;&#x2F;_onexitbegin 为函数指针数组的首地址</span><br><span class="line">	_PVFV * pfend &#x3D; _onexitend;			&#x2F;&#x2F;_onexitend为函数指针数组的尾地址</span><br><span class="line">	while (--pfend &gt;&#x3D;__onexitbegin)		&#x2F;&#x2F;从后向前依次释放全局对象</span><br><span class="line">		if (*pfend !&#x3D; NULL)</span><br><span class="line">			(**pfend)();				&#x2F;&#x2F;调用数组中保存的函数</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>__onexitbegin 指向一个指针数组，该数组中保存着各类资源释放时的函数的首地址。全局构造函数的调用是在  _cinit 函数的第二个 _initterm 函数内完成，而在第二个 _initterm函数中，会先执行 _onexitinit 函数的初始化函数指针数组。在执行每个全局对象构造代理函数时都会先执行对象的构造函数，然后使用atexit注册析构代理函数。</p>
+<h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><p>对于全局对象和静态对象，能不能取消代理函数而直接在main函数前调用其构造函数呢?</p>
+<p>不能。由于构造函数可以重载，因此其参数的类型、个数和顺序都无法预知，也就无法预先定义构造函数。函数参数如何匹配呢?如何保证栈顶平衡呢?最简洁的办法就是使用代理函数。</p>
+<p>编译器为每个全局对象分别生成构造代理函数，由代理函数去调用各类形形色色的参数和约定的构造函数。由于代理函数的类型被统一指定为PVFV，因此能通过数组统一地管理和执行。</p>
+<h1 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h1><p>对象的多态性需要通过虚表和虚表指针来完成，虚表指针被定义在对象首地址的前4字节处，因此虚函数必须作为成员函数使用。</p>
+<h2 id="虚函数的机制"><a href="#虚函数的机制" class="headerlink" title="虚函数的机制"></a>虚函数的机制</h2><p>在C++中，使用关键字virtual声明函数为虚函数。当类中定义有虚函数时，编译器会将该类中所有虚函数的首地址保存在一-张地址表中，这张表被称为虛函数地址表，简称虚表。同时，编译器还会在类中添加-一个隐藏数据成员，称为虚表指针。该指针中保存着虚表的首地址，用于记录和查找虚函数。</p>
+<p>来份代码！</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtual&#123;</span><br><span class="line">	public:</span><br><span class="line">		virtual int GetNumber()&#123;</span><br><span class="line">			return m_nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">		virtual void SetNumber(int nNumber)&#123;</span><br><span class="line">			m_nNumber &#x3D; nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">	private:</span><br><span class="line">		int m_nNumber;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个类的大小为8，多出的4个字节用于保存虚表指针。在虚表指针所指向的函数指针数组中，保存着虚函数GetNumber和SetNumber的首地址。对于开发者而言，虚表和虚表指针都是隐藏的，在常规的开发过程中感觉不到它们的存在。</p>
+<p>虚表指针和虚表的关系如图</p>
+<p><img src="P18.jpg" alt=""></p>
+<p>虚表指针初始化：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解;</span><br><span class="line">int main(int argc， char* argv[]) &#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">00401048	lea		ecx,[ebp-8]				;获取对象首地址</span><br><span class="line">;调用构造函数，类CVirtual中并没有定义构造函数，此调用为默认构造函数</span><br><span class="line">0040104B	call	@ILT+15 (CVirtual::CVirtual) (00401014)</span><br><span class="line">return 0;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;默认构造函数分析</span><br><span class="line">CVirtua1::CVirtual;</span><br><span class="line">;Debug初始化保存环境略</span><br><span class="line">00401089	pop		ecx						;还原this指针</span><br><span class="line">0040108A	mov		dword ptr [ebp-4],ecx;	;[ebp-4]存储this指针</span><br><span class="line">;取出this指针并保存到eax中，这个地址将会作为指针保存到虚表的首地址中</span><br><span class="line">0040108D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;取虚表的首地址，保存到虚表指针中</span><br><span class="line">00401090	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39; (0042201c) </span><br><span class="line">00401096	mov		eax, dword ptr [ebp-4]	;返回对象首地址</span><br><span class="line">00401099	pop		edi</span><br><span class="line">0040109A	pop		esi</span><br><span class="line">0040109B	pop		ebx</span><br><span class="line">0040109C	mov		esp,ebp</span><br><span class="line">0040109E	pop		ebp</span><br><span class="line">0040109F	ret</span><br></pre></td></tr></table></figure>
+
+<p>编译器为类CVirtual提供了默认的构造函数。该默认构造函数先取得虚表首地址再赋值到虚表指针中。</p>
+<p>对象的虚表指针初始化是通过编译器在构造函数内插入代码来完成的。由于虚表信息在编译后会被链接到对应的执行文件中，因此所获得的虛表地址是一个相对固定的地址。虛表中虛函数的地址的排列顺序依据虛函数在类中的声明顺序而定，先声明的虚函数的地址会被排列在虚表中靠前的位置。</p>
+<p>对于含有构造函数的类而言，其虚表初始化过程和默认构造函数相同，都是以对象首地址的前4字节数据保存虚表的首地址。如图</p>
+<p><img src="P19.jpg" alt=""></p>
+<p><strong>对于单线继承的类结构，在其某个成员函数中，将this的地址赋值为虛表首地址时，可以判定这个成员函数为构造函数。</strong></p>
+<p>析构函数分析：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; C++源码与对应汇编代码讲解</span><br><span class="line">int main(int argc,char* argv[])&#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">return 0;</span><br><span class="line">;构造函数分析略，直接看析构函数的调用</span><br><span class="line">00401060	mov		dword ptr [ebp-0Ch],0</span><br><span class="line">00401067	lea		ecx, [ebp-8]</span><br><span class="line">0040106A	call	@ILT+15 (CVirtual::~CVirtual) (00401014)	&#x2F;&#x2F;析构函数调用</span><br><span class="line">0040106F	mov		eax, dword ptr [ebp-0Ch]</span><br><span class="line">&#125;</span><br><span class="line">00401014	jmp		CVirtual::~CVirtual (00401100)</span><br><span class="line">&#x2F;&#x2F;析构函数分析</span><br><span class="line">~CVirtual()&#123;</span><br><span class="line">;函数入口代码略</span><br><span class="line">00401119	pop		ecx	</span><br><span class="line">0040111A	mov		dword ptr [ebp-4],ecx		;[ebp-4]保存this指针</span><br><span class="line">0040111D	mov		eax,dword ptr [ebp-4] 		;eax 得到this指针，这是虚表的位置</span><br><span class="line">;将当前类的虚表首地址赋值到虚表指针中</span><br><span class="line">00401120	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39;(00425024)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>析构函数中的填写虚表，是在还原虚表指针，让其指向自身的虚表首地址，防止在析构函数中调用虚函数时取到非自身虚表，从而导致函数调用错误。</p>
+<h2 id="虚函数的识别"><a href="#虚函数的识别" class="headerlink" title="虚函数的识别"></a>虚函数的识别</h2><p>有以下特征</p>
+<ul>
+<li>类中隐式定义了一个数据成员;</li>
+<li>该数据成员在首地址处，占4字节;</li>
+<li>构造函数会将此数据成员初始化为某个数组的首地址;</li>
+<li>这个地址属于数据区，是相对固定的地址;</li>
+<li>在这个数组内，每个元素都是函数指针;</li>
+<li>仔细观察这些函数，它们被调用时，第-个参数必然是this指针(要注意调用约定);</li>
+<li>在这些函数内部，很有可能会对this指针使用相对间接的访问方式。</li>
+</ul>
+<p>虚函数的识别最终转变成识别构造函数或者析构函数。构造函数与虛表指针的初始化有依赖关系。<strong>重点看对象首地址前4字节被赋予的值。</strong>来个栗子！</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">;具有成员函数特征，传递对象首地址作为this指针</span><br><span class="line">lea		ecx,[ebp-8]					;荻取对象首地址</span><br><span class="line">call	XXXXXXXXh					;调用函数</span><br><span class="line">;调用函数的实现代码</span><br><span class="line">pop		ecx							;this指针的还原，非Debug编译选项组在可能无此代码</span><br><span class="line">mov		eax,dword ptr [ecx]			;取出首地址前4字节数据</span><br><span class="line">;向对象首地址处写入4宇节数据，查看并确认此4字节数据是否为函数地址表的首地址</span><br><span class="line">mov		dword ptr [eax],XXXXXXXXh</span><br></pre></td></tr></table></figure>
+
+<h1 id="从内存角度看继承和多重继承"><a href="#从内存角度看继承和多重继承" class="headerlink" title="从内存角度看继承和多重继承"></a>从内存角度看继承和多重继承</h1><h2 id="识别类和类之间的关系"><a href="#识别类和类之间的关系" class="headerlink" title="识别类和类之间的关系"></a>识别类和类之间的关系</h2><p>在父类中声明为私有(private)的成员，虽然子类对象无法直接访问，但是在子类对象的内存结构中，父类私有的成员数据依然存在。</p>
+<p><strong>编译器在当子类中没有构造函数或析构函数，但是其父类却含有的情况下，编译器会为该父类的子类提供默认的构造函数与析构函数。</strong></p>
+<p>子类在初始化的时候，如果父类有构造函数会先执行父类的构造函数，在销毁的时候，为了调用父类的析构函数，编译器为子类提供了默认的析构函数。在子类的析构函数中，先执行自身的析构代码，再执行其父类的析构代码。</p>
+<p>如果子类中含有构造函数，但是父类中没有，那么编译器不会为父类提供默认的构造函数。但是如果父类中如果含有虚函数，则编译器为了初始化虚表，会提供默认的构造函数。</p>
+<p>在类对象初始化的过程中，构造的顺序如下：先构造父类，然后按声明顺序构造成员对象和初始化列表中指定的成员，最后才是自身的构造函数。</p>
+<p>在子类对象的内存布局中，低地址是用来存储父类数据成员的，高地址是存储自身数据成员。</p>
+<p>有了这样的内存结构，不但可以使用指向子类对象的子类指针间接寻址到父类定义的成员，而且可以使用指向子类对象的父类指针间接寻址到父类定义的成员。在使用父类成员函数时，传递的this指针也可以是子类对象首地址。所以子类指针的寻址范围不小于父类指针，这是个包含关系。在使用子类指针访问父类对象时，如果访问的成员数据是父类对象所定义的，那么不会出错;如果访问的是子类派生的成员数据，则会造成访问越界。</p>
+<p>来份代码！</p>
+<p><img src="P20.jpg" alt=""></p>
+<p><img src="P21.jpg" alt=""></p>
+<p>如使用对象或对象的指针调用成员函数，编译器可根据对象所属作用域来使用“名称粉碎法”，以实现正确匹配。在成员函数中调用其他成员函数时，可匹配当前作用域。</p>
+<p><a href="https://blog.csdn.net/lixiangminghate/article/details/79340775" target="_blank" rel="noopener">名称粉碎法</a></p>
+<p>虚函数的多态问题这本书写的一言难尽，一会说在构造函数中调用虚函数不彳亍，一会又说彳亍，给👴整懵逼了，草(一种植物)，可能是👴太菜了，但我感觉写的稀里糊涂，找了几篇blog看看算了</p>
+<p><a href="https://blog.csdn.net/weixin_30682415/article/details/101553704" target="_blank" rel="noopener"></a></p>
+<p><a href="https://blog.csdn.net/tianguiyuyu/article/details/104560102" target="_blank" rel="noopener"></a></p>
+<p><a href="https://blog.csdn.net/K346K346/article/details/49872023" target="_blank" rel="noopener"></a></p>
+<p>无内鬼，来、迷惑操作</p>
+<p><img src="P22.jpg" alt=""></p>
+<p><img src="P23.jpg" alt=""></p>
+<p>到底让不让我调用？书上的意思好像是在父类构造函数中调用虚函数会使虚表指针变成直接调用，无法构成多态，但是我实际写了写好像没多大影响，留个坑。</p>
+<p>来填坑，原来子类初始化的时候调用父类虚函数就叫虚函数失效，害，就这？</p>
+<h2 id="多重继承"><a href="#多重继承" class="headerlink" title="多重继承"></a>多重继承</h2><p>当子类拥有多个父类时，便构成多重继承关系。</p>
+<p>举个栗子</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CSofa &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nColor &#x3D; 2;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofa()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetColor() &#123;</span><br><span class="line">		return m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down and rest your legs\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">class CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nLength &#x3D; 4;</span><br><span class="line">		m_nWidth &#x3D; 5;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetArea() &#123;</span><br><span class="line">		return m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nLength;</span><br><span class="line">	int m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line">class CSofaBed : public CSofa, public CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight &#x3D; 6;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofaBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetHeight() &#123;</span><br><span class="line">		return m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在内存中的分布如图：</p>
+<p><img src="P24.jpg" alt=""></p>
+<p>占用的内存空间大小为0x18字节。除此之外，还有两个地址值，分别为0x00426198和0x0042501C，这两处地址的数据如图：</p>
+<p><img src="P25.jpg" alt=""></p>
+<p>这两个虚表中保存了子类的虚函数和父类的虚函数，父类的虚函数在子类中没有实现。由此可见，编译器将子类CSofaBed的虚函数制作了两份，康康编译器的操作</p>
+<p><img src="P26.jpg" alt=""></p>
+<p>在调用另-一个父类CBed时，并不是直接将对象的首地址作为this指针传递，而是向后调整了父类CSofa的大小，以调整后的地址值作为this指针，最后再调用父类CBed的构造函数。</p>
+<p>转换成父类指针的时候也是如此，如果转换成CBed，会调整首地址并跳过第一个父类所占用的空间，这样就不会错误寻址咯。</p>
+<p>看看析构过程：</p>
+<p><img src="P27.jpg" alt=""></p>
+<p><img src="P28.jpg" alt=""></p>
+<p>在析构的过程中，由于具有多个父类，当在析构的过程中调用各个父类的析构函数时，传递的首地址将有所不同，编译器会根据每个父类在对象中占用的空间位置，对应地传入各个父类部分的首地址作为this指针。</p>
+<p>在Debug版下，由于侧重调试功能，因此使用了两个临时变量来分别保存两个this指针，它们对应的地址分别为两个虚表指针的首地址。在Release版下，虽然会进行优化，但原理不变，子类析构函数调用父类的析构函数时，仍然会传人在对象中父类对应的地址，当做this指针。</p>
+<p>做个对比~</p>
+<ul>
+<li><strong>单继承类</strong><ul>
+<li>在类对象占用的内存空间中，只保存一份虚表指针。</li>
+<li>由于只有一个虚表指针，对应的也只有一个虚表。</li>
+<li>虚表中各项保存了类中各虚函数的首地址。</li>
+<li>构造时先构造父类，再构造自身，并且只调用一次父类构造函数。</li>
+<li>析构时先析构自身，再析构父类，并且只调用一-次父类析构函数。</li>
+</ul>
+</li>
+<li><strong>多重继承类</strong><ul>
+<li>在类对象所占用的内存空间中，根据继承父类的个数保存对应的虚表指针。</li>
+<li>根据所保存的虚表指针的个数，对应产生相应个数的虛表。</li>
+<li>转换父类指针时，需要跳转到对象的首地址。</li>
+<li>构造时需要调用多个父类构造函数。</li>
+<li>构造时先构造继承列表中第一个父类，然后依次调用到最后一个继承的父类构造函数。</li>
+<li>析构时先析构自身，然后以与构造函数相反的顺序调用所有父类的析构函数。</li>
+<li>当对象作为成员时，整个类对象的内存结构和多重继承很相似。当类中无虚函数时，整个类对象内存结构和多重继承完全一样，可酌情还原;当父类或成员对象存在虚函数时，通过观察虚表指针的位置和构造函数、析构函数中填写虚表指针的数目及目标地址，来还原继承或成员关系。</li>
+</ul>
+</li>
+</ul>
+<h2 id="虚基类"><a href="#虚基类" class="headerlink" title="虚基类"></a>虚基类</h2><p>直接来份代码康康</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show() &#x3D; 0;	    </span><br><span class="line">&#125;;</span><br><span class="line">class CVirtualChild : public CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show()&#123;</span><br><span class="line">        printf(&quot;虚基类分析\r\n&quot;);</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;;</span><br><span class="line">void main(int argc,char* argv[])&#123;</span><br><span class="line">    CVirtualChild VirtualChild;</span><br><span class="line">    VirtualChild.show();</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;反汇编代码分析，跟踪到虚基类构造函数中，查看其虚表信息</span><br><span class="line">CVirtualBase::CVirtualBase;				&#x2F;&#x2F;虚基类构造函数</span><br><span class="line">00401829	pop 	ecx</span><br><span class="line">0040182A	mov		dword ptr [ebp-4],ecx</span><br><span class="line">0040182D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;设置虚基类虚表指针，虚表地址在0x00425068处</span><br><span class="line">00401830	mov		dword ptr [eax],offset CVirtualBase::&#39;vftable&#39;(00425068)</span><br><span class="line">00401836	mov		eax,dword ptr [ebp-4]</span><br><span class="line">0040183F	ret</span><br><span class="line"></span><br><span class="line">;虚基类CVirtualBase中虚表信息的第一项所指向的函数首地址</span><br><span class="line">void _cdecl _purecall (void) &#123;</span><br><span class="line">00401E90	push	ebp</span><br><span class="line">00401E91	mov		ebp,esp</span><br><span class="line">_amsg_exit(_ RT_PUREVIRT);</span><br><span class="line">00401E93	push	19h							;压入错误编码</span><br><span class="line">00401E95	call	_amsg_exit (00401fd0)		;结束程序</span><br><span class="line">00401E9A	add		esp,4</span><br><span class="line">&#125;</span><br><span class="line">00401E9D	pop		ebp</span><br><span class="line">00401E9E	ret</span><br></pre></td></tr></table></figure>
+
+<p>如代码所示，在虚基类CVirtualBase的虚表信息中，由于纯虚函数没有实现代码，因此没有首地址。编译器为了防止误调用纯虚函数，将虛表中保存的纯虚函数的首地址项替换成函数_ purecall, 用于结束程序，并发出错误编码信息0x19。</p>
+<h2 id="菱形继承"><a href="#菱形继承" class="headerlink" title="菱形继承"></a>菱形继承</h2><p><img src="P29.jpg" alt=""></p>
+<p>来个栗子！</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CFurniture</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CFurniture() &#123;</span><br><span class="line">		m_nPrice = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CFurniture()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CFurniture()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nPrice;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nPrice;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofa</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nPrice = <span class="number">1</span>;</span><br><span class="line">		m_nColor = <span class="number">2</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofa()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetColor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down and rest your legs\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CBed</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nPrice = <span class="number">3</span>;</span><br><span class="line">		m_nLength = <span class="number">4</span>;</span><br><span class="line">		m_nWidth = <span class="number">5</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetArea</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nLength;</span><br><span class="line">	<span class="keyword">int</span> m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofaBed</span> :</span> <span class="keyword">public</span> CSofa, <span class="keyword">public</span> CBed &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight = <span class="number">6</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofaBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetHeight</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>子类结构如图所示</p>
+<p><img src="P30.jpg" alt=""></p>
+<p><img src="P31.jpg" alt=""></p>
+<p>对于CSofaBed_vt(new)和vt_offset的解释如下</p>
+<p><img src="P32.jpg" alt=""></p>
+<p><img src="P33.jpg" alt=""></p>
+<p>从代码的指针转换过程中可以看出来，vt_offset指向的内存地址中保存的数据为偏移数据，每个vt_offset对应的数据有两项：第一项为vt_offset所属类对应的虚表指针相对于vtoffset的偏移值;第二项保存的是父类虚表指针相对于vt_offset 的偏移值。</p>
+<p><img src="P34.jpg" alt=""></p>
+<p>三个虚表指针内容如下</p>
+<p><img src="P35.jpg" alt=""></p>
+<p>如图所示，这三个虚表指针所指向的虛表包含了子类CSofaBed含有的虚函数。有了这些记录就可以随心所欲地将虚表指针转换成任意的父类指针。在利用父类指针访问虚函数时，只能调用子类与父类共有的虚函数，子类继承自其他父类的虚函数是无法调用的，虚表中也没有相关的记录。</p>
+<p>来看一下构造</p>
+<p><img src="P36.jpg" alt=""></p>
+<p><img src="P37.jpg" alt=""></p>
+<p>子类构造的过程中，在调用时要传入一个参数，这个参数是一个标志信息。构造过程中先构造父类，然后再构造自己。当标记为1时，则构造父类；当标记为0时，则跳过构造函数。</p>
+<p>在析构的时候，并没有使用标记信息，而是将祖父类放在最后调用，先依次执行两个父类CBed和CSofa的析构函数，然后执行祖父类的析构函数。</p>
+<h2 id="思考题-1"><a href="#思考题-1" class="headerlink" title="思考题"></a>思考题</h2><p><strong>为什么编译器要在子类析构函数中再次将虚表设置为子类虚表呢?</strong>这个操作非常必要，因为编译器无法预知这个子类以后是否会被其他类继承，如果被继承，原来的子类就成了父类，析构函数执行时会先执行当前对象的析构函数，然后向祖父类的方向按继承线路逐层调用各类析构函数，当前对象的析构函数开始执行时，其虚表也是当前对象的，因此执行到父类的析构函数时，虚表必须改写为父类的虚表。编译器所产生的类实现代码，必须能够适应将来不可预知的对象关系，故在每个对象的析构函数内，要加入填写自己虚表的代码。</p>
+<h1 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h1><p>学习之前先看两个blog</p>
+<p><a href="https://www.cnblogs.com/yilang/p/11233935.html" target="_blank" rel="noopener">SEH1</a></p>
+<p><a href="https://www.cnblogs.com/yilang/p/11238201.html" target="_blank" rel="noopener">SEH2</a></p>
+<h2 id="异常处理的相关知识"><a href="#异常处理的相关知识" class="headerlink" title="异常处理的相关知识"></a>异常处理的相关知识</h2><ul>
+<li>try语句块负责监视异常。</li>
+<li>throw用于异常信息的发送，也称之为抛出异常。</li>
+<li>catch用于异常的捕获，并作出相应的处理。</li>
+</ul>
+<p>VC++在处理异常时会在具有异常处理功能的函数的人口处注册一个异常回调函数，当该函数内有异常抛出时，便会执行这个已注册的异常回调函数。所有的异常信息都会被记录在相关表格中，异常回调函数根据这些表格中的信息进行异常的匹配处理工作。</p>
+<p>关于异常的实现…说实话没大看懂，留个坑，等我学明白内核来填</p>
+<h2 id="识别异常处理"><a href="#识别异常处理" class="headerlink" title="识别异常处理"></a>识别异常处理</h2><p>通过对VC++异常处理的分析，可将其处理流程总结为以下9个步骤：</p>
+<ol>
+<li>在函数入口处设置异常回调函数，其回调函数先设置eax为FuncInfo数据的地址，然后跳往 ___CxxFrameHandler。</li>
+<li>异常的抛出由 CxxThrowException函数完成，该函数使用了两个参数，一个是抛出异常的关键字throw的参数的指针，另一个是抛出信息类型的指针(ThrowInfo*)。</li>
+<li>在异常回调函数中，可以得到异常对象的地址和对应ThrowInfo数据的地址以及FunInfo表结构的地址。根据所记录的异常类型，进行try块的匹配工作。</li>
+<li>如果没有找到try块，则析构异常对象，返回ExceptionContinueSearch，继续下一个异常回调函数的处理。</li>
+<li>当找到对应的try块时，通过TryBlockMapEntry表结构中的pCatch指向catch信息表，用 ThrowInfo表结构中的异常类型遍历查找与之匹配的catch块，比较关键字名称（如整型为.h，单精度浮点为.m)，找到有效的catch块。</li>
+<li>执行栈展开操作，并产生catch块中使用的异常对象（有4种不同的产生方法)。</li>
+<li>正确析构所有生命期己结束的对象。</li>
+<li>跳转到catch块，执行catch块代码。</li>
+<li>调用 JumpToContinuation函数，返回所有catch语句块的结束地址。</li>
+</ol>
+<p>有一个具体案例的分析，书上讲的很详细，懒得做笔记了，吸吸</p>
+<p>终于看完啦，完结撒花~</p>
 ]]></content>
       <categories>
         <category>读书笔记</category>

@@ -99,7 +99,7 @@
 <meta property="og:site_name" content="Kittener&#39;s blog">
 <meta property="og:description" content="csapp第八章 异常控制流">
 <meta property="article:published_time" content="2021-02-09T10:22:16.000Z">
-<meta property="article:modified_time" content="2021-02-14T03:18:19.312Z">
+<meta property="article:modified_time" content="2021-02-14T10:05:47.191Z">
 <meta property="article:author" content="Kittener">
 <meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
@@ -354,7 +354,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2021-02-14T11:18:19+08:00">
+              <time title="更新于" itemprop="dateModified" datetime="2021-02-14T18:05:47+08:00">
                 2021-02-14
               </time>
             
@@ -552,6 +552,9 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">char</span> *<span class="title">getenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span>;		<span class="comment">//若存在则返回指向value的指针，若无匹配的，则返回NULL</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name, <span class="keyword">const</span> <span class="keyword">char</span> *newvalue,<span class="keyword">int</span> overwrite)</span></span>;	<span class="comment">//若成功返回0，失败返回-1</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">unsetenv</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span></span></span><br></pre></td></tr></table></figure>
 
 <h1 id="8-5-信号"><a href="#8-5-信号" class="headerlink" title="8.5 信号"></a>8.5 信号</h1><p>信号就是小消息，它通知进程系统中发生了一个某种类型的事件。</p>
+<p>一个发出而没有被接收的信号叫做待处理信号(pending signal)。在任何时候，一种类型至多只会有一个待处理信号。再来的直接被丢弃。</p>
+<p>进程可以自行选择阻塞某种信号，信号被阻塞后依然可以被发送，但除非进程取消阻塞，否则一直不会被接收。</p>
+<p>内核为每个进程在pending位向量中维护着待处理信号的集合，在blocked位向量中维护着被阻塞的信号集合。传送就设置，接收就清除。</p>
 <h2 id="发送信号"><a href="#发送信号" class="headerlink" title="发送信号"></a>发送信号</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">pid_t</span> <span class="title">getpgrp</span><span class="params">(<span class="keyword">void</span>)</span></span>;	<span class="comment">//返回调用进程的进程组PID</span></span><br></pre></td></tr></table></figure>
 
 <p>一个子进程和它的父进程都属于一个进程组，一个进程可以通过使用setpgid函数来改变自己或其他进程的进程组</p>
@@ -560,15 +563,40 @@
 <p>如果进程15213是调用进程，那么setpgid(0,0)则会创建一个新的进程组，进程组ID为15213，并把进程15213加入到这个新的进程组中。</p>
 <p><strong>还可以用/bin/kill发送信号(Linux终端)</strong></p>
 <p>用kill函数发送信号：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">kill</span><span class="params">(<span class="keyword">pid_t</span> pid,<span class="keyword">int</span> sig)</span></span>;	<span class="comment">//成功返回0，若错误返回-1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">kill</span><span class="params">(<span class="keyword">pid_t</span> pid,<span class="keyword">int</span> sig)</span></span>;	<span class="comment">//成功返回0，若错误返回-1如果pid&gt;0：kill函数发送sig给进程pid</span></span><br></pre></td></tr></table></figure>
 
-<p>如果pid&gt;0：kill函数发送sig给进程pid</p>
 <p>如果pid=0：kill函数发送信号给调用进程所在进程组中的每个进程</p>
 <p>如果pid&lt;0：kill函数发送信号给进程组|PID|(PID的绝对值中的每个进程)</p>
 <p>用alarm发送信号：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">alarm</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> secs)</span></span>;	<span class="comment">//返回前一次闹钟剩余的描述，若没有设置闹钟，则返回0</span></span><br></pre></td></tr></table></figure>
 
-<h2 id=""><a href="#" class="headerlink" title=""></a></h2>
+<h2 id="接收信号"><a href="#接收信号" class="headerlink" title="接收信号"></a>接收信号</h2><p>当内核把进程p从内核模式切换到用户模式时，会检查p的未被阻塞的待处理信号的集合(pending &amp; ~blocked)。</p>
+<p>每个信号都有默认行为，但是可以通过<em>signal函数</em>修改这种行为，但是，<strong>SIGSTOP和SIGKILL</strong>不能被修改。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*<span class="keyword">sighandler_t</span>)</span><span class="params">(<span class="keyword">int</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">sighander_t</span> <span class="title">signal</span><span class="params">(<span class="keyword">int</span> signum, <span class="keyword">sighander_t</span> handler)</span></span>;	<span class="comment">//若成功返回指向前次处理程序的指针，若失败返回SIG_ERR</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果handler是SIG_IGN，那么忽略的类型为signum的信号</li>
+<li>如果handler是SIG_DFL，那么类型为signum的信号行为恢复为默认行为</li>
+<li>否则，handler就是用户定义的函数的地址，这个函数被称为<em>信号处理程序</em>，只要进程就收到一个类型为signum的信号，就会调用这个程序。通过把处理程序的地址传递到signal函数从而改变默认行为，这叫做<em>设置信号处理程序</em>。调用信号处理程序被称为<em>捕获信号</em>。执行信号处理程序被称为<em>处理信号</em>。</li>
+</ul>
+<h2 id="阻塞和解除阻塞信号"><a href="#阻塞和解除阻塞信号" class="headerlink" title="阻塞和解除阻塞信号"></a>阻塞和解除阻塞信号</h2><p>应用程序可以使用sigprocmask函数和它的辅助函数，明确地阻塞和解除阻塞选定的信号。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigprocmask</span><span class="params">(<span class="keyword">int</span> how, <span class="keyword">const</span> <span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">sigset_t</span> *oldset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigemptyset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigfillset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigaddset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">int</span> signum)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigdelset</span><span class="params">(<span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">int</span> signum)</span></span>;	</span><br><span class="line">											<span class="comment">//成功返回0，否则-1</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">sigismember</span><span class="params">(<span class="keyword">const</span> <span class="keyword">sigset_t</span> *<span class="built_in">set</span>, <span class="keyword">int</span> signum)</span></span>;	<span class="comment">//若signum是set地成员则为1，不是则为0，出错返回-1</span></span><br></pre></td></tr></table></figure>
+
+<p>how的值可以为：</p>
+<ul>
+<li><p>SIG_BLOCK：把set中的信号添加到blocked中(blocked=blocked | set)。</p>
+</li>
+<li><p>SIG_UNBLOCK：把blocked中删除set中的信号(blocked=blocked &amp;~set)。</p>
+</li>
+<li><p>SIG_SETMASK：block=set</p>
+</li>
+</ul>
+<p>各个函数的作用：</p>
+<p>sigemptyset初始化set集合为空。</p>
+<p>sigfillset函数把每个信号都添加到set中。</p>
+<p>sigaddset函数把signum添加到set。</p>
+<p>之后就是关于并发编程的了，看的模模糊糊的，准备看完12章再来复习一下吧。</p>
+
       
     </div>
     
@@ -780,7 +808,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-异常"><span class="nav-number">1.</span> <span class="nav-text">8.1 异常</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#异常的种类"><span class="nav-number">1.1.</span> <span class="nav-text">异常的种类</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-2-进程"><span class="nav-number">2.</span> <span class="nav-text">8.2 进程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-4-进程控制"><span class="nav-number">3.</span> <span class="nav-text">8.4 进程控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#获取进程ID"><span class="nav-number">3.1.</span> <span class="nav-text">获取进程ID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建和终止进程"><span class="nav-number">3.2.</span> <span class="nav-text">创建和终止进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回收子进程"><span class="nav-number">3.3.</span> <span class="nav-text">回收子进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加载并运行程序"><span class="nav-number">3.4.</span> <span class="nav-text">加载并运行程序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-5-信号"><span class="nav-number">4.</span> <span class="nav-text">8.5 信号</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#发送信号"><span class="nav-number">4.1.</span> <span class="nav-text">发送信号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#"><span class="nav-number">4.2.</span> <span class="nav-text"></span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#8-1-异常"><span class="nav-number">1.</span> <span class="nav-text">8.1 异常</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#异常的种类"><span class="nav-number">1.1.</span> <span class="nav-text">异常的种类</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-2-进程"><span class="nav-number">2.</span> <span class="nav-text">8.2 进程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-4-进程控制"><span class="nav-number">3.</span> <span class="nav-text">8.4 进程控制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#获取进程ID"><span class="nav-number">3.1.</span> <span class="nav-text">获取进程ID</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建和终止进程"><span class="nav-number">3.2.</span> <span class="nav-text">创建和终止进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回收子进程"><span class="nav-number">3.3.</span> <span class="nav-text">回收子进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加载并运行程序"><span class="nav-number">3.4.</span> <span class="nav-text">加载并运行程序</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-5-信号"><span class="nav-number">4.</span> <span class="nav-text">8.5 信号</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#发送信号"><span class="nav-number">4.1.</span> <span class="nav-text">发送信号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接收信号"><span class="nav-number">4.2.</span> <span class="nav-text">接收信号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阻塞和解除阻塞信号"><span class="nav-number">4.3.</span> <span class="nav-text">阻塞和解除阻塞信号</span></a></li></ol></li></ol></div>
             
 
           </div>
