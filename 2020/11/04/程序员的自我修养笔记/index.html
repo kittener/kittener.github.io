@@ -107,8 +107,15 @@
 <meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P7.png">
 <meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P8.png">
 <meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P9.png">
+<meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P10.png">
+<meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P11.png">
+<meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P12.png">
+<meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P13.png">
+<meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P14.png">
+<meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P15.png">
+<meta property="og:image" content="http://www.kittener.top/2020/11/04/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB%E7%AC%94%E8%AE%B0/P16.png">
 <meta property="article:published_time" content="2020-11-04T12:27:55.000Z">
-<meta property="article:modified_time" content="2020-11-12T14:53:05.063Z">
+<meta property="article:modified_time" content="2020-12-02T14:42:31.827Z">
 <meta property="article:author" content="Kittener">
 <meta property="article:tag" content="笔记">
 <meta name="twitter:card" content="summary">
@@ -364,8 +371,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-11-12T22:53:05+08:00">
-                2020-11-12
+              <time title="更新于" itemprop="dateModified" datetime="2020-12-02T22:42:31+08:00">
+                2020-12-02
               </time>
             
           </span>
@@ -527,6 +534,51 @@
 <li><em>(.data)所有输入文件中的名字为.data的文件符合条件。 * 是通配符，类似于正则表达式中的</em>，我们还可以使用正则表达式中的?、[]等规则。</li>
 <li><code>[a-z]*(.text*[A-Z])</code>这个条件比较复杂，它表示所有输入文件中以小写字母a到z开头的文件中所有段名以.text开头，并且以大写字母A到Z结尾的段。从这个规则中你也许可以看到一些链接脚本功能的强大。</li>
 </ul>
+<h1 id="Windows-PE-COFF文件"><a href="#Windows-PE-COFF文件" class="headerlink" title="Windows PE/COFF文件"></a>Windows PE/COFF文件</h1><h2 id="COFF文件结构"><a href="#COFF文件结构" class="headerlink" title="COFF文件结构"></a>COFF文件结构</h2><p><img src="P10.png" alt=""></p>
+<p>文件头里描述的COFF文件总体属性的映像头是一个”IMAGE_FILE_HEADER”的结构。这个结构以及相关常数定义在”VC\PlatformSDK\include\WinNT.h”里面</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef struct _IMAGE_FILE_HEADER&#123;</span><br><span class="line">	WORD  Machine;</span><br><span class="line">	WORD  Numberofsections;</span><br><span class="line">	DWORD TimeDatestamp;</span><br><span class="line">	DWORD PointerToSymbolTable ;</span><br><span class="line">	DWORD NumberOfSymbols;</span><br><span class="line">	WORD  SizeOfOptionalHeader ;</span><br><span class="line">	WORD  Characteristics;</span><br><span class="line">&#125; IMAGE_FILE_HEADER，*PIMAGE_FILE_HEADER;</span><br></pre></td></tr></table></figure>
+
+<p>后面紧跟着段表，它是一个类型为”IMAGE_SECTION_HEADER”结构的数组，数组中的每个元素代表一个段。</p>
+<p>也被定义在WinNT.h里面:</p>
+<p><img src="P11.png" alt=""></p>
+<p>可以看到每个段所拥有的属性包括段名( Section Name )、物理地址( Physical address)、虚拟地址(Virtual address)、原始数据大小(Size of raw data)、段在文件中的位置(File pointer to raw data)、该段的重定位表在文件中的位置(File pointer to relocationtable )、该段的行号表在文件中的位置( File pointer to line numbers)、标志位( Characteristics）等。</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>VirtualSize</td>
+<td>该段被加载至内存后的大小</td>
+</tr>
+<tr>
+<td>VirtualAddress</td>
+<td>该段被加载至内存后的虚拟地址</td>
+</tr>
+<tr>
+<td>SizeOfRawData</td>
+<td>该段在文件中的大小。注意:这个值有可能跟 VirtualSize的值不一样，比如.bss 段的SizeOfRawData是0，而VirtualSize值是.bss段的大小。另外涉及一些内存对齐等问题，这个值往往比 VirtualSize 小</td>
+</tr>
+<tr>
+<td>Characteristics</td>
+<td>段的属性，属性里包含的主要是段的类型（代码、数据、bss )、对齐方式及可读可写可执行等权限。段的属性是一些标志位的组合，这些标志位被定义在WinNT.h里，比如IMAGE_SCN_CNT_CODE ( Ox00000020）表示该段里面包含的是代码;IMAGE_SCN_MEM_READ ( Ox40000000)表示该段在内存中是可读的;IMAGE_SCN_MEM_EXECUTE ( Ox20000000 )表示该段在内存中是可执行的，等等</td>
+</tr>
+</tbody></table>
+<p>符号表和ELF文件类似，不在赘述</p>
+<h2 id="PE文件"><a href="#PE文件" class="headerlink" title="PE文件"></a>PE文件</h2><p>PE文件相较于COFF多了几个结构，主要的变化有两个：</p>
+<p>第一个是文件最开始的部分不是COFF文件头，而是DOS MZ可执行文件格式的文件头和桩代码(DOS MZ File Header and Stub);</p>
+<p>第二个变化是原来的 COFF文件头中的“IMAGE_FILE_HEADER”部分扩展成了PE文件文件头结构“IMAGE_NT_HEADERS”,这个结构包括了原来的“Image Header”及新增的PE扩展头部结构(PE Optional Header)。PE文件的结构如图5-2所示。</p>
+<p><img src="P12.png" alt=""></p>
+<p>“IMAGE_DOS_HEADER”结构唯一需要关心的就是”e_lfanew”成员，它表明了PE文件头(IMAGE_NT_HEADERS)在PE文件中的<strong>偏移</strong>。</p>
+<p>“IMAGE_NT_HEADERS”是PE真正的文件头，它包含了一个<strong>标记</strong>和两个<strong>结构体</strong>。标记是一个常量，值为0x00004550，按照小端序，对应的是’P’、’E’、’\0’、’\0’这四个字符的ASCII码。文件头包含的两个结构分别是<strong>映像头</strong>(Image Header)、<strong>PE扩展头部结构</strong>。定义如下：</p>
+<p><img src="P13.png" alt=""></p>
+<p>映像头的结构如下：</p>
+<p><img src="P14.png" alt=""></p>
+<p><img src="P15.png" alt=""></p>
+<h3 id="PE数据目录"><a href="#PE数据目录" class="headerlink" title="PE数据目录"></a>PE数据目录</h3><p>在 Windows系统装载PE可执行文件时,往往须要很快地找到一些装载所须要的数据结构，比如导入表、导出表、资源、重定位表等。这些常用的数据的位置和长度都被保存在了一个叫数据目录(Data Directory)的结构里面，其实它就是前面“IMAGE_OPTIONAL_HEADER”结构里面的“DataDirectory”成员。这个成员是一个“IMAGE_DATA_DIRECTORY”的结构数组，相关的定义如下:</p>
+<p><img src="P16.png" alt=""></p>
 
       
     </div>
@@ -653,7 +705,7 @@
               
                 <a href="/archives/%7C%7C%20archive">
               
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">16</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -664,7 +716,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">7</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -743,7 +795,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#静态链接"><span class="nav-number">1.</span> <span class="nav-text">静态链接</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#空间与地址分配"><span class="nav-number">1.1.</span> <span class="nav-text">空间与地址分配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#相似段合并"><span class="nav-number">1.1.1.</span> <span class="nav-text">相似段合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两步链接"><span class="nav-number">1.1.2.</span> <span class="nav-text">两步链接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#符号解析与重定位"><span class="nav-number">1.2.</span> <span class="nav-text">符号解析与重定位</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重定位表"><span class="nav-number">1.2.1.</span> <span class="nav-text">重定位表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指令修正方式"><span class="nav-number">1.2.2.</span> <span class="nav-text">指令修正方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最”小“的程序"><span class="nav-number">1.2.3.</span> <span class="nav-text">最”小“的程序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ld链接脚本语法"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">ld链接脚本语法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#语句类型"><span class="nav-number">1.2.3.1.1.</span> <span class="nav-text">语句类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#语法"><span class="nav-number">1.2.3.1.2.</span> <span class="nav-text">语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#常用的命令语句"><span class="nav-number">1.2.3.1.3.</span> <span class="nav-text">常用的命令语句</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SECTIONS命令"><span class="nav-number">1.2.3.1.4.</span> <span class="nav-text">SECTIONS命令</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#静态链接"><span class="nav-number">1.</span> <span class="nav-text">静态链接</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#空间与地址分配"><span class="nav-number">1.1.</span> <span class="nav-text">空间与地址分配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#相似段合并"><span class="nav-number">1.1.1.</span> <span class="nav-text">相似段合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两步链接"><span class="nav-number">1.1.2.</span> <span class="nav-text">两步链接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#符号解析与重定位"><span class="nav-number">1.2.</span> <span class="nav-text">符号解析与重定位</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#重定位表"><span class="nav-number">1.2.1.</span> <span class="nav-text">重定位表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指令修正方式"><span class="nav-number">1.2.2.</span> <span class="nav-text">指令修正方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最”小“的程序"><span class="nav-number">1.2.3.</span> <span class="nav-text">最”小“的程序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ld链接脚本语法"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">ld链接脚本语法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#语句类型"><span class="nav-number">1.2.3.1.1.</span> <span class="nav-text">语句类型</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#语法"><span class="nav-number">1.2.3.1.2.</span> <span class="nav-text">语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#常用的命令语句"><span class="nav-number">1.2.3.1.3.</span> <span class="nav-text">常用的命令语句</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SECTIONS命令"><span class="nav-number">1.2.3.1.4.</span> <span class="nav-text">SECTIONS命令</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Windows-PE-COFF文件"><span class="nav-number">2.</span> <span class="nav-text">Windows PE&#x2F;COFF文件</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#COFF文件结构"><span class="nav-number">2.1.</span> <span class="nav-text">COFF文件结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PE文件"><span class="nav-number">2.2.</span> <span class="nav-text">PE文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PE数据目录"><span class="nav-number">2.2.1.</span> <span class="nav-text">PE数据目录</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -763,7 +815,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
