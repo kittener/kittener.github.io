@@ -1,6 +1,426 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>垃圾回收的算法与实现</title>
+    <url>/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/</url>
+    <content><![CDATA[<p>垃圾回收的算法与实现，实现篇目前先做python的，Dalvik和v8的当作个坑后续补</p>
+<a id="more"></a>
+
+<h1 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h1><p><img src="/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/P1.jpg" alt=""></p>
+<h2 id="命名规则"><a href="#命名规则" class="headerlink" title="命名规则"></a>命名规则</h2><p>变量以及函数都用小写字母表示（例：obj）。常量都用大写字母表示（例：COPIED）。另外，本书采用下划线连接两个及两个以上的单词（例：free_list、update_ptr()、HEAP_SIZE）。</p>
+<h2 id="名词"><a href="#名词" class="headerlink" title="名词"></a>名词</h2><p><strong>对象</strong>：通过应用程序利用的数据的集合，由头(head)和域(field)构成</p>
+<ul>
+<li>头：对象中保存对象本身信息的部分<ul>
+<li>对象的大小</li>
+<li>对象的种类</li>
+</ul>
+</li>
+<li>域：对象使用者在对象中可访问的部分<ul>
+<li>指针</li>
+<li>非指针</li>
+</ul>
+</li>
+</ul>
+<p><strong>children(obj)</strong> ：获取指向对象 obj 的子对象的指针数组，<strong>指针默认指向对象首地址</strong></p>
+<p><strong>Mutator</strong>： 主要进行两种操作</p>
+<ul>
+<li>生成对象</li>
+<li>更新指针</li>
+</ul>
+<p><strong>活动对象/非活动对象</strong> ：我们将分配到内存空间中的对象中那些能通过 mutator 引用的对象称为“活动对象”。反过来，把分配到堆中那些不能通过程序引用的对象称为“非活动对象”。也就是说，不能通过程序引用的对象已经没有人搭理了，所以死掉了。死掉的对象（即非活动对象）我们就称为“垃圾”。</p>
+<p>死去的对象无法复活，无法通过Mutator找到死掉的对象，GC会清理死掉的对象</p>
+<p><strong>分配</strong>：在内存空间中分配对象。当 mutator 需要新对象时，就会向分配器（allocator）申请一个大小合适的空间。分配器则在堆的可用空间中找寻满足要求的空间，返回给 mutator。当堆被活动对象占满时，有以下两种选择：</p>
+<ul>
+<li>销毁至今为止的所有计算结果，输出错误信息</li>
+<li>扩大堆，分配可用空间</li>
+</ul>
+<p><strong>分块</strong>：为利用对象而事先准备出来的空间。内存里的各个区块都重复着分块→活动对象→垃圾（非活动对象）→分块→ …… 这样的过程。</p>
+<p><strong>根</strong>：指向对象的指针的“起点”部分</p>
+<h1 id="2-GC标记-清除算法"><a href="#2-GC标记-清除算法" class="headerlink" title="2 GC标记-清除算法"></a>2 GC标记-清除算法</h1><h2 id="2-1-什么是GC标记-清除算法"><a href="#2-1-什么是GC标记-清除算法" class="headerlink" title="2.1 什么是GC标记-清除算法"></a>2.1 什么是GC标记-清除算法</h2><p>GC 标记 - 清除算法由标记阶段和清除阶段构成。标记阶段是把所有活动对象都做上标记的阶段。清除阶段是把那些没有标记的对象，也就是非活动对象回收的阶段。</p>
+<h3 id="2-1-1-标记阶段"><a href="#2-1-1-标记阶段" class="headerlink" title="2.1.1 标记阶段"></a>2.1.1 标记阶段</h3><p>内存利用一般是堆，会递归标记指针数组能访问到的对象</p>
+<p>将对象头部打上记号表示这是一个活动对象</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mark(obj)&#123;</span><br><span class="line">	if(obj.mark &#x3D;&#x3D; FALSE)</span><br><span class="line"> 	obj.mark &#x3D; TRUE</span><br><span class="line"> 	for(child : children(obj))</span><br><span class="line"> 		mark(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-2-清除阶段"><a href="#2-1-2-清除阶段" class="headerlink" title="2.1.2 清除阶段"></a>2.1.2 清除阶段</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sweep_phase()&#123;</span><br><span class="line">	sweeping &#x3D; $heap_start			</span><br><span class="line"> 	while(sweeping &lt; $heap_end)</span><br><span class="line"> 		if(sweeping.mark &#x3D;&#x3D; TRUE)</span><br><span class="line"> 			sweeping.mark &#x3D; FALSE			&#x2F;&#x2F;准备下一次的GC(实际的code应该不会这样干吧233)</span><br><span class="line"> 		else</span><br><span class="line"> 			sweeping.next &#x3D; $free_list		&#x2F;&#x2F;加入free链(单向链表)</span><br><span class="line"> 			$free_list &#x3D; sweeping</span><br><span class="line"> 		sweeping +&#x3D; sweeping.size</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>next 的域，我们只在生成空闲链表以及从这个空闲链表中取出分块时才会使用到它。没有必要为各个对象特别准备域，从对象已有的域之中分出来一个就够了。在本章中，next 表示对象（或者分块）最初的域，即 field1。也就是说，给 field1 这个域起个别名叫 next。这跟 C 语言中的联合体（union）的概念相同。</p>
+<h3 id="2-1-3-分配"><a href="#2-1-3-分配" class="headerlink" title="2.1.3 分配"></a>2.1.3 分配</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line">	chunk &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 	if(chunk !&#x3D; NULL)</span><br><span class="line"> 		return chunk</span><br><span class="line"> 	else</span><br><span class="line"> 		allocation_fail()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就是malloc嘛（摊手</p>
+<p>pickup_chunk() 函数用于遍历 $free_list，寻找大于等于 size 的分块。它不光会返回和 size 大小相同的分块，还会返回比 size 大的分块。如果它找到和 size 大小相同的分块，则会直接返回该分块；如果它找到比 size 大的分块，则会将其分割成 size 大小的分块和去掉 size 后剩余大小的分块，并把剩余的分块返回空闲链表。</p>
+<p>这里再提一下立即适配，延后适配和最佳适配吧，贴一个网上的答案</p>
+<ol>
+<li><p>首次适应算法（First Fit）   </p>
+<ul>
+<li><p>算法思想：将空闲分区链以地址递增的顺序连接；在进行内存分配时，从链首开始顺序查找，直到找到一块分区的大小可以满足需求时，按照该作业的大小，从该分区中分配出内存，将剩下的空闲分区仍然链在空闲分区链中。   </p>
+</li>
+<li><p>优点：高址部分的大的空闲分区得到保留，为大作业的内存分配创造了条件；</p>
+</li>
+<li><p>缺点：（1）每次都是优先利用低址部分的空闲分区，造成低址部分产生大量的外碎片。            </p>
+<p>​            （2）每次都是从低址部分查找，使得查找空闲分区的开销增大；  </p>
+</li>
+</ul>
+</li>
+<li><p>循环首次适应算法（Next Fit）  </p>
+<ul>
+<li><p>算法：分配内存时不是从链首进行查找可以分配 内存的空闲分区，而是从上一次分配内存的空闲分区的下一个分区开始查找，直到找到可以为该进程分配内存的空闲分区；    </p>
+</li>
+<li><p>优点：（1）使得空闲分区分布更加均匀；             </p>
+<p>​            （2）空闲分区的查找开销小；</p>
+</li>
+<li><p>缺点：高址部分的大空闲分区被分小，使得大作业进入无法分配内存；  </p>
+</li>
+</ul>
+</li>
+<li><p>最佳适应算法（Best Fit）  </p>
+<ul>
+<li>算法：将空闲分区链中的空闲分区按照空闲分区由小到大的顺序排序，从而形成空闲分区链。每次从链首进行查找合适的空闲分区为作业分配内存，这样每次找到的空闲分区是和作业大小最接近的，所谓“最佳”。    </li>
+<li>优点：第一次找到的空闲分区是大小最接近待分配内存作业大小的； </li>
+<li>缺点:产生大量难以利用的外部碎片。  </li>
+</ul>
+</li>
+<li><p>最坏适应算法（Worst Fit）  </p>
+<ul>
+<li>算法：与最佳适应算法刚好相反，将空闲分区链的分区按照从大到小的顺序排序形成空闲分区链，每次查找时只要看第一个空闲分区是否满足即可。    </li>
+<li>优点：效率高，分区查找方便；  </li>
+<li>缺点：当小作业把大空闲分区分小了，那么，大作业就找不到合适的空闲分区。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-1-4-合并"><a href="#2-1-4-合并" class="headerlink" title="2.1.4 合并"></a>2.1.4 合并</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sweep_phase()&#123;</span><br><span class="line">	sweeping &#x3D; $heap_start</span><br><span class="line">	while(sweeping &lt; $heap_end)</span><br><span class="line">		if(sweeping.mark &#x3D;&#x3D; TRUE)</span><br><span class="line">			sweeping.mark &#x3D; FALSE</span><br><span class="line">		else</span><br><span class="line"> 			if(sweeping &#x3D;&#x3D; $free_list + $free_list.size)</span><br><span class="line"> 				$free_list.size +&#x3D; sweeping.size</span><br><span class="line"> 			else</span><br><span class="line">				sweeping.next &#x3D; $free_list</span><br><span class="line"> 				$free_list &#x3D; sweeping</span><br><span class="line"> 		sweeping +&#x3D; sweeping.size</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好嘛，free函数（摊手，但是实现的并不好</p>
+<p>作者给的多链表的其实也是malloc的简单实现，建议大家码一遍CMU的malloc lab，我就不多写了</p>
+<p>本章的几个优化方法，跟malloc lab的提分技巧大同小异，我就不做笔记了</p>
+<h1 id="3-引用计数法"><a href="#3-引用计数法" class="headerlink" title="3 引用计数法"></a>3 引用计数法</h1><p>GC 原本是一种“释放怎么都无法被引用的对象的机制”。那么人们自然而然地就会想到，可以让所有对象事先记录下“有多少程序引用自己”。让各对象知道自己的“人气指数”，从而让没有人气的对象自己消失。</p>
+<p>感觉好有意思~</p>
+<h2 id="3-1-引用计数的算法"><a href="#3-1-引用计数的算法" class="headerlink" title="3.1 引用计数的算法"></a>3.1 引用计数的算法</h2><p><img src="P2.jpg" alt=""></p>
+<h3 id="new-obj-函数"><a href="#new-obj-函数" class="headerlink" title="new_obj()函数"></a>new_obj()函数</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line">	obj &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 	if(obj &#x3D;&#x3D; NULL)</span><br><span class="line"> 		allocation_fail()</span><br><span class="line"> 	else</span><br><span class="line"> 		obj.ref_cnt &#x3D; 1</span><br><span class="line"> 		return obj</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里，pickup_chunk() 函数的用法也大致与在 GC 标记 - 清除算法中的用法相同。不过这次当 pickup_chunk() 函数返回 NULL 时，分配就失败了。</p>
+<p>在引用计数法中，除了连接到空闲链表的对象，其他所有对象都是活动对象。也就是说，在 pickup_chunk() 函数返回 NULL 那一刻，堆中就没有合适大小的分块了。</p>
+<h3 id="update-ptr-函数"><a href="#update-ptr-函数" class="headerlink" title="update_ptr()函数"></a>update_ptr()函数</h3><p>update_ptr() 函数用于更新指针 ptr，使其指向对象 obj，同时进行计数器值的增减。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">update_ptr(ptr, obj)&#123;</span><br><span class="line">	inc_ref_cnt(obj)</span><br><span class="line"> 	dec_ref_cnt(*ptr)</span><br><span class="line"> 	*ptr &#x3D; obj</span><br><span class="line">&#125;</span><br><span class="line">inc_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt++</span><br><span class="line">&#125;</span><br><span class="line">dec_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt--</span><br><span class="line"> 	if(obj.ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line">		 for(child : children(obj))</span><br><span class="line"> 			dec_ref_cnt(*child)</span><br><span class="line"> 		 reclaim(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个点要注意，就是<code>inc_ref_cnt()</code> 和 <code>dec_ref_cnt()</code> 的调用顺序，这一点是为了处理 * ptr 和 obj 是同一对象时的情况。如果按照先 dec_ref_cnt() 后 inc_ref_cnt() 函数的顺序调用，* ptr 和 obj 又是同一对象的话，执行 dec_ref_cnt(*ptr) 时 *ptr 的计数器的值就有可能变为 0 而被回收。这样一来，下面再想执行 inc_ref_cnt(obj) 时 obj 早就被回收了，可能会引发重大的 BUG。因此我们要通过先对 obj 的计数器进行增量操作来回避这种 BUG。</p>
+<p>这里有个卡我的点，记录一下，就是我不大明白这个update_ptr为什么要进行这种将对象赋值给指针的操作。看了看书，知道，这个是改变指针指向对象的操作，如果一个指向正在使用中的对象的指针被改变了，那么这个对象一定被放弃了。如图中的B：</p>
+<p><img src="%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP3.jpg" alt=""></p>
+<h3 id="“致命”缺点"><a href="#“致命”缺点" class="headerlink" title="“致命”缺点"></a>“致命”缺点</h3><p>这个算法，无法回收相互引用的对象</p>
+<p>example：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class Person&#123; </span><br><span class="line">	string name</span><br><span class="line"> 	Person lover</span><br><span class="line">&#125;</span><br><span class="line">taro &#x3D; new Person(&quot;太郎&quot;)		   #生成Person类的实例太郎</span><br><span class="line">hanako &#x3D; new Person(&quot;花子&quot;)	   #生成Person类的实例花子</span><br><span class="line">taro.lover &#x3D; hanako				#太郎喜欢花子</span><br><span class="line">hanako.lover &#x3D; taro				#花子喜欢太郎</span><br><span class="line">taro &#x3D; null					    #将taro转换为null</span><br><span class="line">hanako &#x3D; null					#将hanako转换为null</span><br></pre></td></tr></table></figure>
+
+<p>为两个对象互相引用，所以各对象的计数器的值都是 1</p>
+<p>hhh，顺便说句题外话，日本人的土名也挺土的（</p>
+<p>如何改进？</p>
+<h2 id="3-2-延迟引用计数法"><a href="#3-2-延迟引用计数法" class="headerlink" title="3.2 延迟引用计数法"></a>3.2 延迟引用计数法</h2><p>简单来说，就是减轻计数器的增减处理，引入一个ZCT表</p>
+<p>所谓ZCT表就是会记录下计数器值在<code>dec_ref_cnt()</code>函数作用下为0的对象。所以应该改进一下该函数。</p>
+<h3 id="dec-ref-cnt-函数"><a href="#dec-ref-cnt-函数" class="headerlink" title="dec_ref_cnt()函数"></a>dec_ref_cnt()函数</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">dec_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt--</span><br><span class="line"> 	if(obj.ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line"> 		if(is_full($zct) &#x3D;&#x3D; TRUE)</span><br><span class="line">			scan_zct()</span><br><span class="line"> 		push($zct, obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>逻辑就那样</p>
+<h3 id="new-obj-函数-1"><a href="#new-obj-函数-1" class="headerlink" title="new_obj()函数"></a>new_obj()函数</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line"> 	obj &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 	if(obj &#x3D;&#x3D; NULL)</span><br><span class="line"> 		scan_zct()</span><br><span class="line"> 		obj &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 		if(obj &#x3D;&#x3D; NULL)</span><br><span class="line"> 			allocation_fail()</span><br><span class="line"> 	obj.ref_cnt &#x3D; 1</span><br><span class="line"> 	return obj</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="scan-zct-函数"><a href="#scan-zct-函数" class="headerlink" title="scan_zct()函数"></a>scan_zct()函数</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">scan_zct()&#123;</span><br><span class="line">	for(r : $roots)</span><br><span class="line"> 		(*r).ref_cnt++</span><br><span class="line"> 	for(obj : $zct)</span><br><span class="line"> 		if(obj.ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line"> 			remove($zct, obj)</span><br><span class="line"> 			delete(obj)</span><br><span class="line"> 	for(r : $roots)</span><br><span class="line"> 		(*r).ref_cnt--</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>delete()函数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">delete(obj)&#123;</span><br><span class="line"> 	for(child : children(obj)</span><br><span class="line"> 		(*child).ref_cnt--</span><br><span class="line"> 	if((*child).ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line"> 		delete(*child)</span><br><span class="line"> 	reclaim(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法…让我想起了计算机科学的万能法宝——中间层</p>
+<h2 id="3-3-Sticky引用计数法"><a href="#3-3-Sticky引用计数法" class="headerlink" title="3.3 Sticky引用计数法"></a>3.3 Sticky引用计数法</h2><h2 id="3-7-部分标记-清除算法"><a href="#3-7-部分标记-清除算法" class="headerlink" title="3.7 部分标记-清除算法"></a>3.7 部分标记-清除算法</h2><h3 id="3-7-1-约定"><a href="#3-7-1-约定" class="headerlink" title="3.7.1 约定"></a>3.7.1 约定</h3><p>对象会被涂成4种不同的颜色来进行处理</p>
+<ol>
+<li>黑(BLACK) : 绝对不是垃圾的对象（对象产生时的初始颜色）</li>
+<li>白（WHITE）：绝对是垃圾的对象</li>
+<li>灰（GRAY）：搜索完毕的对象</li>
+<li>阴影（HATCH）：可能是循环垃圾的对象</li>
+</ol>
+<h3 id="3-7-2-dec-ref-cnt-函数"><a href="#3-7-2-dec-ref-cnt-函数" class="headerlink" title="3.7.2 dec_ref_cnt()函数"></a>3.7.2 dec_ref_cnt()函数</h3><p>接下来，通过 <code>mutator</code> 删除由根到对象 A 的引用。这个引用是由 <code>update_ptr()</code> 函数产生的。跟以往的引用计数法一样，为了将对象 A 的计数器减量，在 <code>update_ptr()</code> 函数中调用 <code>dec_ref_cnt()</code> 函数。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">dec_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt--</span><br><span class="line"> 	<span class="keyword">if</span>(obj.ref_cnt == <span class="number">0</span>)</span><br><span class="line"> 		delete(obj)</span><br><span class="line"> 	<span class="keyword">else</span> <span class="keyword">if</span>(obj.color != HATCH)</span><br><span class="line"> 		obj.color = HATCH</span><br><span class="line"> 		enqueue(obj, $hatch_queue)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当 obj 的颜色不是阴影的时候，算法会将其涂上阴影并追加到队列中。</p>
+<h3 id="3-7-3-new-obj-函数"><a href="#3-7-3-new-obj-函数" class="headerlink" title="3.7.3 new_obj()函数"></a>3.7.3 new_obj()函数</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line"> 	obj &#x3D; pickup_chunk(size)</span><br><span class="line"> 	if(obj !&#x3D; NULL)</span><br><span class="line"> 		obj.color &#x3D; BLACK</span><br><span class="line"> 		obj.ref_cnt &#x3D; 1</span><br><span class="line"> 		return obj</span><br><span class="line"> 	else if(is_empty($hatch_queue) &#x3D;&#x3D; FALSE)</span><br><span class="line"> 		scan_hatch_queue()</span><br><span class="line"> 		return new_obj(size)</span><br><span class="line"> 	else</span><br><span class="line"> 		allocation_fail()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当可以分配时，对象就会被涂回黑色。当分配无法顺利进行的时候，程序会调查队列是否为空。当队列不为空时，程序会通过 <code>scan_hatch_queue()</code> 函数搜索队列，分配分块。<code>scan_hatch_queue()</code> 函数执行完毕后，程序会递归地调用 <code>new_obj()</code> 函数再次尝试分配。</p>
+<h3 id="3-7-4-scan-hatch-queue-函数"><a href="#3-7-4-scan-hatch-queue-函数" class="headerlink" title="3.7.4 scan_hatch_queue()函数"></a>3.7.4 scan_hatch_queue()函数</h3><p><code>scan_hatch_queue()</code> 函数在找到阴影对象前会一直从队列中取出对象。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">scan_hatch_queue()&#123;</span><br><span class="line"> 	obj &#x3D; dequeue($hatch_queue)</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; HATCH)</span><br><span class="line"> 		paint_gray(obj)</span><br><span class="line"> 		scan_gray(obj)</span><br><span class="line"> 		collect_white(obj)</span><br><span class="line"> 	else if(is_empty($hatch_queue) &#x3D;&#x3D; FALSE)</span><br><span class="line"> 		scan_hatch_queue()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果取出的对象 obj 被涂上了阴影，程序就会将 obj 作为参数，依次调用 <code>paint_gray()</code>函数、<code>scan_gray()</code> 函数和 <code>collect_white()</code> 函数（第 4 行到第 6 行），从而通过这些函数找出循环引用的垃圾，将其回收。</p>
+<p>当 obj 没有被涂上阴影时，就意味着 obj 没有形成循环引用。此时程序对 obj 不会进行任何操作，而是再次调用 scan_hatch_queue() 函数。</p>
+<h3 id="3-7-5-paint-gray-函数"><a href="#3-7-5-paint-gray-函数" class="headerlink" title="3.7.5 paint_gray()函数"></a>3.7.5 paint_gray()函数</h3><p>程序会把黑色或者阴影对象涂成灰色，对子对象进行计数器减量操作，并调用 paint_gray() 函数。把对象涂成灰色是为了防止程序重复搜索。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">paint_gray(obj)&#123;</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; (BLACK | HATCH))</span><br><span class="line"> 		obj.color &#x3D; GRAY</span><br><span class="line"> 		for(child : children(obj))</span><br><span class="line"> 			(*child).ref_cnt--</span><br><span class="line"> 			paint_gray(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:%5CUsers%5CKittener%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419204550063.png" alt="image-20210419204550063"></p>
+<p>首先，在 (a) 中 A 被涂成了灰色。虽然程序对计数器执行了减量操作，但并不是对 A，而是对 B 的计数器进行了减量操作。下面在 (b) 中 B 也被涂成了灰色，不过这时程序并没有对 B 进行减量操作，而是对 C 进行了减量操作。在 (c) 中 C 被涂成灰色时，程序对 A 和 F 的计数器进行了减量操作。这样一来，A、B、C 的循环垃圾的计数器值都变成了 0。(d) 是 A、B、C、F 各个对象搜索结束后的样子。</p>
+<h3 id="3-7-6-scan-gray-函数"><a href="#3-7-6-scan-gray-函数" class="headerlink" title="3.7.6 scan_gray()函数"></a>3.7.6 scan_gray()函数</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">scan_gray(obj)&#123;</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; GRAY)</span><br><span class="line"> 		if(obj.ref_cnt &gt; 0)</span><br><span class="line"> 			paint_black(obj)</span><br><span class="line"> 		else</span><br><span class="line"> 			obj.color &#x3D; WHITE</span><br><span class="line"> 			for(child : children(obj))</span><br><span class="line"> 				scan_gray(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打个比方，在图 3.11 这种情况下，程序会从对象 A 开始搜索，但是搜索的只有灰色对象。如果对象的计数器值为 0，程序就会把这个对象涂成白色，再查找这个对象的子对象。也就是说，A、B、C 都会被涂成白色。计数器值大于 0 的对象会被 paint_black() 函数处理。</p>
+<h3 id="3-7-7-paint-black-函数"><a href="#3-7-7-paint-black-函数" class="headerlink" title="3.7.7 paint_black()函数"></a>3.7.7 paint_black()函数</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">paint_black(obj)&#123;</span><br><span class="line"> 	obj.color &#x3D; BLACK</span><br><span class="line"> 	for(child : children(obj))</span><br><span class="line"> 		(*child).ref_cnt++</span><br><span class="line"> 		if((*child).color !&#x3D; BLACK)</span><br><span class="line"> 			paint_black(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-7-8-collect-white-函数"><a href="#3-7-8-collect-white-函数" class="headerlink" title="3.7.8 collect_white()函数"></a>3.7.8 collect_white()函数</h3><p>回收函数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">collect_white(obj)&#123;</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; WHITE)</span><br><span class="line"> 		obj.color &#x3D; BLACK</span><br><span class="line"> 		for(child : children(obj))</span><br><span class="line"> 			collect_white(*child)</span><br><span class="line"> 		reclaim(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-7-9-限定搜索对象"><a href="#3-7-9-限定搜索对象" class="headerlink" title="3.7.9 限定搜索对象"></a>3.7.9 限定搜索对象</h3><p>部分标记 - 清除算法的优点，就是把要搜索的对象限定在阴影对象及其子对象，也就是“可能是循环垃圾的对象群”中。</p>
+<p><img src="C:%5CUsers%5CKittener%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419204451339.png" alt="image-20210419204451339"></p>
+<p>部分标记 - 清除算法中用 <code>dec_ref_cnt()</code> 函数来检查这个值。如果对象的计数器值减量后不为 0，说明这个对象可能是循环引用的一份子。这时会先让这个对象连接到队列，以方便之后搜索它。</p>
+<h1 id="4-GC复制算法"><a href="#4-GC复制算法" class="headerlink" title="4 GC复制算法"></a>4 GC复制算法</h1><p>简单来说就是复制能用的对象到另一块区域，然后把原区域全部清空。</p>
+<p>copy函数</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">copying()&#123;</span><br><span class="line"> 	$free &#x3D; $to_start</span><br><span class="line"> 	for(r : $roots)</span><br><span class="line"> 		*r &#x3D; copy(*r)</span><br><span class="line"> 	swap($from_start, $to_start)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>$free 是指示分块开头的变量。首先在第 2 行将 $free 设置在 To 空间的开头，然后在第 3 行、第 4 行复制能从根引用的对象。copy() 函数将作为参数传递的对象 *r 复制的同时，也将其子对象进行递归复制。复制结束后返回指针，这里返回的指针指向的是 *r 所在的新空间的对象。</p>
+<p>在 GC 复制算法中，在 GC 结束时，原空间的对象会作为垃圾被回收。因此，由根指向原空间对象的指针也会被重写成指向返回值的新对象的指针。</p>
+<h2 id="4-1-GC复制算法是什么"><a href="#4-1-GC复制算法是什么" class="headerlink" title="4.1 GC复制算法是什么"></a>4.1 GC复制算法是什么</h2><h3 id="4-1-1-copy-函数"><a href="#4-1-1-copy-函数" class="headerlink" title="4.1.1 copy()函数"></a>4.1.1 copy()函数</h3><h1 id="python的垃圾回收机制"><a href="#python的垃圾回收机制" class="headerlink" title="python的垃圾回收机制"></a>python的垃圾回收机制</h1><p>ok终于来到重头戏，让我康康python的GC机制(标记清除法)到底是怎么回事吧</p>
+<p>下载了跟书上一样python3.0.1的源代码（有时候研究实现机制并不需要最新版的</p>
+<h2 id="10-1-对象管理"><a href="#10-1-对象管理" class="headerlink" title="10.1 对象管理"></a>10.1 对象管理</h2><table>
+<thead>
+<tr>
+<th>结构体名</th>
+<th>对应的内置数据类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PyListObject</td>
+<td>列表型</td>
+</tr>
+<tr>
+<td>PyTupleObject</td>
+<td>元组型</td>
+</tr>
+<tr>
+<td>PyDictObject</td>
+<td>字典型</td>
+</tr>
+<tr>
+<td>PyFloatObject</td>
+<td>浮点型</td>
+</tr>
+<tr>
+<td>PyLongObject</td>
+<td>长整型</td>
+</tr>
+</tbody></table>
+<p>直接康源码</p>
+<p>浮点型</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Include&#x2F;floatobject.h</span><br><span class="line">typedef struct &#123;</span><br><span class="line"> 	PyObject_HEAD</span><br><span class="line"> 	double ob_fval;</span><br><span class="line">&#125;PyFloatObject;</span><br></pre></td></tr></table></figure>
+
+<p>PyObject_HEAD 定义如下。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Include&#x2F;object.h</span><br><span class="line">#define PyObject_HEAD PyObject ob_base;</span><br></pre></td></tr></table></figure>
+
+<p>元组型</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Include&#x2F;tupleobject.h</span><br><span class="line">typedef struct &#123;</span><br><span class="line"> 	PyObject_VAR_HEAD</span><br><span class="line"> 	PyObject *ob_item[1];</span><br><span class="line">&#125; PyTupleObject;</span><br></pre></td></tr></table></figure>
+
+<p>宏 PyObject_VAR_HEAD 的定义如下。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Include&#x2F;object.h</span><br><span class="line">#define PyObject_VAR_HEAD PyVarObject ob_base;</span><br><span class="line">typedef struct &#123;</span><br><span class="line"> 	PyObject ob_base;</span><br><span class="line"> 	Py_ssize_t ob_size; &#x2F;* 保持元素数量 *&#x2F;</span><br><span class="line">&#125; PyVarObject;</span><br></pre></td></tr></table></figure>
+
+<p>看上去好像是定义了PyVarObject型的成员，但是还是定义了PyObject</p>
+<p>那么这里就有一个问题，PyObject到底什么内容，上源码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Include&#x2F;object.h</span><br><span class="line">typedef struct _object &#123;</span><br><span class="line"> 	_PyObject_HEAD_EXTRA</span><br><span class="line"> 	Py_ssize_t ob_refcnt;</span><br><span class="line"> 	struct _typeobject *ob_type;</span><br><span class="line">&#125; PyObject;</span><br></pre></td></tr></table></figure>
+
+<p>ob_refcnt成员负责维持引用计数</p>
+<h2 id="10-2-Python的内存分配器"><a href="#10-2-Python的内存分配器" class="headerlink" title="10.2 Python的内存分配器"></a>10.2 Python的内存分配器</h2><p>python的分配器很有意思，它不是简单的malloc，它是分层的</p>
+<p><img src="E:/BaiduNetdiskDownload/P10-1.jpg" alt=""></p>
+<p>如果生成一个字典对象，则会发生如下过程</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">PyDict_New()				——3层</span><br><span class="line">	PyObject_GC_New()		——2层</span><br><span class="line"> 	PyObject_Malloc()		——2层</span><br><span class="line"> 		new_arena()			——1层</span><br><span class="line"> 		malloc()			——0层</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-3-第0层-通用的基础分配器"><a href="#10-3-第0层-通用的基础分配器" class="headerlink" title="10.3 第0层 通用的基础分配器"></a>10.3 第0层 通用的基础分配器</h2><p>以 Linux 为例，第 0 层指的就是 glibc 的 malloc() 这样的分配器，是对 Linux 等 OS 申请内存的部分。</p>
+<p>Python 中并不是在生成所有对象时都调用 malloc()，而是根据要分配的内存大小来改变分配的方法。申请的内存大小如果大于 256 字节，就老实地调用 malloc()；如果小于等于 256 字节，就要轮到第 1 层和第 2 层出场了。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">void *</span><br><span class="line">PyObject_Malloc(size_t nbytes)</span><br><span class="line">&#123;</span><br><span class="line"> block *bp;</span><br><span class="line"> poolp pool;</span><br><span class="line"> poolp next;</span><br><span class="line"> uint size;</span><br><span class="line"> &#x2F;* 这部分为异常处理，略去 *&#x2F;</span><br><span class="line"> if ((nbytes - 1) &lt; SMALL_REQUEST_THRESHOLD) &#123;</span><br><span class="line"> &#x2F;* 当申请的内存大小小于等于256字节时的内存分配(第1层和第2层) *&#x2F;</span><br><span class="line"> &#125;</span><br><span class="line"> &#x2F;* 当申请的内存大小大于256字节时的内存分配(第0层) *&#x2F;</span><br><span class="line"> return (void *)malloc(nbytes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-4-第1层-Python低级内存分配器"><a href="#10-4-第1层-Python低级内存分配器" class="headerlink" title="10.4 第1层 Python低级内存分配器"></a>10.4 第1层 Python低级内存分配器</h2><p>假设我们有这样一段代码</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">for x in range(100):</span><br><span class="line">	print(x)</span><br></pre></td></tr></table></figure>
+
+<p>这段代码会使用大量一次性的小字符串，如果调用malloc()和free()这显然是我们无法接受的。</p>
+<p>所以第1层和第2层的内存分配器会进行处理</p>
+<h3 id="10-4-1-内存结构"><a href="#10-4-1-内存结构" class="headerlink" title="10.4.1 内存结构"></a>10.4.1 内存结构</h3><p>根据所管理的内存空间的作用和大小不同，划分为三级结构从大到小为arena、pool、block，三者为包含关系。</p>
+<h3 id="10-4-2-arena"><a href="#10-4-2-arena" class="headerlink" title="10.4.2 arena"></a>10.4.2 arena</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct arena_object &#123;</span><br><span class="line"> 	&#x2F;* malloc后的arena的地址</span><br><span class="line"> 	uptr address;</span><br><span class="line"> 	&#x2F;* 将arena的地址用于给pool使用而对齐的地址 *&#x2F;</span><br><span class="line"> 	block* pool_address;</span><br><span class="line"> 	&#x2F;* 此arena中空闲的pool数量 *&#x2F;</span><br><span class="line"> 	uint nfreepools;</span><br><span class="line"> 	&#x2F;* 此arena中pool的总数 *&#x2F;</span><br><span class="line"> 	uint ntotalpools;</span><br><span class="line"> 	&#x2F;* 连接空闲pool的单向链表 *&#x2F;</span><br><span class="line"> 	struct pool_header* freepools;</span><br><span class="line"> 	&#x2F;* 稍后说明 *&#x2F;</span><br><span class="line"> 	struct arena_object* nextarena;</span><br><span class="line"> 	struct arena_object* prevarena;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>arena的大小固定为<strong>256k字节</strong></p>
+<p>这里有个有趣的点，arena_object结构体不仅保存了malloc后arena的地址，还保存了开头pool的地址，按照常理来说，<em>这两个地址应该是一样的啊？</em></p>
+<p>arenas数组管理arena_object</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;* 将arena_object作为元素的数组 *&#x2F;</span><br><span class="line">static struct arena_object* arenas &#x3D; NULL;</span><br><span class="line">&#x2F;* arenas的元素数量 *&#x2F;</span><br><span class="line">static uint maxarenas &#x3D; 0;</span><br></pre></td></tr></table></figure>
+
+<p>然后让我们来看看uptr到底是啥吧，宏定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">typedef uintptr_t Py_uintptr_t;</span><br></pre></td></tr></table></figure>
+
+<p>简单来说，这个类型是整数型的一个别名，用来存放指针，会根据c指针的大小而变成4字节或者8字节，防止溢出。</p>
+<h3 id="10-4-3-pool"><a href="#10-4-3-pool" class="headerlink" title="10.4.3 pool"></a>10.4.3 pool</h3><p>pool的大小固定在<strong>4K字节</strong>，因为对几乎所有OS而言，虚拟内存的页面大小都是4K</p>
+<p>这样的话，就能让OS以pool来管理内存</p>
+<p>所以说~arena和第一个pool的地址不一定相同，<strong>因为pool开头地址需要进行4k字节的倍数进行对齐。</strong></p>
+<p>看一哈结构体</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">struct pool_header &#123;</span><br><span class="line"> 	&#x2F;* 分配到pool里的block的数量 *&#x2F;</span><br><span class="line"> 	union &#123; </span><br><span class="line"> 		block *_padding;</span><br><span class="line"> 		uint count; </span><br><span class="line"> 	&#125; ref;</span><br><span class="line"> 	&#x2F;* block的空闲链表的开头 *&#x2F;</span><br><span class="line"> 	block *freeblock;</span><br><span class="line"> 	&#x2F;* 指向下一个pool的指针（双向链表） *&#x2F;</span><br><span class="line"> 	struct pool_header *nextpool;</span><br><span class="line"> 	&#x2F;* 指向前一个pool的指针（双向链表） *&#x2F;</span><br><span class="line"> 	struct pool_header *prevpool;</span><br><span class="line"> 	&#x2F;* 自己所属的arena的索引（对于arenas而言） *&#x2F;</span><br><span class="line"> 	uint arenaindex;</span><br><span class="line"> 	&#x2F;* 分配的block的大小 *&#x2F;</span><br><span class="line">  	uint szidx;</span><br><span class="line"> 	&#x2F;* 到下一个block的偏移 *&#x2F;</span><br><span class="line"> 	uint nextoffset;</span><br><span class="line"> 	&#x2F;* 到能分配下一个block之前的偏移 *&#x2F;</span><br><span class="line"> 	uint maxnextoffset;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-4-4-new-arena"><a href="#10-4-4-new-arena" class="headerlink" title="10.4.4 new_arena()"></a>10.4.4 new_arena()</h3><p>先整体看一下new_arena()的大体部分</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">static struct arena_object*</span><br><span class="line">new_arena(void)</span><br><span class="line">&#123;</span><br><span class="line"> 	struct arena_object* arenaobj;</span><br><span class="line"> 	if (unused_arena_objects &#x3D;&#x3D; NULL) &#123;</span><br><span class="line"> 	&#x2F;* 生成arena_object *&#x2F;</span><br><span class="line"> 	&#x2F;* 把生成的arena_object 补充到arenas和unused_arena_objects里*&#x2F;</span><br><span class="line"> 	&#125;</span><br><span class="line"> 	&#x2F;* 把arena分配给未使用的arena_object *&#x2F;</span><br><span class="line"> 	&#x2F;* 把arena内部分割成pool *&#x2F;</span><br><span class="line"> 	return arenaobj; &#x2F;* 返回新的arena_object *&#x2F;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是源码：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">arena_object</span>*</span></span><br><span class="line"><span class="class"><span class="title">new_arena</span>(<span class="title">void</span>)</span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">arena_object</span>* <span class="title">arenaobj</span>;</span></span><br><span class="line">	uint excess;	<span class="comment">/* number of bytes above pool alignment */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> PYMALLOC_DEBUG</span></span><br><span class="line">	<span class="keyword">if</span> (Py_GETENV(<span class="string">"PYTHONMALLOCSTATS"</span>))</span><br><span class="line">		_PyObject_DebugMallocStats();</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">if</span> (unused_arena_objects == <span class="literal">NULL</span>) &#123; </span><br><span class="line">        <span class="comment">/*unused_arena_objects 指的是现在未使用的 arena_object 的单向链表，含有新生成的arena_object和已经使用过的、已废弃的arena_object*/</span></span><br><span class="line">		uint i;</span><br><span class="line">		uint numarenas;</span><br><span class="line">		<span class="keyword">size_t</span> nbytes;</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			maxarenas表示的是 arenas（所有的 arena 的数组）现在的元素数量，在初始时被定义成0</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">		<span class="comment">/* Double the number of arena objects on each allocation.</span></span><br><span class="line"><span class="comment">		 * Note that it's possible for `numarenas` to overflow.</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		numarenas = maxarenas ? maxarenas &lt;&lt; <span class="number">1</span> : INITIAL_ARENA_OBJECTS;</span><br><span class="line">		<span class="keyword">if</span> (numarenas &lt;= maxarenas)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;	<span class="comment">/* overflow */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SIZEOF_SIZE_T &lt;= SIZEOF_INT</span></span><br><span class="line">		<span class="keyword">if</span> (numarenas &gt; PY_SIZE_MAX / <span class="keyword">sizeof</span>(*arenas))</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;	<span class="comment">/* overflow */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">		nbytes = numarenas * <span class="keyword">sizeof</span>(*arenas);</span><br><span class="line">        <span class="comment">/* 在第1个参数为NULL时，realloc与malloc相同 */</span></span><br><span class="line">		arenaobj = (struct arena_object *)<span class="built_in">realloc</span>(arenas, nbytes);</span><br><span class="line">		<span class="keyword">if</span> (arenaobj == <span class="literal">NULL</span>)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">		arenas = arenaobj;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* We might need to fix pointers that were copied.  However,</span></span><br><span class="line"><span class="comment">		 * new_arena only gets called when all the pages in the</span></span><br><span class="line"><span class="comment">		 * previous arenas are full.  Thus, there are *no* pointers</span></span><br><span class="line"><span class="comment">		 * into the old array. Thus, we don't have to worry about</span></span><br><span class="line"><span class="comment">		 * invalid pointers.  Just to be sure, some asserts:</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		assert(usable_arenas == <span class="literal">NULL</span>);</span><br><span class="line">		assert(unused_arena_objects == <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* Put the new arenas on the unused_arena_objects list. */</span></span><br><span class="line">		<span class="keyword">for</span> (i = maxarenas; i &lt; numarenas; ++i) &#123;</span><br><span class="line">            <span class="comment">/* 标记尚未分配arena */</span></span><br><span class="line">			arenas[i].address = <span class="number">0</span>;	<span class="comment">/* mark as unassociated */</span></span><br><span class="line">            <span class="comment">/* 只在末尾存入NULL，除此之外都指向下一个指针 */</span></span><br><span class="line">			arenas[i].nextarena = i &lt; numarenas - <span class="number">1</span> ?</span><br><span class="line">					       &amp;arenas[i+<span class="number">1</span>] : <span class="literal">NULL</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* Update globals. */</span></span><br><span class="line">		unused_arena_objects = &amp;arenas[maxarenas];</span><br><span class="line">		maxarenas = numarenas;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    我们把新分配的 arena_object 作为“未被使用的 arena_object”连接到一个链表。这</span></span><br><span class="line"><span class="comment">时 arena_object 结构体的成员 nextarena 是作为单向链表使用的。</span></span><br><span class="line"><span class="comment">	除此之外，我们同时把 0 加入 arena_object 的成员 address 中。成员 address 里通常</span></span><br><span class="line"><span class="comment">包含指向 arena 的指针，不过在 arena_object 不持有 arena 的时候，将其明确设置为 0，使</span></span><br><span class="line"><span class="comment">用 arena 未被保留的标志。</span></span><br><span class="line"><span class="comment">	最终我们将用单向链表连接的 arena_object 开头的指针存入 unused_arena_objects 中。</span></span><br><span class="line"><span class="comment">	另外，我们把更新后的数组 arenas 内的 arena_object 的数量存入 maxarenas 里。</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">    </span><br><span class="line">	<span class="comment">/* Take the next available arena object off the head of the list. */</span></span><br><span class="line">	assert(unused_arena_objects != <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">/* 取出未被使用的arena_object */</span></span><br><span class="line">	arenaobj = unused_arena_objects;</span><br><span class="line">	unused_arena_objects = arenaobj-&gt;nextarena; <span class="comment">/* 取出 */</span></span><br><span class="line">	assert(arenaobj-&gt;address == <span class="number">0</span>);</span><br><span class="line">    <span class="comment">/* 分配arena（256K字节） */</span></span><br><span class="line">	arenaobj-&gt;address = (uptr)<span class="built_in">malloc</span>(ARENA_SIZE);</span><br><span class="line">	<span class="keyword">if</span> (arenaobj-&gt;address == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="comment">/* The allocation failed: return NULL after putting the</span></span><br><span class="line"><span class="comment">		 * arenaobj back.</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		arenaobj-&gt;nextarena = unused_arena_objects;</span><br><span class="line">		unused_arena_objects = arenaobj;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	++narenas_currently_allocated;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> PYMALLOC_DEBUG</span></span><br><span class="line">	++ntimes_arena_allocated;</span><br><span class="line">	<span class="keyword">if</span> (narenas_currently_allocated &gt; narenas_highwater)</span><br><span class="line">		narenas_highwater = narenas_currently_allocated;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	arenaobj-&gt;freepools = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="comment">/* pool_address &lt;- 对齐后开头pool的地址</span></span><br><span class="line"><span class="comment">		 nfreepools &lt;- 对齐后arena中pool的数量 */</span></span><br><span class="line">	arenaobj-&gt;pool_address = (block*)arenaobj-&gt;address;</span><br><span class="line">	arenaobj-&gt;nfreepools = ARENA_SIZE / POOL_SIZE;</span><br><span class="line">	assert(POOL_SIZE * arenaobj-&gt;nfreepools == ARENA_SIZE);</span><br><span class="line">	excess = (uint)(arenaobj-&gt;address &amp; POOL_SIZE_MASK);</span><br><span class="line">	<span class="keyword">if</span> (excess != <span class="number">0</span>) &#123;</span><br><span class="line">		--arenaobj-&gt;nfreepools;</span><br><span class="line">		arenaobj-&gt;pool_address += POOL_SIZE - excess;</span><br><span class="line">	&#125;</span><br><span class="line">	arenaobj-&gt;ntotalpools = arenaobj-&gt;nfreepools;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> arenaobj;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	结构体 arena_object 的成员 pool_address 中存有以 4K 字节对齐的 pool 的地址。</span></span><br><span class="line"><span class="comment">	在此使用 POOL_SIZE_MASK 来对用 malloc() 保留的 arena 的地址进行屏蔽处理，计算超</span></span><br><span class="line"><span class="comment">过的量（excess）。</span></span><br><span class="line"><span class="comment">	如果超过的量（excess）为 0，因为 arena 的地址刚好是 4K 字节（2 的 12 次方）的倍数，</span></span><br><span class="line"><span class="comment">所以程序会原样返回分配的 arena_object。这时候因为 arena 内已经被 pool 填满了，所以可以通过计算 arena 的大小或 pool 的大小来求出 arena 内 pool 的数量。</span></span><br><span class="line"><span class="comment">	如果超过的量不为 0，程序就会计算“arena 的地址 ＋ 超过的量”，将其设置为成员</span></span><br><span class="line"><span class="comment">pool_address。此时 arena 内前后加起来会产生一个 pool 的空白，所以要减去这部分，将其</span></span><br><span class="line"><span class="comment">设置为 nfreepools。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP10-2.jpg" alt=""></p>
+<p>hhh,这里我要记录一个点，被自己蠢到</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">a &#x3D; b ? b &lt;&lt; 1 : 16;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码的意思是b如果为0的话a=16，如果不为0的话，a=b*2，这里a=b的判断是b的值(胡言乱语中)</p>
+<h4 id="10-4-5-usable-arenas和unused-arena-objects"><a href="#10-4-5-usable-arenas和unused-arena-objects" class="headerlink" title="10.4.5 usable_arenas和unused_arena_objects"></a>10.4.5 usable_arenas和unused_arena_objects</h4><p>直接看源码吧~</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">unused_arena_objects</span><br><span class="line"> 将现在未被使用的arena_object连接到单向链表。</span><br><span class="line"> （可以说arena还未得到保留）</span><br><span class="line"> arena_object是从new_arena()内列表的开头取的。</span><br><span class="line"> 此外，在PyObject_Free()时arena为空的情况下，arena_object会被追加到这个列表的开头。</span><br><span class="line"> 注意：只有当结构体arena_object的成员address为0时，才将其存入这个列表。</span><br><span class="line">usable_arenas</span><br><span class="line"> 这是持有arena的arena_object的双向链表，其中arena分配了可利用的pool。</span><br><span class="line"> 这个pool正在等待被再次使用，或者还未被使用过。</span><br><span class="line"> 这个链表按照block数量最多的arena的顺序排列。</span><br><span class="line"> （基于成员nfreepools升序排列）</span><br><span class="line"> 这意味着下次分配会从使用得最多的arena开始取。</span><br><span class="line"> 然后它也会给很多将几乎为空的arena返回系统的机会。</span><br><span class="line"> 根据我的测试，这项改善能够在很大程度上释放arena。</span><br></pre></td></tr></table></figure>
+
+<p>在没有能用的 arena 时，我们使用 unused_arena_objects。如果在分配时没有 arena，就从这个链表中取出一个 arena_object，分配新的 arena。</p>
+<p>在没有能用的 pool 时，则使用 usable_arenas。如果在分配时没有 pool，就从这个链表中取出 arena_object，从分配到的 arena 里取出一个 pool。</p>
+<p><strong>unused_arena_objects 是单向链表，usable_arenas 是双向链表。</strong></p>
+<p>当我们采用 unused_arena_objects 时，只能使用结构体 arena_object 的成员 nextarena；而当我们采用 usable_arenas 时，则可以使用成员 nextarena 和成员 prevarena。</p>
+<h2 id="10-5-第2层-Python对象分配器"><a href="#10-5-第2层-Python对象分配器" class="headerlink" title="10.5 第2层 Python对象分配器"></a>10.5 第2层 <strong>Python</strong>对象分配器</h2><p>第二层管理的是block</p>
+<h3 id="10-5-1-block"><a href="#10-5-1-block" class="headerlink" title="10.5.1 block"></a>10.5.1 block</h3><p>有几个比较有意思的点记录一下</p>
+<p>block的大小一定是8的倍数，这点毋庸置疑，相应的地址也一定是8的倍数(因为pool是按照4K字节来对齐的)</p>
+<p>为什么要将 block 按 8 的倍数对齐呢？这是因为这样一来 block 的地址在 64 位 CPU 和32 位 CPU 中都不会出现问题。</p>
+<p>分配的字节数会根据申请的字节数自动调节至最接近的8字节的倍数(高于)。</p>
+<h3 id="10-5-2-usedpools"><a href="#10-5-2-usedpools" class="headerlink" title="10.5.2 usedpools"></a>10.5.2 usedpools</h3><p>Python 的分配器采用 Best - fit 的分配战略，即极力让分配的 block 的大小接近申请的大小。</p>
+<p>搜索 pool 的过程必须是高速的。因为在每次分配时都会进行这项搜索处理。</p>
+<p>秘诀在于usedpools中</p>
+<p><img src="%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP10-3.jpg" alt=""></p>
+<h3 id="10-5-4-block的状态管理"><a href="#10-5-4-block的状态管理" class="headerlink" title="10.5.4 block的状态管理"></a>10.5.4 block的状态管理</h3><p>block只有一下三种状态</p>
+<ol>
+<li>已经分配</li>
+<li>使用完毕</li>
+<li>未使用</li>
+</ol>
+<p>所有使用完毕的 block 都会被连接到一个叫作 freeblock 的空闲链表进行管理。block是在释放的时候被连接到空闲链表的。因为使用完毕的 block 肯定经过了使用→释放的流程，所以释放时空闲链表开头的地址就会被直接写入作为释放对象的 block 内。之后我们将释放完毕的 block 的地址存入 freeblock 中。这个 freeblock 是由 pool_header 定义的。我们将freeblock 放在开头，形成 block 的空闲链表。</p>
+<p>未使用的block直接通过偏移量分配</p>
+<h3 id="10-5-5-PyObject-Malloc"><a href="#10-5-5-PyObject-Malloc" class="headerlink" title="10.5.5 PyObject_Malloc()"></a>10.5.5 PyObject_Malloc()</h3>]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Frida学习笔记</title>
+    <url>/2021/03/17/Frida%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="简单Hook"><a href="#简单Hook" class="headerlink" title="简单Hook"></a>简单Hook</h1><h2 id="调用原来的函数"><a href="#调用原来的函数" class="headerlink" title="调用原来的函数"></a>调用原来的函数</h2><p>example：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">    String obj = editText.getText().toString();</span><br><span class="line">    String obj2 = editText2.getText().toString();</span><br><span class="line">    <span class="keyword">if</span> (TextUtils.isEmpty(obj) || TextUtils.isEmpty(obj2)) &#123;</span><br><span class="line">    	Toast.makeText(LoginActivity.<span class="keyword">this</span>.mContext, <span class="string">"username or password is empty."</span>, <span class="number">1</span>).show();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (LoginActivity.a(obj, obj).equals(obj2)) &#123;</span><br><span class="line">		LoginActivity.<span class="keyword">this</span>.startActivity(<span class="keyword">new</span> Intent(LoginActivity.<span class="keyword">this</span>.mContext, FridaActivity1<span class="class">.<span class="keyword">class</span>))</span>;</span><br><span class="line">        LoginActivity.<span class="keyword">this</span>.finishActivity(<span class="number">0</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Toast.makeText(LoginActivity.<span class="keyword">this</span>.mContext, <span class="string">"Login failed."</span>, <span class="number">1</span>).show();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">a</span><span class="params">(<span class="keyword">byte</span>[] bArr)</span> </span>&#123;</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">		...</span><br><span class="line">        <span class="keyword">return</span> sb.toString().toLowerCase();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* access modifiers changed from: private */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">a</span><span class="params">(String str, String str2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            SecretKeySpec secretKeySpec = <span class="keyword">new</span> SecretKeySpec(str2.getBytes(), <span class="string">"HmacSHA256"</span>);</span><br><span class="line">            Mac instance = Mac.getInstance(<span class="string">"HmacSHA256"</span>);</span><br><span class="line">            instance.init(secretKeySpec);</span><br><span class="line">            <span class="keyword">return</span> a(instance.doFinal(str.getBytes()));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            <span class="keyword">return</span> BuildConfig.FLAVOR;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，如果LoginActivity.a这个函数的返回值等于obj2，则通过验证，obj2为输入框的第二栏，所以我们只要看到obj经过运算后的结果就可以了</p>
+<p>hook code：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_java</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="keyword">var</span> LoginActivity = Java.use(<span class="string">"LoginActivity(类名)"</span>);</span><br><span class="line">       LoginActivity.a.overload(<span class="string">'java.lang.String'</span>,<span class="string">'java.lang.String'</span>).implementation = <span class="function"><span class="keyword">function</span> (<span class="params">str,str2</span>)</span>&#123; <span class="comment">//有两个a，所以要通过指明变量个数指明是哪个a函数</span></span><br><span class="line">           <span class="keyword">var</span> result = <span class="keyword">this</span>.a(str,str2);	<span class="comment">//调用原来的函数</span></span><br><span class="line">           <span class="built_in">console</span>.log(<span class="string">"LoginActivity.a:"</span>,str,str2,result);</span><br><span class="line">           <span class="keyword">return</span> result;</span><br><span class="line">       &#125;; </span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hook_java();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setImmediate(main);</span><br></pre></td></tr></table></figure>
+
+<h2 id="不调用原来的函数"><a href="#不调用原来的函数" class="headerlink" title="不调用原来的函数"></a>不调用原来的函数</h2><p>example</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCheck</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (a(b(<span class="string">"请输入密码:"</span>)).equals(<span class="string">"R4jSLLLLLLLLLLOrLE7/5B+Z6fsl65yj6BgC6YWz66gO6g2t65Pk6a+P65NK44NNROl0wNOLLLL="</span>)) &#123;</span><br><span class="line">            CheckSuccess();</span><br><span class="line">            startActivity(<span class="keyword">new</span> Intent(<span class="keyword">this</span>, FridaActivity2<span class="class">.<span class="keyword">class</span>))</span>;</span><br><span class="line">            finishActivity(<span class="number">0</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">super</span>.CheckFailed();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，直接修改a的返回值就可以通过check了</p>
+<p>hook code</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_java</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="keyword">var</span> LoginActivity = Java.use(<span class="string">"LoginActivity(类名)"</span>);</span><br><span class="line">       LoginActivity.a.implementation = <span class="function"><span class="keyword">function</span> (<span class="params">barr</span>)</span>&#123; </span><br><span class="line">           <span class="keyword">return</span> <span class="string">"R4jSLLLLLLLLLLOrLE7/5B+Z6fsl65yj6BgC6YWz66gO6g2t65Pk6a+P65NK44NNROl0wNOLLLL="</span>;</span><br><span class="line">       &#125;; </span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hook_java();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setImmediate(main);</span><br></pre></td></tr></table></figure>
+
+<h2 id="主动调用函数"><a href="#主动调用函数" class="headerlink" title="主动调用函数"></a>主动调用函数</h2><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_java</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="keyword">var</span> LoginActivity = Java.use(<span class="string">"LoginActivity(类名)"</span>);</span><br><span class="line">		LoginActivity<span class="function">.<span class="keyword">function</span>(<span class="params"></span>); //调用静态函数</span></span><br><span class="line"><span class="function">        </span></span><br><span class="line"><span class="function">        <span class="title">Java</span>.<span class="title">choose</span>(<span class="params"><span class="string">"当前类路径，类似于com.example..."</span>,&#123;</span></span></span><br><span class="line"><span class="function"><span class="params">            onMatch: function(instance</span>)</span>&#123;</span><br><span class="line">                instance.funcution; <span class="comment">// 调用函数</span></span><br><span class="line">            &#125;</span><br><span class="line">            onComplete: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hook_java();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setImmediate(main);</span><br></pre></td></tr></table></figure>
+
+<h2 id="主动设置变量的值"><a href="#主动设置变量的值" class="headerlink" title="主动设置变量的值"></a>主动设置变量的值</h2><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_java</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="keyword">var</span> LoginActivity = Java.use(<span class="string">"LoginActivity(类名)"</span>);</span><br><span class="line">       LoginActivity.static_var.value = <span class="literal">true</span>; <span class="comment">//改变静态变量值</span></span><br><span class="line">        </span><br><span class="line">        Java.choose(<span class="string">"当前类路径，类似于com.example..."</span>,&#123;</span><br><span class="line">            onMatch: <span class="function"><span class="keyword">function</span>(<span class="params">instance</span>)</span>&#123;</span><br><span class="line">                instance.var = <span class="literal">true</span>;</span><br><span class="line">                instance._var = <span class="literal">true</span>; <span class="comment">//若变量与函数重名，则前面加下划线</span></span><br><span class="line">            &#125;</span><br><span class="line">            onComplete: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                </span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hook_java();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setImmediate(main);</span><br></pre></td></tr></table></figure>
+
+<h2 id="HOOK内部类的函数"><a href="#HOOK内部类的函数" class="headerlink" title="HOOK内部类的函数"></a>HOOK内部类的函数</h2><p>逻辑代码是这样的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FridaActivity</span> <span class="keyword">extends</span> <span class="title">BaseFridaActivity</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">InnerClass</span></span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">check1</span><span class="params">()</span></span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到是private内部类</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_java</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">       <span class="keyword">var</span> InnerClass = Java.use(<span class="string">"FridaActivity$InnerClass"</span>);  <span class="comment">//$后面跟内部类名</span></span><br><span class="line">       InnerClase.check1.implementation = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">true</span>;  </span><br><span class="line">       &#125;;</span><br><span class="line">       </span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    hook_java();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setImmediate(main);</span><br></pre></td></tr></table></figure>
+
+<p>但是如果有多个check()函数的话，这样太不方便了，有没有可以获取所有函数的方法呢，答案是肯定的</p>
+<p><code>getDeclareMethods()</code> 可以帮助我们获取所有函数的方法</p>
+<p>然后再进行字符串截取拼接就可以了</p>
+<h2 id="HOOK-动态dex"><a href="#HOOK-动态dex" class="headerlink" title="HOOK 动态dex"></a>HOOK 动态dex</h2><p>example如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> AbstractC0000CheckInterface <span class="title">getDynamicDexCheck</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.DynamicDexCheck == <span class="keyword">null</span>) &#123;</span><br><span class="line">        loaddex();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.DynamicDexCheck;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loaddex</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    File cacheDir = getCacheDir();</span><br><span class="line">    <span class="keyword">if</span> (!cacheDir.exists()) &#123;</span><br><span class="line">        cacheDir.mkdir();</span><br><span class="line">    &#125;</span><br><span class="line">    String str = cacheDir.getAbsolutePath() + File.separator + <span class="string">"DynamicPlugin.dex"</span>;</span><br><span class="line">    File file = <span class="keyword">new</span> File(str);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!file.exists()) &#123;</span><br><span class="line">            file.createNewFile();</span><br><span class="line">            copyFiles(<span class="keyword">this</span>, <span class="string">"DynamicPlugin.dex"</span>, file);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.DynamicDexCheck = (AbstractC0000CheckInterface) <span class="keyword">new</span> DexClassLoader(str, cacheDir.getAbsolutePath(), <span class="keyword">null</span>, getClassLoader()).loadClass(<span class="string">"com.example.androiddemo.Dynamic.DynamicCheck"</span>).newInstance();</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.DynamicDexCheck == <span class="keyword">null</span>) &#123;</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span>, <span class="string">"loaddex Failed!"</span>, <span class="number">1</span>).show();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e2) &#123;</span><br><span class="line">        e2.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>枚举加载的类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Java.enumerateClassLoaders(&#123;</span><br><span class="line">	onMatch: function(loader)&#123;</span><br><span class="line">		</span><br><span class="line">	&#125;,onComplete: function()&#123;</span><br><span class="line">	</span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>frida是不能Java use接口的，要先找到接口实现的名字</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Java.choose(&quot;com.example.androiddemo.Activity.FridaActivity5&quot;, &#123;</span><br><span class="line">    onMatch: function (instance) &#123;</span><br><span class="line">        console.log(instance.getDynamicDexCheck().$className); &#x2F;&#x2F;$可以显示名字</span><br><span class="line">    &#125;, onComplete: function () &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>找到名字就可以hook这个实现类</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">Java.enumerateClassLoaders(&#123;</span><br><span class="line">	onMatch: <span class="function"><span class="keyword">function</span> (<span class="params">loader</span>) </span>&#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (loader.findClass(<span class="string">"com.example.androiddemo.Dynamic.DynamicCheck"</span>)) &#123;</span><br><span class="line">				<span class="built_in">console</span>.log(loader);</span><br><span class="line">				Java.classFactory.loader = loader;      <span class="comment">//切换classloader</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125;, <span class="attr">onComplete</span>: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>然后进行hook check函数</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> DynamicCheck = Java.use(<span class="string">"com.example.androiddemo.Dynamic.DynamicCheck"</span>);</span><br><span class="line">	<span class="built_in">console</span>.log(DynamicCheck);</span><br><span class="line">	DynamicCheck.check.implementation = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">"DynamicCheck.check"</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="HOOK-不同class的函数"><a href="#HOOK-不同class的函数" class="headerlink" title="HOOK 不同class的函数"></a>HOOK 不同class的函数</h2><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">hook_FridaActivity6</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    Java.perform(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> Frida6Class0 = Java.use(<span class="string">"com.example.androiddemo.Activity.Frida6.Frida6Class0"</span>);</span><br><span class="line">        Frida6Class0.check.implementation = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">var</span> Frida6Class1 = Java.use(<span class="string">"com.example.androiddemo.Activity.Frida6.Frida6Class1"</span>);</span><br><span class="line">        Frida6Class1.check.implementation = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">var</span> Frida6Class2 = Java.use(<span class="string">"com.example.androiddemo.Activity.Frida6.Frida6Class2"</span>);</span><br><span class="line">        Frida6Class2.check.implementation = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+  </entry>
+  <entry>
+    <title>IdaPython手册</title>
+    <url>/2021/03/02/IdaPython%E6%89%8B%E5%86%8C/</url>
+    <content><![CDATA[<p>全网的IdaPython完整手册好少，做个记录  </p>
+<a id="more"></a>
+
+<h1 id="声明"><a href="#声明" class="headerlink" title="声明"></a>声明</h1><p>这篇文章是根据《The Beginner’s Guide to IDAPython》翻译的，如果侵权，请联系作者删除</p>
+<p>因为本人英文水平有限，如果有理解错的地方，欢迎来联系我邮箱 <a href="mailto:xkittener@gmail.com">xkittener@gmail.com</a></p>
+<h1 id="操作数"><a href="#操作数" class="headerlink" title="操作数"></a>操作数</h1><h2 id="idc-get-operand-type-ea-n"><a href="#idc-get-operand-type-ea-n" class="headerlink" title="idc.get_operand_type(ea,n)"></a>idc.get_operand_type(ea,n)</h2><p>获取操作数类型</p>
+<p>ea：当前地址，n：参数(指第几个操作数)</p>
+<p>返回值：</p>
+<ul>
+<li>如果没有操作数，返回0，如retn</li>
+<li>如果为寄存器，返回1</li>
+<li>如果为内存引用，返回2，如<code>ds:dword_A152B8</code></li>
+<li>如果为变址或/和基址寄存器，返回3</li>
+<li>如果为基址寄存器+立即数，返回4</li>
+<li>如果为立即数，返回5</li>
+<li>如果为远地址，返回6</li>
+<li>如果为近地址，返回7</li>
+</ul>
+<h2 id="idc-op-plain-offset-ea-n-base"><a href="#idc-op-plain-offset-ea-n-base" class="headerlink" title="idc.op_plain_offset(ea, n, base)"></a>idc.op_plain_offset(ea, n, base)</h2><p>将操作数变为偏移</p>
+<p>ea：当前地址，n：参数，base：当前基地址</p>
+<h1 id="Ida基本块"><a href="#Ida基本块" class="headerlink" title="Ida基本块"></a>Ida基本块</h1><p>基本块是一个没有分支的代码序列，由单个入口点和单个出口点组成。</p>
+<h2 id="idaapi-FlowChart-f-None-bounds-None-flags-0"><a href="#idaapi-FlowChart-f-None-bounds-None-flags-0" class="headerlink" title="idaapi.FlowChart(f=None, bounds=None, flags=0)"></a>idaapi.FlowChart(f=None, bounds=None, flags=0)</h2><p>f参数需要func_t类，用<code>idaapi.get_func(ea)</code>获得该类</p>
+<p>bounds：传递一个元组，包括开始与结束</p>
+<p>flags：在ida7.4版本中，如果前驱块被计算，flags必须设置为<code>idaapi.FC_PREDS</code></p>
+<p>返回值：</p>
+<p>包含ida_gdl.FlowChart，内部包含所有遍历块</p>
+<p>每个块都包含以下属性：</p>
+<ul>
+<li><code>id</code>，每个块都有独一无二的id号，第一块的id为0</li>
+<li><code>type</code>，类型<ul>
+<li><code>fcb_normal</code> 一个普通块，代表值为0</li>
+<li><code>fcb_indjump</code> 块结束时间接跳转，值为1</li>
+<li><code>fcb_ret</code> 块结束时用return，值为2。<code>ida_gdl.is_ret_block(block.type)</code>也可以识别这种块</li>
+<li><code>fcb_cndret</code> 有条件判断的return，值为3</li>
+<li><code>fcb_noret</code> 没有return，值为4</li>
+<li><code>fcb_enoret</code> 没有return并且不属于任何一个函数，值为5</li>
+<li><code>fcb_extern</code> extern普通块，值为6</li>
+<li><code>fcb_error</code>  is a block that passes execution past the function end(翻译不出来了，估计是通过函数传递执行)，值为7</li>
+</ul>
+</li>
+<li><code>start_ea</code> 块开头</li>
+<li><code>end_ea</code> 块结束</li>
+<li><code>preds</code> 返回所有全部前驱地址的生成器</li>
+<li><code>succs</code> 返回所有全部后驱地址的生成器</li>
+</ul>
+<p>ps:preds和succs在给的例子中，中间的block块都给出了前驱后驱</p>
+<p><a href="P1.png"></a></p>
+<h1 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h1><h2 id="idc-add-default-til-name"><a href="#idc-add-default-til-name" class="headerlink" title="idc.add_default_til(name)"></a>idc.add_default_til(name)</h2><p>加载TIL表</p>
+<p>TIL表是ida对于C/C++结构独有的文件头，可以按(SHIFT+F11)导入不同的TIL表</p>
+<p>返回值：</p>
+<p>是否加载成功</p>
+<h2 id="idc-import-type-idx-type-name"><a href="#idc-import-type-idx-type-name" class="headerlink" title="idc.import_type(idx, type_name)"></a>idc.import_type(idx, type_name)</h2><p>加载不同的定义</p>
+<p>idx：每种type都有自己的id，若值为-1，则表示该加载type列表中的最后一个。因为加载项每次不固定，所以-1使用的很常见</p>
+<p>一般有三种 <code>_TEB</code>, <code>PEB</code> and <code>PEB_LDR_DATA</code></p>
+<h2 id="idc-get-struc-id-string-name"><a href="#idc-get-struc-id-string-name" class="headerlink" title="idc.get_struc_id(string_name)"></a>idc.get_struc_id(string_name)</h2><p>获取加载type的ID</p>
+<h2 id="idc-op-stroff-ea-n-strid-delta"><a href="#idc-op-stroff-ea-n-strid-delta" class="headerlink" title="idc.op_stroff(ea, n, strid, delta)"></a>idc.op_stroff(ea, n, strid, delta)</h2><p>参数：</p>
+<p>ea：包含偏移的指令，即将被加载</p>
+<p>n：操作数数量</p>
+<p>strid：需要用于将偏移量转换为结构体的type id</p>
+<p>delta： the delta between the structures base and the pointer into the structure.(意思应该是结构体基址和指针的中间量)</p>
+<h2 id="idc-del-struc-sid"><a href="#idc-del-struc-sid" class="headerlink" title="idc.del_struc(sid)"></a>idc.del_struc(sid)</h2><p>删除结构体</p>
+<h2 id="idc-add-struc-index-name-is-union"><a href="#idc-add-struc-index-name-is-union" class="headerlink" title="idc.add_struc(index, name, is_union)"></a>idc.add_struc(index, name, is_union)</h2><p>创建一个结构体</p>
+<p>index：新结构体的序号，最好是-1</p>
+<p>name：名字</p>
+<p>is_union：判断是否是union</p>
+<h2 id="idc-add-struc-member-sid-name-offset-flag-typeid-nbytes"><a href="#idc-add-struc-member-sid-name-offset-flag-typeid-nbytes" class="headerlink" title="idc.add_struc_member(sid, name, offset, flag, typeid, nbytes)"></a>idc.add_struc_member(sid, name, offset, flag, typeid, nbytes)</h2><p>添加结构体成员</p>
+<p>offset：一般都是-1</p>
+<p>flag：数据类型</p>
+<p>typeid：更多更复杂的定义(作者没说)</p>
+<p>nbytes：分配的空间，和flag相匹配</p>
+<h1 id="已枚举的Types"><a href="#已枚举的Types" class="headerlink" title="已枚举的Types"></a>已枚举的Types</h1><p>对于已经strip的常量，可以重新赋名</p>
+<h1 id="杂"><a href="#杂" class="headerlink" title="杂"></a>杂</h1>]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>csapp第八章笔记</title>
     <url>/2021/02/09/csapp%E7%AC%AC%E5%85%AB%E7%AB%A0%E7%AC%94%E8%AE%B0/</url>
     <content><![CDATA[<p>csapp第八章 异常控制流</p>
@@ -1452,263 +1872,6 @@
       </tags>
   </entry>
   <entry>
-    <title>C++反汇编与逆向分析技术(五)</title>
-    <url>/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/</url>
-    <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》(五)  </p>
-<a id="more"></a>  
-<h1 id="关于构造函数和析构函数"><a href="#关于构造函数和析构函数" class="headerlink" title="关于构造函数和析构函数"></a>关于构造函数和析构函数</h1><p><strong>构造函数</strong>：常用来完成对象生成时的数据初始化工作。</p>
-<p><strong>析构函数</strong>：常用于在对象销毁时释放对象中所申请的资源</p>
-<p>构造函数与析构函数都是类中特殊的成员函数，构造函数支持函数重载，而析构函数只能是一个无参函数。它们不可定义返回值，调用构造函数后，返回值为对象首地址，也就是this指针。</p>
-<h2 id="构造函数出现的时机"><a href="#构造函数出现的时机" class="headerlink" title="构造函数出现的时机"></a>构造函数出现的时机</h2><ol>
-<li><p><strong>局部对象：</strong></p>
-<p>当对象产生时就可能引发构造函数的调用。来个栗子~</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;无参构造函数的调用过程</span><br><span class="line">class CNumber&#123;</span><br><span class="line">	public:</span><br><span class="line">		CNumber()&#123;</span><br><span class="line">			m_nNumber &#x3D; 1;</span><br><span class="line">		&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;</span><br><span class="line">void main()&#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解</span><br><span class="line">void main()&#123;</span><br><span class="line">CNumber Number;</span><br><span class="line">0040B468	lea		ecx,[ebp-4]				;取得对象首地址,传入ecx中作为参数</span><br><span class="line">0040B46B	call	@ILT+5 (CNumber::CNumber) (0040100a) ; 调用构造函数</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;构造函数CNumber分析</span><br><span class="line">CNumber();</span><br><span class="line">;函数入口分析略</span><br><span class="line">0040B4A9	pop		ecx						;还原ecx,ecx中保存对象的首地址</span><br><span class="line">0040B4AA	mov		dword ptr [ebp-4],ecx 	;[ebp-4] 就是this指针</span><br><span class="line">&#123;</span><br><span class="line">m_nNumber &#x3D; 1;</span><br><span class="line">0040B4AD	mov		eax,dword ptr [ebp-4]	;eax中保存了对象的首地址</span><br><span class="line">0040B4B0	mov		dword ptr [eax],1		;将数据成员m_nNumber设置为1</span><br><span class="line">&#125;</span><br><span class="line">0040B4B6	mov		eax,dword ptr [ebp-4] 	;将this指针存入eax中，作为返回值</span><br><span class="line">0040B4B9	pop		edi</span><br><span class="line">0040B4BA	pop		esi</span><br><span class="line">0040B4BB	pop		ebx</span><br><span class="line">0040B4BC	mov		esp,ebp</span><br><span class="line">0040B4BE	pop		ebp</span><br><span class="line">0040B4BF	ret</span><br></pre></td></tr></table></figure>
-
-<p>当在进人对象的作用域时，编译器会产生调用构造函数的代码。由于构造函数属于成员函数，因此在调用的过程中同样需要传递this指针。构造函数调用结束后，会将this指针作为返回值。总结一下局部对象构造函数的<strong>必要条件</strong>：</p>
-<ul>
-<li>该成员函数是这个对象在作用域内调用的第一个成员函数，根据this指针即可以区分</li>
-<li>返回this指针</li>
-</ul>
-</li>
-<li><p><strong>堆对象</strong>：</p>
-<p>堆对象的识别重点在于识别堆空间的申请与使用。在C++的语法中，堆空间的申请需要使用malloc函数、new运算符或者其他同类功能的函数。因此，识别堆对象有了重要的依据。来个栗子！</p>
-<p>(从这里开始我有的代码部分要直接截图了，👴就是懒狗！)</p>
-<p><img src="P1.jpg" alt="构造函数返回值的使用——Debug版"></p>
-<p><img src="P2.jpg" alt="构造函数返回值的使用——Debug版"></p>
-<p>在使用了new申请了堆空间之后，需要调用构造函数，用来完成数据成员的初始化。相应的，如果没有申请成功，则会避开构造函数的调用。对此，编译器会产生一个<strong>双分支结构来根据不同的结果采取相应的行为</strong>。这是检查的重点。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;圆括号是调用有参构造函数，最后只申请了一个int类型的堆变量并赋初值10</span><br><span class="line">int *pInt &#x3D; new int (10);</span><br><span class="line">&#x2F;&#x2F;方括号才是申请了10个int元素的堆数组</span><br><span class="line">int *pInt &#x3D; new int [10];</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>参数对象</strong>：</p>
-<p>参数对象属于局部对象中的–种特殊情况。当对象作为函数参数时，调用一个特殊的构造函数——拷贝构造函数。该构造函数只有一个参数，类型为对象的引用。</p>
-<p>当对象为参数的时候触发此类对象的拷贝构造函数。在函数调用时传递参数会进行复制，形参是实参的副本。两个对象的复制过程会在拷贝构造函数中完成。如果没有定义拷贝构造函数，编译器会对原对象与拷贝对象中的各数据成员直接进行数据复制，称为默认拷贝构造函数，这种拷贝方式属于浅拷贝：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CNumber &#123;</span><br><span class="line">public:</span><br><span class="line">	CNumber() &#123;</span><br><span class="line">		m_nNumber &#x3D; 1;</span><br><span class="line">	&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;;</span><br><span class="line">void main() &#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">	CNumber number(Number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是这种函数在有析构函数的情况下会出错，那么就需要深拷贝来救场了。<strong>源对象中的数据成员间接访问到的其他资源并制作副本的拷贝构造函数称为深拷贝</strong>。</p>
-<p>来个栗子！</p>
-<p><img src="P3.jpg" alt=""></p>
-<p><img src="P4.jpg" alt=""></p>
-<p><img src="P.jpg" alt=""></p>
-<p><img src="P5.jpg" alt=""></p>
-<p><img src="P6.jpg" alt=""></p>
-</li>
-<li><p><strong>返回对象</strong></p>
-<p>与参数对象的区别是：当对象作为参数时，在进入函数前使用拷贝构造函数，而返回对象则在函数返回时使用拷贝构造函数。</p>
-<p>来个栗子~</p>
-<p><img src="P7.jpg" alt=""></p>
-<p><img src="P8.jpg" alt=""></p>
-<p>这种返回对象的函数和返回对象指针类型的函数在汇编中的区别就是：<strong>返回值和参数为对象指针类型的函数，不会使用以参数为目标的拷贝构造函数，而是直接使用指针保存对象首地址。</strong></p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;函数的返回类型与参数类型都是对象的指针类型</span><br><span class="line">CMyString* GetMyString (CMyString* pMyString) &#123;</span><br><span class="line">CMyString MyString;			&#x2F;&#x2F;定义局部对象</span><br><span class="line">MyString.SetString (&quot;World&quot;);</span><br><span class="line">pMyString &#x3D; &amp;MyString;</span><br><span class="line">00401589	lea		eax,[ebp-10h]		;直接保存对象首地址</span><br><span class="line">0040158C	mov		dword ptr [ebp+8],eax</span><br><span class="line">return &amp;MyString;</span><br><span class="line">0040158F	lea		ecx,[ebp-10h]</span><br><span class="line">00401592	mov		dword ptr [ebp-14h],ecx </span><br><span class="line">00401595	mov		dword ptr [ebp-4],0FFFFFFFFh</span><br><span class="line">0040159C	lea		ecx,[ebp-10h]		;将局部对象作为返回值</span><br><span class="line">0040159F	call	@ILT+35 (CMyString::-CMyString) (00401028)</span><br><span class="line">004015A4	mov		eax,dword ptr [ebp-14h]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><strong>全局对象与静态对象</strong></p>
-<p>这两类对象的构造时机相同，它们的构造函数的调用被隐藏在深处，但是识别过程很容易。因为程序中所有的全局对象将会在同一地点调用构造函数来初始化数据。</p>
-<p>构造函数需要传递对象的首地址作为this指针,而且构造函数可以带各类参数，因此编译器将为每个全局对象生成一段传递this指针和参数的代码，然后使用无参的代理函数去调用构造函数。</p>
-<p>如何跟踪？</p>
-<ul>
-<li><p>直接定位初始化函数</p>
-</li>
-<li><p>利用栈回溯</p>
-<p>如果反汇编代码中出现了全局对象，由于全局对象的地址固定(对于有重定位表的执行文件中的全局对象，也可以在执行文件被加载后至执行前计算得到全局对象的地址)，因此可以在对象的数据成员中设置读写断点，调试运行程序，等待构造函数调用的到来。利用栈回溯窗口，找到程序的执行流程，依次向上查询即可找到构造函数调用的起始处。</p>
-</li>
-</ul>
-</li>
-</ol>
-<h2 id="每个对象都有默认的构造函数吗"><a href="#每个对象都有默认的构造函数吗" class="headerlink" title="每个对象都有默认的构造函数吗"></a>每个对象都有默认的构造函数吗</h2><p>并不是。只有以下两种情况会有：</p>
-<ul>
-<li><p>本类、本类中定义的成员对象或者父类中有虚函数存在</p>
-<p>由于需要初始化虚表，且这个工作理应在构造函数中隐式完成，因此在没有定义构造函数的情况下，编译器会添加默认的构造函数用于隐式完成虚表的初始化工作</p>
-</li>
-<li><p>父类或本类中定义的成员对象带有构造函数</p>
-<p>在对象被定义时，由于对象本身为派生类，因此构造顺序是先构造父类再构造自身。当父类中带有构造函数时，将会调用父类构造函数，而这个调用过程需要在构造函数内完成，因此编译器添加了默认的构造函数来完成这个调用过程。成员对象带有构造函数的情况与此相同。</p>
-</li>
-</ul>
-<h2 id="析构函数出现的时机"><a href="#析构函数出现的时机" class="headerlink" title="析构函数出现的时机"></a>析构函数出现的时机</h2><p>对象何时被销毁取决于对象所在的作用域，当程序流程执行到作用域结束处时，便会将该作用域内的所有对象释放，释放的过程中会调用到对象的析构函数。</p>
-<p>析构函数的触发时机分为以下几种情况</p>
-<ul>
-<li>局部对象:作用域结束前调用析构函数</li>
-<li>堆对象:释放堆空间前调用析构函数</li>
-<li>参数对象:退出函数前，调用参数对象的析构函数</li>
-<li>返回对象:如无对象引用定义，退出函数后，调用返回对象的析构函数，否则与对象引用的作用域一致</li>
-<li>全局对象: main函数退出后调用析构函数</li>
-<li>静态对象:main函数退出后调用析构函数</li>
-</ul>
-<h3 id="堆对象"><a href="#堆对象" class="headerlink" title="堆对象"></a>堆对象</h3><p>书上给了几个代码👴觉得很有学习必要，截图了</p>
-<h4 id="堆对象析构函数的调用"><a href="#堆对象析构函数的调用" class="headerlink" title="堆对象析构函数的调用"></a>堆对象析构函数的调用</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(ubt argc,char* argv[])&#123;</span><br><span class="line">	CNumber * pNumber &#x3D; NULL;</span><br><span class="line">	pNumber &#x3D; new CNumber;</span><br><span class="line">	pNumber-&gt;m_nNumber &#x3D; 2;</span><br><span class="line">	printf(&quot;%d \r\n&quot;,pNumber-&gt;m_nNumber);</span><br><span class="line">	if(pNumber !&#x3D; NULL)&#123;</span><br><span class="line">		delete pNumber;</span><br><span class="line">		pNumber &#x3D; NULL;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="P8.jpg" alt=""></p>
-<p><img src="P9.jpg" alt=""></p>
-<p><img src="P10.jpg" alt=""></p>
-<p><img src="P11.jpg" alt=""></p>
-<p>多个堆对象的申请与释放</p>
-<p><img src="P12.jpg" alt=""></p>
-<p><img src="P13.jpg" alt=""></p>
-<p><img src="P14.jpg" alt=""></p>
-<h4 id="堆对象的构造代理函数"><a href="#堆对象的构造代理函数" class="headerlink" title="堆对象的构造代理函数"></a>堆对象的构造代理函数</h4><p><img src="P15.jpg" alt=""></p>
-<p><img src="P16.jpg" alt=""></p>
-<h4 id="堆对象释放函数分析"><a href="#堆对象释放函数分析" class="headerlink" title="堆对象释放函数分析"></a>堆对象释放函数分析</h4><p><img src="P17.jpg" alt=""></p>
-<h3 id="参数对象和返回对象"><a href="#参数对象和返回对象" class="headerlink" title="参数对象和返回对象"></a>参数对象和返回对象</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CMyString MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
-
-<p>这是把MyString的地址作为隐含的参数传递给GetMyString()，在GetMyString()内部完成拷贝构造的过程。函数执行完毕后，MyString 就已经构造完成了，所以析构函数由MyString的作用域来决定.</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
-
-<p>因为这样的代码不是MyString在定义时赋初值，所以不会触发MyString的拷贝构造函数，这时候会产生临时对象作为GetMyString()的隐含参数，这个临时对象会在GetMyString0内部完成拷贝构造函数的过程。函数执行完毕后，如果MyString的类中定义了“=”运算符重载，则调用之;否则就根据对象成员逐个赋值。如果对象内数据量过大，就会调用rep movs这样的串操作指令批量赋值，这样的赋值也属于浅拷贝。临时对象以一条高级语句为生命周期，它在函数调用时产生，在语句执行完毕时销毁。C和C++以分号作为语句的结束符，也就是说，- -旦分号出现，就会触发临时对象的析构函数。</p>
-<h3 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h3><p>全局对象与静态对象相同，其构造函数在函数 _cinit的第二个 _initterm调用中被构造。它们的析构函数的调用时机是在main函数执行完毕之后。既然构造函数出现在初始化过程中，对应的析构函数就会出现在程序结束处。</p>
-<p>在main函数调用结束后，由exit来结束进程，从而终止程序的运行。全局变量的析构函数的调用也在其中(exit函数的doexit实现)</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (__onexitbegin) &#123;					&#x2F;&#x2F;_onexitbegin 为函数指针数组的首地址</span><br><span class="line">	_PVFV * pfend &#x3D; _onexitend;			&#x2F;&#x2F;_onexitend为函数指针数组的尾地址</span><br><span class="line">	while (--pfend &gt;&#x3D;__onexitbegin)		&#x2F;&#x2F;从后向前依次释放全局对象</span><br><span class="line">		if (*pfend !&#x3D; NULL)</span><br><span class="line">			(**pfend)();				&#x2F;&#x2F;调用数组中保存的函数</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>__onexitbegin 指向一个指针数组，该数组中保存着各类资源释放时的函数的首地址。全局构造函数的调用是在  _cinit 函数的第二个 _initterm 函数内完成，而在第二个 _initterm函数中，会先执行 _onexitinit 函数的初始化函数指针数组。在执行每个全局对象构造代理函数时都会先执行对象的构造函数，然后使用atexit注册析构代理函数。</p>
-<h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><p>对于全局对象和静态对象，能不能取消代理函数而直接在main函数前调用其构造函数呢?</p>
-<p>不能。由于构造函数可以重载，因此其参数的类型、个数和顺序都无法预知，也就无法预先定义构造函数。函数参数如何匹配呢?如何保证栈顶平衡呢?最简洁的办法就是使用代理函数。</p>
-<p>编译器为每个全局对象分别生成构造代理函数，由代理函数去调用各类形形色色的参数和约定的构造函数。由于代理函数的类型被统一指定为PVFV，因此能通过数组统一地管理和执行。</p>
-<h1 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h1><p>对象的多态性需要通过虚表和虚表指针来完成，虚表指针被定义在对象首地址的前4字节处，因此虚函数必须作为成员函数使用。</p>
-<h2 id="虚函数的机制"><a href="#虚函数的机制" class="headerlink" title="虚函数的机制"></a>虚函数的机制</h2><p>在C++中，使用关键字virtual声明函数为虚函数。当类中定义有虚函数时，编译器会将该类中所有虚函数的首地址保存在一-张地址表中，这张表被称为虛函数地址表，简称虚表。同时，编译器还会在类中添加-一个隐藏数据成员，称为虚表指针。该指针中保存着虚表的首地址，用于记录和查找虚函数。</p>
-<p>来份代码！</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtual&#123;</span><br><span class="line">	public:</span><br><span class="line">		virtual int GetNumber()&#123;</span><br><span class="line">			return m_nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">		virtual void SetNumber(int nNumber)&#123;</span><br><span class="line">			m_nNumber &#x3D; nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">	private:</span><br><span class="line">		int m_nNumber;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个类的大小为8，多出的4个字节用于保存虚表指针。在虚表指针所指向的函数指针数组中，保存着虚函数GetNumber和SetNumber的首地址。对于开发者而言，虚表和虚表指针都是隐藏的，在常规的开发过程中感觉不到它们的存在。</p>
-<p>虚表指针和虚表的关系如图</p>
-<p><img src="P18.jpg" alt=""></p>
-<p>虚表指针初始化：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解;</span><br><span class="line">int main(int argc， char* argv[]) &#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">00401048	lea		ecx,[ebp-8]				;获取对象首地址</span><br><span class="line">;调用构造函数，类CVirtual中并没有定义构造函数，此调用为默认构造函数</span><br><span class="line">0040104B	call	@ILT+15 (CVirtual::CVirtual) (00401014)</span><br><span class="line">return 0;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;默认构造函数分析</span><br><span class="line">CVirtua1::CVirtual;</span><br><span class="line">;Debug初始化保存环境略</span><br><span class="line">00401089	pop		ecx						;还原this指针</span><br><span class="line">0040108A	mov		dword ptr [ebp-4],ecx;	;[ebp-4]存储this指针</span><br><span class="line">;取出this指针并保存到eax中，这个地址将会作为指针保存到虚表的首地址中</span><br><span class="line">0040108D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;取虚表的首地址，保存到虚表指针中</span><br><span class="line">00401090	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39; (0042201c) </span><br><span class="line">00401096	mov		eax, dword ptr [ebp-4]	;返回对象首地址</span><br><span class="line">00401099	pop		edi</span><br><span class="line">0040109A	pop		esi</span><br><span class="line">0040109B	pop		ebx</span><br><span class="line">0040109C	mov		esp,ebp</span><br><span class="line">0040109E	pop		ebp</span><br><span class="line">0040109F	ret</span><br></pre></td></tr></table></figure>
-
-<p>编译器为类CVirtual提供了默认的构造函数。该默认构造函数先取得虚表首地址再赋值到虚表指针中。</p>
-<p>对象的虚表指针初始化是通过编译器在构造函数内插入代码来完成的。由于虚表信息在编译后会被链接到对应的执行文件中，因此所获得的虛表地址是一个相对固定的地址。虛表中虛函数的地址的排列顺序依据虛函数在类中的声明顺序而定，先声明的虚函数的地址会被排列在虚表中靠前的位置。</p>
-<p>对于含有构造函数的类而言，其虚表初始化过程和默认构造函数相同，都是以对象首地址的前4字节数据保存虚表的首地址。如图</p>
-<p><img src="P19.jpg" alt=""></p>
-<p><strong>对于单线继承的类结构，在其某个成员函数中，将this的地址赋值为虛表首地址时，可以判定这个成员函数为构造函数。</strong></p>
-<p>析构函数分析：</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; C++源码与对应汇编代码讲解</span><br><span class="line">int main(int argc,char* argv[])&#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">return 0;</span><br><span class="line">;构造函数分析略，直接看析构函数的调用</span><br><span class="line">00401060	mov		dword ptr [ebp-0Ch],0</span><br><span class="line">00401067	lea		ecx, [ebp-8]</span><br><span class="line">0040106A	call	@ILT+15 (CVirtual::~CVirtual) (00401014)	&#x2F;&#x2F;析构函数调用</span><br><span class="line">0040106F	mov		eax, dword ptr [ebp-0Ch]</span><br><span class="line">&#125;</span><br><span class="line">00401014	jmp		CVirtual::~CVirtual (00401100)</span><br><span class="line">&#x2F;&#x2F;析构函数分析</span><br><span class="line">~CVirtual()&#123;</span><br><span class="line">;函数入口代码略</span><br><span class="line">00401119	pop		ecx	</span><br><span class="line">0040111A	mov		dword ptr [ebp-4],ecx		;[ebp-4]保存this指针</span><br><span class="line">0040111D	mov		eax,dword ptr [ebp-4] 		;eax 得到this指针，这是虚表的位置</span><br><span class="line">;将当前类的虚表首地址赋值到虚表指针中</span><br><span class="line">00401120	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39;(00425024)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>析构函数中的填写虚表，是在还原虚表指针，让其指向自身的虚表首地址，防止在析构函数中调用虚函数时取到非自身虚表，从而导致函数调用错误。</p>
-<h2 id="虚函数的识别"><a href="#虚函数的识别" class="headerlink" title="虚函数的识别"></a>虚函数的识别</h2><p>有以下特征</p>
-<ul>
-<li>类中隐式定义了一个数据成员;</li>
-<li>该数据成员在首地址处，占4字节;</li>
-<li>构造函数会将此数据成员初始化为某个数组的首地址;</li>
-<li>这个地址属于数据区，是相对固定的地址;</li>
-<li>在这个数组内，每个元素都是函数指针;</li>
-<li>仔细观察这些函数，它们被调用时，第-个参数必然是this指针(要注意调用约定);</li>
-<li>在这些函数内部，很有可能会对this指针使用相对间接的访问方式。</li>
-</ul>
-<p>虚函数的识别最终转变成识别构造函数或者析构函数。构造函数与虛表指针的初始化有依赖关系。<strong>重点看对象首地址前4字节被赋予的值。</strong>来个栗子！</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">;具有成员函数特征，传递对象首地址作为this指针</span><br><span class="line">lea		ecx,[ebp-8]					;荻取对象首地址</span><br><span class="line">call	XXXXXXXXh					;调用函数</span><br><span class="line">;调用函数的实现代码</span><br><span class="line">pop		ecx							;this指针的还原，非Debug编译选项组在可能无此代码</span><br><span class="line">mov		eax,dword ptr [ecx]			;取出首地址前4字节数据</span><br><span class="line">;向对象首地址处写入4宇节数据，查看并确认此4字节数据是否为函数地址表的首地址</span><br><span class="line">mov		dword ptr [eax],XXXXXXXXh</span><br></pre></td></tr></table></figure>
-
-<h1 id="从内存角度看继承和多重继承"><a href="#从内存角度看继承和多重继承" class="headerlink" title="从内存角度看继承和多重继承"></a>从内存角度看继承和多重继承</h1><h2 id="识别类和类之间的关系"><a href="#识别类和类之间的关系" class="headerlink" title="识别类和类之间的关系"></a>识别类和类之间的关系</h2><p>在父类中声明为私有(private)的成员，虽然子类对象无法直接访问，但是在子类对象的内存结构中，父类私有的成员数据依然存在。</p>
-<p><strong>编译器在当子类中没有构造函数或析构函数，但是其父类却含有的情况下，编译器会为该父类的子类提供默认的构造函数与析构函数。</strong></p>
-<p>子类在初始化的时候，如果父类有构造函数会先执行父类的构造函数，在销毁的时候，为了调用父类的析构函数，编译器为子类提供了默认的析构函数。在子类的析构函数中，先执行自身的析构代码，再执行其父类的析构代码。</p>
-<p>如果子类中含有构造函数，但是父类中没有，那么编译器不会为父类提供默认的构造函数。但是如果父类中如果含有虚函数，则编译器为了初始化虚表，会提供默认的构造函数。</p>
-<p>在类对象初始化的过程中，构造的顺序如下：先构造父类，然后按声明顺序构造成员对象和初始化列表中指定的成员，最后才是自身的构造函数。</p>
-<p>在子类对象的内存布局中，低地址是用来存储父类数据成员的，高地址是存储自身数据成员。</p>
-<p>有了这样的内存结构，不但可以使用指向子类对象的子类指针间接寻址到父类定义的成员，而且可以使用指向子类对象的父类指针间接寻址到父类定义的成员。在使用父类成员函数时，传递的this指针也可以是子类对象首地址。所以子类指针的寻址范围不小于父类指针，这是个包含关系。在使用子类指针访问父类对象时，如果访问的成员数据是父类对象所定义的，那么不会出错;如果访问的是子类派生的成员数据，则会造成访问越界。</p>
-<p>来份代码！</p>
-<p><img src="P20.jpg" alt=""></p>
-<p><img src="P21.jpg" alt=""></p>
-<p>如使用对象或对象的指针调用成员函数，编译器可根据对象所属作用域来使用“名称粉碎法”，以实现正确匹配。在成员函数中调用其他成员函数时，可匹配当前作用域。</p>
-<p><a href="https://blog.csdn.net/lixiangminghate/article/details/79340775" target="_blank" rel="noopener">名称粉碎法</a></p>
-<p>虚函数的多态问题这本书写的一言难尽，一会说在构造函数中调用虚函数不彳亍，一会又说彳亍，给👴整懵逼了，草(一种植物)，可能是👴太菜了，但我感觉写的稀里糊涂，找了几篇blog看看算了</p>
-<p><a href="https://blog.csdn.net/weixin_30682415/article/details/101553704" target="_blank" rel="noopener"></a></p>
-<p><a href="https://blog.csdn.net/tianguiyuyu/article/details/104560102" target="_blank" rel="noopener"></a></p>
-<p><a href="https://blog.csdn.net/K346K346/article/details/49872023" target="_blank" rel="noopener"></a></p>
-<p>无内鬼，来、迷惑操作</p>
-<p><img src="P22.jpg" alt=""></p>
-<p><img src="P23.jpg" alt=""></p>
-<p>到底让不让我调用？书上的意思好像是在父类构造函数中调用虚函数会使虚表指针变成直接调用，无法构成多态，但是我实际写了写好像没多大影响，留个坑。</p>
-<p>来填坑，原来子类初始化的时候调用父类虚函数就叫虚函数失效，害，就这？</p>
-<h2 id="多重继承"><a href="#多重继承" class="headerlink" title="多重继承"></a>多重继承</h2><p>当子类拥有多个父类时，便构成多重继承关系。</p>
-<p>举个栗子</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CSofa &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nColor &#x3D; 2;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofa()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetColor() &#123;</span><br><span class="line">		return m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down and rest your legs\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">class CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nLength &#x3D; 4;</span><br><span class="line">		m_nWidth &#x3D; 5;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetArea() &#123;</span><br><span class="line">		return m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nLength;</span><br><span class="line">	int m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line">class CSofaBed : public CSofa, public CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight &#x3D; 6;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofaBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetHeight() &#123;</span><br><span class="line">		return m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在内存中的分布如图：</p>
-<p><img src="P24.jpg" alt=""></p>
-<p>占用的内存空间大小为0x18字节。除此之外，还有两个地址值，分别为0x00426198和0x0042501C，这两处地址的数据如图：</p>
-<p><img src="P25.jpg" alt=""></p>
-<p>这两个虚表中保存了子类的虚函数和父类的虚函数，父类的虚函数在子类中没有实现。由此可见，编译器将子类CSofaBed的虚函数制作了两份，康康编译器的操作</p>
-<p><img src="P26.jpg" alt=""></p>
-<p>在调用另-一个父类CBed时，并不是直接将对象的首地址作为this指针传递，而是向后调整了父类CSofa的大小，以调整后的地址值作为this指针，最后再调用父类CBed的构造函数。</p>
-<p>转换成父类指针的时候也是如此，如果转换成CBed，会调整首地址并跳过第一个父类所占用的空间，这样就不会错误寻址咯。</p>
-<p>看看析构过程：</p>
-<p><img src="P27.jpg" alt=""></p>
-<p><img src="P28.jpg" alt=""></p>
-<p>在析构的过程中，由于具有多个父类，当在析构的过程中调用各个父类的析构函数时，传递的首地址将有所不同，编译器会根据每个父类在对象中占用的空间位置，对应地传入各个父类部分的首地址作为this指针。</p>
-<p>在Debug版下，由于侧重调试功能，因此使用了两个临时变量来分别保存两个this指针，它们对应的地址分别为两个虚表指针的首地址。在Release版下，虽然会进行优化，但原理不变，子类析构函数调用父类的析构函数时，仍然会传人在对象中父类对应的地址，当做this指针。</p>
-<p>做个对比~</p>
-<ul>
-<li><strong>单继承类</strong><ul>
-<li>在类对象占用的内存空间中，只保存一份虚表指针。</li>
-<li>由于只有一个虚表指针，对应的也只有一个虚表。</li>
-<li>虚表中各项保存了类中各虚函数的首地址。</li>
-<li>构造时先构造父类，再构造自身，并且只调用一次父类构造函数。</li>
-<li>析构时先析构自身，再析构父类，并且只调用一-次父类析构函数。</li>
-</ul>
-</li>
-<li><strong>多重继承类</strong><ul>
-<li>在类对象所占用的内存空间中，根据继承父类的个数保存对应的虚表指针。</li>
-<li>根据所保存的虚表指针的个数，对应产生相应个数的虛表。</li>
-<li>转换父类指针时，需要跳转到对象的首地址。</li>
-<li>构造时需要调用多个父类构造函数。</li>
-<li>构造时先构造继承列表中第一个父类，然后依次调用到最后一个继承的父类构造函数。</li>
-<li>析构时先析构自身，然后以与构造函数相反的顺序调用所有父类的析构函数。</li>
-<li>当对象作为成员时，整个类对象的内存结构和多重继承很相似。当类中无虚函数时，整个类对象内存结构和多重继承完全一样，可酌情还原;当父类或成员对象存在虚函数时，通过观察虚表指针的位置和构造函数、析构函数中填写虚表指针的数目及目标地址，来还原继承或成员关系。</li>
-</ul>
-</li>
-</ul>
-<h2 id="虚基类"><a href="#虚基类" class="headerlink" title="虚基类"></a>虚基类</h2><p>直接来份代码康康</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show() &#x3D; 0;	    </span><br><span class="line">&#125;;</span><br><span class="line">class CVirtualChild : public CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show()&#123;</span><br><span class="line">        printf(&quot;虚基类分析\r\n&quot;);</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;;</span><br><span class="line">void main(int argc,char* argv[])&#123;</span><br><span class="line">    CVirtualChild VirtualChild;</span><br><span class="line">    VirtualChild.show();</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;反汇编代码分析，跟踪到虚基类构造函数中，查看其虚表信息</span><br><span class="line">CVirtualBase::CVirtualBase;				&#x2F;&#x2F;虚基类构造函数</span><br><span class="line">00401829	pop 	ecx</span><br><span class="line">0040182A	mov		dword ptr [ebp-4],ecx</span><br><span class="line">0040182D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;设置虚基类虚表指针，虚表地址在0x00425068处</span><br><span class="line">00401830	mov		dword ptr [eax],offset CVirtualBase::&#39;vftable&#39;(00425068)</span><br><span class="line">00401836	mov		eax,dword ptr [ebp-4]</span><br><span class="line">0040183F	ret</span><br><span class="line"></span><br><span class="line">;虚基类CVirtualBase中虚表信息的第一项所指向的函数首地址</span><br><span class="line">void _cdecl _purecall (void) &#123;</span><br><span class="line">00401E90	push	ebp</span><br><span class="line">00401E91	mov		ebp,esp</span><br><span class="line">_amsg_exit(_ RT_PUREVIRT);</span><br><span class="line">00401E93	push	19h							;压入错误编码</span><br><span class="line">00401E95	call	_amsg_exit (00401fd0)		;结束程序</span><br><span class="line">00401E9A	add		esp,4</span><br><span class="line">&#125;</span><br><span class="line">00401E9D	pop		ebp</span><br><span class="line">00401E9E	ret</span><br></pre></td></tr></table></figure>
-
-<p>如代码所示，在虚基类CVirtualBase的虚表信息中，由于纯虚函数没有实现代码，因此没有首地址。编译器为了防止误调用纯虚函数，将虛表中保存的纯虚函数的首地址项替换成函数_ purecall, 用于结束程序，并发出错误编码信息0x19。</p>
-<h2 id="菱形继承"><a href="#菱形继承" class="headerlink" title="菱形继承"></a>菱形继承</h2><p><img src="P29.jpg" alt=""></p>
-<p>来个栗子！</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CFurniture</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CFurniture() &#123;</span><br><span class="line">		m_nPrice = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CFurniture()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CFurniture()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nPrice;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nPrice;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofa</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nPrice = <span class="number">1</span>;</span><br><span class="line">		m_nColor = <span class="number">2</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofa()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetColor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down and rest your legs\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CBed</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nPrice = <span class="number">3</span>;</span><br><span class="line">		m_nLength = <span class="number">4</span>;</span><br><span class="line">		m_nWidth = <span class="number">5</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetArea</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nLength;</span><br><span class="line">	<span class="keyword">int</span> m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofaBed</span> :</span> <span class="keyword">public</span> CSofa, <span class="keyword">public</span> CBed &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight = <span class="number">6</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofaBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetHeight</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>子类结构如图所示</p>
-<p><img src="P30.jpg" alt=""></p>
-<p><img src="P31.jpg" alt=""></p>
-<p>对于CSofaBed_vt(new)和vt_offset的解释如下</p>
-<p><img src="P32.jpg" alt=""></p>
-<p><img src="P33.jpg" alt=""></p>
-<p>从代码的指针转换过程中可以看出来，vt_offset指向的内存地址中保存的数据为偏移数据，每个vt_offset对应的数据有两项：第一项为vt_offset所属类对应的虚表指针相对于vtoffset的偏移值;第二项保存的是父类虚表指针相对于vt_offset 的偏移值。</p>
-<p><img src="P34.jpg" alt=""></p>
-<p>三个虚表指针内容如下</p>
-<p><img src="P35.jpg" alt=""></p>
-<p>如图所示，这三个虚表指针所指向的虛表包含了子类CSofaBed含有的虚函数。有了这些记录就可以随心所欲地将虚表指针转换成任意的父类指针。在利用父类指针访问虚函数时，只能调用子类与父类共有的虚函数，子类继承自其他父类的虚函数是无法调用的，虚表中也没有相关的记录。</p>
-<p>来看一下构造</p>
-<p><img src="P36.jpg" alt=""></p>
-<p><img src="P37.jpg" alt=""></p>
-<p>子类构造的过程中，在调用时要传入一个参数，这个参数是一个标志信息。构造过程中先构造父类，然后再构造自己。当标记为1时，则构造父类；当标记为0时，则跳过构造函数。</p>
-<p>在析构的时候，并没有使用标记信息，而是将祖父类放在最后调用，先依次执行两个父类CBed和CSofa的析构函数，然后执行祖父类的析构函数。</p>
-<h2 id="思考题-1"><a href="#思考题-1" class="headerlink" title="思考题"></a>思考题</h2><p><strong>为什么编译器要在子类析构函数中再次将虚表设置为子类虚表呢?</strong>这个操作非常必要，因为编译器无法预知这个子类以后是否会被其他类继承，如果被继承，原来的子类就成了父类，析构函数执行时会先执行当前对象的析构函数，然后向祖父类的方向按继承线路逐层调用各类析构函数，当前对象的析构函数开始执行时，其虚表也是当前对象的，因此执行到父类的析构函数时，虚表必须改写为父类的虚表。编译器所产生的类实现代码，必须能够适应将来不可预知的对象关系，故在每个对象的析构函数内，要加入填写自己虚表的代码。</p>
-<h1 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h1><p>学习之前先看两个blog</p>
-<p><a href="https://www.cnblogs.com/yilang/p/11233935.html" target="_blank" rel="noopener">SEH1</a></p>
-<p><a href="https://www.cnblogs.com/yilang/p/11238201.html" target="_blank" rel="noopener">SEH2</a></p>
-<h2 id="异常处理的相关知识"><a href="#异常处理的相关知识" class="headerlink" title="异常处理的相关知识"></a>异常处理的相关知识</h2><ul>
-<li>try语句块负责监视异常。</li>
-<li>throw用于异常信息的发送，也称之为抛出异常。</li>
-<li>catch用于异常的捕获，并作出相应的处理。</li>
-</ul>
-<p>VC++在处理异常时会在具有异常处理功能的函数的人口处注册一个异常回调函数，当该函数内有异常抛出时，便会执行这个已注册的异常回调函数。所有的异常信息都会被记录在相关表格中，异常回调函数根据这些表格中的信息进行异常的匹配处理工作。</p>
-<p>关于异常的实现…说实话没大看懂，留个坑，等我学明白内核来填</p>
-<h2 id="识别异常处理"><a href="#识别异常处理" class="headerlink" title="识别异常处理"></a>识别异常处理</h2><p>通过对VC++异常处理的分析，可将其处理流程总结为以下9个步骤：</p>
-<ol>
-<li>在函数入口处设置异常回调函数，其回调函数先设置eax为FuncInfo数据的地址，然后跳往 ___CxxFrameHandler。</li>
-<li>异常的抛出由 CxxThrowException函数完成，该函数使用了两个参数，一个是抛出异常的关键字throw的参数的指针，另一个是抛出信息类型的指针(ThrowInfo*)。</li>
-<li>在异常回调函数中，可以得到异常对象的地址和对应ThrowInfo数据的地址以及FunInfo表结构的地址。根据所记录的异常类型，进行try块的匹配工作。</li>
-<li>如果没有找到try块，则析构异常对象，返回ExceptionContinueSearch，继续下一个异常回调函数的处理。</li>
-<li>当找到对应的try块时，通过TryBlockMapEntry表结构中的pCatch指向catch信息表，用 ThrowInfo表结构中的异常类型遍历查找与之匹配的catch块，比较关键字名称（如整型为.h，单精度浮点为.m)，找到有效的catch块。</li>
-<li>执行栈展开操作，并产生catch块中使用的异常对象（有4种不同的产生方法)。</li>
-<li>正确析构所有生命期己结束的对象。</li>
-<li>跳转到catch块，执行catch块代码。</li>
-<li>调用 JumpToContinuation函数，返回所有catch语句块的结束地址。</li>
-</ol>
-<p>有一个具体案例的分析，书上讲的很详细，懒得做笔记了，吸吸</p>
-<p>终于看完啦，完结撒花~</p>
-]]></content>
-      <categories>
-        <category>读书笔记</category>
-      </categories>
-      <tags>
-        <tag>笔记</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>C++反汇编与逆向分析技术(四)</title>
     <url>/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E5%9B%9B/</url>
     <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》(四)  </p>
@@ -1971,6 +2134,263 @@
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&amp;((struct A*)NULL)-&gt; m_ float 不会崩溃，这时求m_ float 的地址，根据前面提出的结构体寻址公式:</span><br><span class="line">p-&gt;member的地址&#x3D;指针p的地址值+ member在type中的偏移量</span><br><span class="line">代入得:</span><br><span class="line">&amp;((struct A*)NULL)-&gt; m_ float&#x3D;0 +4&#x3D;4，这个表达式实际上是求结构体内成员的偏移量。</span><br><span class="line">可以定义如下宏，用于在不产生对象的情况下取得成员偏移量:</span><br><span class="line">#define offsetof(s,m) (size_t)&amp;(((s *)0)-&gt;m)</span><br></pre></td></tr></table></figure>
 
 <p>这个结束了~</p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++反汇编与逆向分析技术(五)</title>
+    <url>/2020/06/19/C-%E5%8F%8D%E6%B1%87%E7%BC%96%E4%B8%8E%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E6%8A%80%E6%9C%AF-%E4%BA%94/</url>
+    <content><![CDATA[<p>记录一下《C++反汇编与逆向分析技术》(五)  </p>
+<a id="more"></a>  
+<h1 id="关于构造函数和析构函数"><a href="#关于构造函数和析构函数" class="headerlink" title="关于构造函数和析构函数"></a>关于构造函数和析构函数</h1><p><strong>构造函数</strong>：常用来完成对象生成时的数据初始化工作。</p>
+<p><strong>析构函数</strong>：常用于在对象销毁时释放对象中所申请的资源</p>
+<p>构造函数与析构函数都是类中特殊的成员函数，构造函数支持函数重载，而析构函数只能是一个无参函数。它们不可定义返回值，调用构造函数后，返回值为对象首地址，也就是this指针。</p>
+<h2 id="构造函数出现的时机"><a href="#构造函数出现的时机" class="headerlink" title="构造函数出现的时机"></a>构造函数出现的时机</h2><ol>
+<li><p><strong>局部对象：</strong></p>
+<p>当对象产生时就可能引发构造函数的调用。来个栗子~</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;无参构造函数的调用过程</span><br><span class="line">class CNumber&#123;</span><br><span class="line">	public:</span><br><span class="line">		CNumber()&#123;</span><br><span class="line">			m_nNumber &#x3D; 1;</span><br><span class="line">		&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;</span><br><span class="line">void main()&#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解</span><br><span class="line">void main()&#123;</span><br><span class="line">CNumber Number;</span><br><span class="line">0040B468	lea		ecx,[ebp-4]				;取得对象首地址,传入ecx中作为参数</span><br><span class="line">0040B46B	call	@ILT+5 (CNumber::CNumber) (0040100a) ; 调用构造函数</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;构造函数CNumber分析</span><br><span class="line">CNumber();</span><br><span class="line">;函数入口分析略</span><br><span class="line">0040B4A9	pop		ecx						;还原ecx,ecx中保存对象的首地址</span><br><span class="line">0040B4AA	mov		dword ptr [ebp-4],ecx 	;[ebp-4] 就是this指针</span><br><span class="line">&#123;</span><br><span class="line">m_nNumber &#x3D; 1;</span><br><span class="line">0040B4AD	mov		eax,dword ptr [ebp-4]	;eax中保存了对象的首地址</span><br><span class="line">0040B4B0	mov		dword ptr [eax],1		;将数据成员m_nNumber设置为1</span><br><span class="line">&#125;</span><br><span class="line">0040B4B6	mov		eax,dword ptr [ebp-4] 	;将this指针存入eax中，作为返回值</span><br><span class="line">0040B4B9	pop		edi</span><br><span class="line">0040B4BA	pop		esi</span><br><span class="line">0040B4BB	pop		ebx</span><br><span class="line">0040B4BC	mov		esp,ebp</span><br><span class="line">0040B4BE	pop		ebp</span><br><span class="line">0040B4BF	ret</span><br></pre></td></tr></table></figure>
+
+<p>当在进人对象的作用域时，编译器会产生调用构造函数的代码。由于构造函数属于成员函数，因此在调用的过程中同样需要传递this指针。构造函数调用结束后，会将this指针作为返回值。总结一下局部对象构造函数的<strong>必要条件</strong>：</p>
+<ul>
+<li>该成员函数是这个对象在作用域内调用的第一个成员函数，根据this指针即可以区分</li>
+<li>返回this指针</li>
+</ul>
+</li>
+<li><p><strong>堆对象</strong>：</p>
+<p>堆对象的识别重点在于识别堆空间的申请与使用。在C++的语法中，堆空间的申请需要使用malloc函数、new运算符或者其他同类功能的函数。因此，识别堆对象有了重要的依据。来个栗子！</p>
+<p>(从这里开始我有的代码部分要直接截图了，👴就是懒狗！)</p>
+<p><img src="P1.jpg" alt="构造函数返回值的使用——Debug版"></p>
+<p><img src="P2.jpg" alt="构造函数返回值的使用——Debug版"></p>
+<p>在使用了new申请了堆空间之后，需要调用构造函数，用来完成数据成员的初始化。相应的，如果没有申请成功，则会避开构造函数的调用。对此，编译器会产生一个<strong>双分支结构来根据不同的结果采取相应的行为</strong>。这是检查的重点。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;圆括号是调用有参构造函数，最后只申请了一个int类型的堆变量并赋初值10</span><br><span class="line">int *pInt &#x3D; new int (10);</span><br><span class="line">&#x2F;&#x2F;方括号才是申请了10个int元素的堆数组</span><br><span class="line">int *pInt &#x3D; new int [10];</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>参数对象</strong>：</p>
+<p>参数对象属于局部对象中的–种特殊情况。当对象作为函数参数时，调用一个特殊的构造函数——拷贝构造函数。该构造函数只有一个参数，类型为对象的引用。</p>
+<p>当对象为参数的时候触发此类对象的拷贝构造函数。在函数调用时传递参数会进行复制，形参是实参的副本。两个对象的复制过程会在拷贝构造函数中完成。如果没有定义拷贝构造函数，编译器会对原对象与拷贝对象中的各数据成员直接进行数据复制，称为默认拷贝构造函数，这种拷贝方式属于浅拷贝：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CNumber &#123;</span><br><span class="line">public:</span><br><span class="line">	CNumber() &#123;</span><br><span class="line">		m_nNumber &#x3D; 1;</span><br><span class="line">	&#125;</span><br><span class="line">	int m_nNumber;</span><br><span class="line">&#125;;</span><br><span class="line">void main() &#123;</span><br><span class="line">	CNumber Number;</span><br><span class="line">	CNumber number(Number);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是这种函数在有析构函数的情况下会出错，那么就需要深拷贝来救场了。<strong>源对象中的数据成员间接访问到的其他资源并制作副本的拷贝构造函数称为深拷贝</strong>。</p>
+<p>来个栗子！</p>
+<p><img src="P3.jpg" alt=""></p>
+<p><img src="P4.jpg" alt=""></p>
+<p><img src="P.jpg" alt=""></p>
+<p><img src="P5.jpg" alt=""></p>
+<p><img src="P6.jpg" alt=""></p>
+</li>
+<li><p><strong>返回对象</strong></p>
+<p>与参数对象的区别是：当对象作为参数时，在进入函数前使用拷贝构造函数，而返回对象则在函数返回时使用拷贝构造函数。</p>
+<p>来个栗子~</p>
+<p><img src="P7.jpg" alt=""></p>
+<p><img src="P8.jpg" alt=""></p>
+<p>这种返回对象的函数和返回对象指针类型的函数在汇编中的区别就是：<strong>返回值和参数为对象指针类型的函数，不会使用以参数为目标的拷贝构造函数，而是直接使用指针保存对象首地址。</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;函数的返回类型与参数类型都是对象的指针类型</span><br><span class="line">CMyString* GetMyString (CMyString* pMyString) &#123;</span><br><span class="line">CMyString MyString;			&#x2F;&#x2F;定义局部对象</span><br><span class="line">MyString.SetString (&quot;World&quot;);</span><br><span class="line">pMyString &#x3D; &amp;MyString;</span><br><span class="line">00401589	lea		eax,[ebp-10h]		;直接保存对象首地址</span><br><span class="line">0040158C	mov		dword ptr [ebp+8],eax</span><br><span class="line">return &amp;MyString;</span><br><span class="line">0040158F	lea		ecx,[ebp-10h]</span><br><span class="line">00401592	mov		dword ptr [ebp-14h],ecx </span><br><span class="line">00401595	mov		dword ptr [ebp-4],0FFFFFFFFh</span><br><span class="line">0040159C	lea		ecx,[ebp-10h]		;将局部对象作为返回值</span><br><span class="line">0040159F	call	@ILT+35 (CMyString::-CMyString) (00401028)</span><br><span class="line">004015A4	mov		eax,dword ptr [ebp-14h]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>全局对象与静态对象</strong></p>
+<p>这两类对象的构造时机相同，它们的构造函数的调用被隐藏在深处，但是识别过程很容易。因为程序中所有的全局对象将会在同一地点调用构造函数来初始化数据。</p>
+<p>构造函数需要传递对象的首地址作为this指针,而且构造函数可以带各类参数，因此编译器将为每个全局对象生成一段传递this指针和参数的代码，然后使用无参的代理函数去调用构造函数。</p>
+<p>如何跟踪？</p>
+<ul>
+<li><p>直接定位初始化函数</p>
+</li>
+<li><p>利用栈回溯</p>
+<p>如果反汇编代码中出现了全局对象，由于全局对象的地址固定(对于有重定位表的执行文件中的全局对象，也可以在执行文件被加载后至执行前计算得到全局对象的地址)，因此可以在对象的数据成员中设置读写断点，调试运行程序，等待构造函数调用的到来。利用栈回溯窗口，找到程序的执行流程，依次向上查询即可找到构造函数调用的起始处。</p>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="每个对象都有默认的构造函数吗"><a href="#每个对象都有默认的构造函数吗" class="headerlink" title="每个对象都有默认的构造函数吗"></a>每个对象都有默认的构造函数吗</h2><p>并不是。只有以下两种情况会有：</p>
+<ul>
+<li><p>本类、本类中定义的成员对象或者父类中有虚函数存在</p>
+<p>由于需要初始化虚表，且这个工作理应在构造函数中隐式完成，因此在没有定义构造函数的情况下，编译器会添加默认的构造函数用于隐式完成虚表的初始化工作</p>
+</li>
+<li><p>父类或本类中定义的成员对象带有构造函数</p>
+<p>在对象被定义时，由于对象本身为派生类，因此构造顺序是先构造父类再构造自身。当父类中带有构造函数时，将会调用父类构造函数，而这个调用过程需要在构造函数内完成，因此编译器添加了默认的构造函数来完成这个调用过程。成员对象带有构造函数的情况与此相同。</p>
+</li>
+</ul>
+<h2 id="析构函数出现的时机"><a href="#析构函数出现的时机" class="headerlink" title="析构函数出现的时机"></a>析构函数出现的时机</h2><p>对象何时被销毁取决于对象所在的作用域，当程序流程执行到作用域结束处时，便会将该作用域内的所有对象释放，释放的过程中会调用到对象的析构函数。</p>
+<p>析构函数的触发时机分为以下几种情况</p>
+<ul>
+<li>局部对象:作用域结束前调用析构函数</li>
+<li>堆对象:释放堆空间前调用析构函数</li>
+<li>参数对象:退出函数前，调用参数对象的析构函数</li>
+<li>返回对象:如无对象引用定义，退出函数后，调用返回对象的析构函数，否则与对象引用的作用域一致</li>
+<li>全局对象: main函数退出后调用析构函数</li>
+<li>静态对象:main函数退出后调用析构函数</li>
+</ul>
+<h3 id="堆对象"><a href="#堆对象" class="headerlink" title="堆对象"></a>堆对象</h3><p>书上给了几个代码👴觉得很有学习必要，截图了</p>
+<h4 id="堆对象析构函数的调用"><a href="#堆对象析构函数的调用" class="headerlink" title="堆对象析构函数的调用"></a>堆对象析构函数的调用</h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int main(ubt argc,char* argv[])&#123;</span><br><span class="line">	CNumber * pNumber &#x3D; NULL;</span><br><span class="line">	pNumber &#x3D; new CNumber;</span><br><span class="line">	pNumber-&gt;m_nNumber &#x3D; 2;</span><br><span class="line">	printf(&quot;%d \r\n&quot;,pNumber-&gt;m_nNumber);</span><br><span class="line">	if(pNumber !&#x3D; NULL)&#123;</span><br><span class="line">		delete pNumber;</span><br><span class="line">		pNumber &#x3D; NULL;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="P8.jpg" alt=""></p>
+<p><img src="P9.jpg" alt=""></p>
+<p><img src="P10.jpg" alt=""></p>
+<p><img src="P11.jpg" alt=""></p>
+<p>多个堆对象的申请与释放</p>
+<p><img src="P12.jpg" alt=""></p>
+<p><img src="P13.jpg" alt=""></p>
+<p><img src="P14.jpg" alt=""></p>
+<h4 id="堆对象的构造代理函数"><a href="#堆对象的构造代理函数" class="headerlink" title="堆对象的构造代理函数"></a>堆对象的构造代理函数</h4><p><img src="P15.jpg" alt=""></p>
+<p><img src="P16.jpg" alt=""></p>
+<h4 id="堆对象释放函数分析"><a href="#堆对象释放函数分析" class="headerlink" title="堆对象释放函数分析"></a>堆对象释放函数分析</h4><p><img src="P17.jpg" alt=""></p>
+<h3 id="参数对象和返回对象"><a href="#参数对象和返回对象" class="headerlink" title="参数对象和返回对象"></a>参数对象和返回对象</h3><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">CMyString MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
+
+<p>这是把MyString的地址作为隐含的参数传递给GetMyString()，在GetMyString()内部完成拷贝构造的过程。函数执行完毕后，MyString 就已经构造完成了，所以析构函数由MyString的作用域来决定.</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">MyString &#x3D; GetMyString();</span><br></pre></td></tr></table></figure>
+
+<p>因为这样的代码不是MyString在定义时赋初值，所以不会触发MyString的拷贝构造函数，这时候会产生临时对象作为GetMyString()的隐含参数，这个临时对象会在GetMyString0内部完成拷贝构造函数的过程。函数执行完毕后，如果MyString的类中定义了“=”运算符重载，则调用之;否则就根据对象成员逐个赋值。如果对象内数据量过大，就会调用rep movs这样的串操作指令批量赋值，这样的赋值也属于浅拷贝。临时对象以一条高级语句为生命周期，它在函数调用时产生，在语句执行完毕时销毁。C和C++以分号作为语句的结束符，也就是说，- -旦分号出现，就会触发临时对象的析构函数。</p>
+<h3 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h3><p>全局对象与静态对象相同，其构造函数在函数 _cinit的第二个 _initterm调用中被构造。它们的析构函数的调用时机是在main函数执行完毕之后。既然构造函数出现在初始化过程中，对应的析构函数就会出现在程序结束处。</p>
+<p>在main函数调用结束后，由exit来结束进程，从而终止程序的运行。全局变量的析构函数的调用也在其中(exit函数的doexit实现)</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">if (__onexitbegin) &#123;					&#x2F;&#x2F;_onexitbegin 为函数指针数组的首地址</span><br><span class="line">	_PVFV * pfend &#x3D; _onexitend;			&#x2F;&#x2F;_onexitend为函数指针数组的尾地址</span><br><span class="line">	while (--pfend &gt;&#x3D;__onexitbegin)		&#x2F;&#x2F;从后向前依次释放全局对象</span><br><span class="line">		if (*pfend !&#x3D; NULL)</span><br><span class="line">			(**pfend)();				&#x2F;&#x2F;调用数组中保存的函数</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>__onexitbegin 指向一个指针数组，该数组中保存着各类资源释放时的函数的首地址。全局构造函数的调用是在  _cinit 函数的第二个 _initterm 函数内完成，而在第二个 _initterm函数中，会先执行 _onexitinit 函数的初始化函数指针数组。在执行每个全局对象构造代理函数时都会先执行对象的构造函数，然后使用atexit注册析构代理函数。</p>
+<h2 id="思考题"><a href="#思考题" class="headerlink" title="思考题"></a>思考题</h2><p>对于全局对象和静态对象，能不能取消代理函数而直接在main函数前调用其构造函数呢?</p>
+<p>不能。由于构造函数可以重载，因此其参数的类型、个数和顺序都无法预知，也就无法预先定义构造函数。函数参数如何匹配呢?如何保证栈顶平衡呢?最简洁的办法就是使用代理函数。</p>
+<p>编译器为每个全局对象分别生成构造代理函数，由代理函数去调用各类形形色色的参数和约定的构造函数。由于代理函数的类型被统一指定为PVFV，因此能通过数组统一地管理和执行。</p>
+<h1 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h1><p>对象的多态性需要通过虚表和虚表指针来完成，虚表指针被定义在对象首地址的前4字节处，因此虚函数必须作为成员函数使用。</p>
+<h2 id="虚函数的机制"><a href="#虚函数的机制" class="headerlink" title="虚函数的机制"></a>虚函数的机制</h2><p>在C++中，使用关键字virtual声明函数为虚函数。当类中定义有虚函数时，编译器会将该类中所有虚函数的首地址保存在一-张地址表中，这张表被称为虛函数地址表，简称虚表。同时，编译器还会在类中添加-一个隐藏数据成员，称为虚表指针。该指针中保存着虚表的首地址，用于记录和查找虚函数。</p>
+<p>来份代码！</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtual&#123;</span><br><span class="line">	public:</span><br><span class="line">		virtual int GetNumber()&#123;</span><br><span class="line">			return m_nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">		virtual void SetNumber(int nNumber)&#123;</span><br><span class="line">			m_nNumber &#x3D; nNumber;</span><br><span class="line">		&#125;</span><br><span class="line">	private:</span><br><span class="line">		int m_nNumber;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个类的大小为8，多出的4个字节用于保存虚表指针。在虚表指针所指向的函数指针数组中，保存着虚函数GetNumber和SetNumber的首地址。对于开发者而言，虚表和虚表指针都是隐藏的，在常规的开发过程中感觉不到它们的存在。</p>
+<p>虚表指针和虚表的关系如图</p>
+<p><img src="P18.jpg" alt=""></p>
+<p>虚表指针初始化：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F;C++源码与对应汇编代码讲解;</span><br><span class="line">int main(int argc， char* argv[]) &#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">00401048	lea		ecx,[ebp-8]				;获取对象首地址</span><br><span class="line">;调用构造函数，类CVirtual中并没有定义构造函数，此调用为默认构造函数</span><br><span class="line">0040104B	call	@ILT+15 (CVirtual::CVirtual) (00401014)</span><br><span class="line">return 0;</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;默认构造函数分析</span><br><span class="line">CVirtua1::CVirtual;</span><br><span class="line">;Debug初始化保存环境略</span><br><span class="line">00401089	pop		ecx						;还原this指针</span><br><span class="line">0040108A	mov		dword ptr [ebp-4],ecx;	;[ebp-4]存储this指针</span><br><span class="line">;取出this指针并保存到eax中，这个地址将会作为指针保存到虚表的首地址中</span><br><span class="line">0040108D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;取虚表的首地址，保存到虚表指针中</span><br><span class="line">00401090	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39; (0042201c) </span><br><span class="line">00401096	mov		eax, dword ptr [ebp-4]	;返回对象首地址</span><br><span class="line">00401099	pop		edi</span><br><span class="line">0040109A	pop		esi</span><br><span class="line">0040109B	pop		ebx</span><br><span class="line">0040109C	mov		esp,ebp</span><br><span class="line">0040109E	pop		ebp</span><br><span class="line">0040109F	ret</span><br></pre></td></tr></table></figure>
+
+<p>编译器为类CVirtual提供了默认的构造函数。该默认构造函数先取得虚表首地址再赋值到虚表指针中。</p>
+<p>对象的虚表指针初始化是通过编译器在构造函数内插入代码来完成的。由于虚表信息在编译后会被链接到对应的执行文件中，因此所获得的虛表地址是一个相对固定的地址。虛表中虛函数的地址的排列顺序依据虛函数在类中的声明顺序而定，先声明的虚函数的地址会被排列在虚表中靠前的位置。</p>
+<p>对于含有构造函数的类而言，其虚表初始化过程和默认构造函数相同，都是以对象首地址的前4字节数据保存虚表的首地址。如图</p>
+<p><img src="P19.jpg" alt=""></p>
+<p><strong>对于单线继承的类结构，在其某个成员函数中，将this的地址赋值为虛表首地址时，可以判定这个成员函数为构造函数。</strong></p>
+<p>析构函数分析：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&#x2F;&#x2F; C++源码与对应汇编代码讲解</span><br><span class="line">int main(int argc,char* argv[])&#123;</span><br><span class="line">CVirtual MyVirtual;</span><br><span class="line">return 0;</span><br><span class="line">;构造函数分析略，直接看析构函数的调用</span><br><span class="line">00401060	mov		dword ptr [ebp-0Ch],0</span><br><span class="line">00401067	lea		ecx, [ebp-8]</span><br><span class="line">0040106A	call	@ILT+15 (CVirtual::~CVirtual) (00401014)	&#x2F;&#x2F;析构函数调用</span><br><span class="line">0040106F	mov		eax, dword ptr [ebp-0Ch]</span><br><span class="line">&#125;</span><br><span class="line">00401014	jmp		CVirtual::~CVirtual (00401100)</span><br><span class="line">&#x2F;&#x2F;析构函数分析</span><br><span class="line">~CVirtual()&#123;</span><br><span class="line">;函数入口代码略</span><br><span class="line">00401119	pop		ecx	</span><br><span class="line">0040111A	mov		dword ptr [ebp-4],ecx		;[ebp-4]保存this指针</span><br><span class="line">0040111D	mov		eax,dword ptr [ebp-4] 		;eax 得到this指针，这是虚表的位置</span><br><span class="line">;将当前类的虚表首地址赋值到虚表指针中</span><br><span class="line">00401120	mov		dword ptr [eax],offset CVirtual::&#39;vftable&#39;(00425024)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>析构函数中的填写虚表，是在还原虚表指针，让其指向自身的虚表首地址，防止在析构函数中调用虚函数时取到非自身虚表，从而导致函数调用错误。</p>
+<h2 id="虚函数的识别"><a href="#虚函数的识别" class="headerlink" title="虚函数的识别"></a>虚函数的识别</h2><p>有以下特征</p>
+<ul>
+<li>类中隐式定义了一个数据成员;</li>
+<li>该数据成员在首地址处，占4字节;</li>
+<li>构造函数会将此数据成员初始化为某个数组的首地址;</li>
+<li>这个地址属于数据区，是相对固定的地址;</li>
+<li>在这个数组内，每个元素都是函数指针;</li>
+<li>仔细观察这些函数，它们被调用时，第-个参数必然是this指针(要注意调用约定);</li>
+<li>在这些函数内部，很有可能会对this指针使用相对间接的访问方式。</li>
+</ul>
+<p>虚函数的识别最终转变成识别构造函数或者析构函数。构造函数与虛表指针的初始化有依赖关系。<strong>重点看对象首地址前4字节被赋予的值。</strong>来个栗子！</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">;具有成员函数特征，传递对象首地址作为this指针</span><br><span class="line">lea		ecx,[ebp-8]					;荻取对象首地址</span><br><span class="line">call	XXXXXXXXh					;调用函数</span><br><span class="line">;调用函数的实现代码</span><br><span class="line">pop		ecx							;this指针的还原，非Debug编译选项组在可能无此代码</span><br><span class="line">mov		eax,dword ptr [ecx]			;取出首地址前4字节数据</span><br><span class="line">;向对象首地址处写入4宇节数据，查看并确认此4字节数据是否为函数地址表的首地址</span><br><span class="line">mov		dword ptr [eax],XXXXXXXXh</span><br></pre></td></tr></table></figure>
+
+<h1 id="从内存角度看继承和多重继承"><a href="#从内存角度看继承和多重继承" class="headerlink" title="从内存角度看继承和多重继承"></a>从内存角度看继承和多重继承</h1><h2 id="识别类和类之间的关系"><a href="#识别类和类之间的关系" class="headerlink" title="识别类和类之间的关系"></a>识别类和类之间的关系</h2><p>在父类中声明为私有(private)的成员，虽然子类对象无法直接访问，但是在子类对象的内存结构中，父类私有的成员数据依然存在。</p>
+<p><strong>编译器在当子类中没有构造函数或析构函数，但是其父类却含有的情况下，编译器会为该父类的子类提供默认的构造函数与析构函数。</strong></p>
+<p>子类在初始化的时候，如果父类有构造函数会先执行父类的构造函数，在销毁的时候，为了调用父类的析构函数，编译器为子类提供了默认的析构函数。在子类的析构函数中，先执行自身的析构代码，再执行其父类的析构代码。</p>
+<p>如果子类中含有构造函数，但是父类中没有，那么编译器不会为父类提供默认的构造函数。但是如果父类中如果含有虚函数，则编译器为了初始化虚表，会提供默认的构造函数。</p>
+<p>在类对象初始化的过程中，构造的顺序如下：先构造父类，然后按声明顺序构造成员对象和初始化列表中指定的成员，最后才是自身的构造函数。</p>
+<p>在子类对象的内存布局中，低地址是用来存储父类数据成员的，高地址是存储自身数据成员。</p>
+<p>有了这样的内存结构，不但可以使用指向子类对象的子类指针间接寻址到父类定义的成员，而且可以使用指向子类对象的父类指针间接寻址到父类定义的成员。在使用父类成员函数时，传递的this指针也可以是子类对象首地址。所以子类指针的寻址范围不小于父类指针，这是个包含关系。在使用子类指针访问父类对象时，如果访问的成员数据是父类对象所定义的，那么不会出错;如果访问的是子类派生的成员数据，则会造成访问越界。</p>
+<p>来份代码！</p>
+<p><img src="P20.jpg" alt=""></p>
+<p><img src="P21.jpg" alt=""></p>
+<p>如使用对象或对象的指针调用成员函数，编译器可根据对象所属作用域来使用“名称粉碎法”，以实现正确匹配。在成员函数中调用其他成员函数时，可匹配当前作用域。</p>
+<p><a href="https://blog.csdn.net/lixiangminghate/article/details/79340775" target="_blank" rel="noopener">名称粉碎法</a></p>
+<p>虚函数的多态问题这本书写的一言难尽，一会说在构造函数中调用虚函数不彳亍，一会又说彳亍，给👴整懵逼了，草(一种植物)，可能是👴太菜了，但我感觉写的稀里糊涂，找了几篇blog看看算了</p>
+<p><a href="https://blog.csdn.net/weixin_30682415/article/details/101553704" target="_blank" rel="noopener"></a></p>
+<p><a href="https://blog.csdn.net/tianguiyuyu/article/details/104560102" target="_blank" rel="noopener"></a></p>
+<p><a href="https://blog.csdn.net/K346K346/article/details/49872023" target="_blank" rel="noopener"></a></p>
+<p>无内鬼，来、迷惑操作</p>
+<p><img src="P22.jpg" alt=""></p>
+<p><img src="P23.jpg" alt=""></p>
+<p>到底让不让我调用？书上的意思好像是在父类构造函数中调用虚函数会使虚表指针变成直接调用，无法构成多态，但是我实际写了写好像没多大影响，留个坑。</p>
+<p>来填坑，原来子类初始化的时候调用父类虚函数就叫虚函数失效，害，就这？</p>
+<h2 id="多重继承"><a href="#多重继承" class="headerlink" title="多重继承"></a>多重继承</h2><p>当子类拥有多个父类时，便构成多重继承关系。</p>
+<p>举个栗子</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CSofa &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nColor &#x3D; 2;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofa()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetColor() &#123;</span><br><span class="line">		return m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down and rest your legs\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">class CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nLength &#x3D; 4;</span><br><span class="line">		m_nWidth &#x3D; 5;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetArea() &#123;</span><br><span class="line">		return m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nLength;</span><br><span class="line">	int m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line">class CSofaBed : public CSofa, public CBed &#123;</span><br><span class="line">public:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight &#x3D; 6;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;virtual ~CSofaBed()\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int SitDown() &#123;</span><br><span class="line">		return printf(&quot;Sit down on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int Sleep() &#123;</span><br><span class="line">		return printf(&quot;go to sleep on the sofabed\r\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	virtual int GetHeight() &#123;</span><br><span class="line">		return m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line">protected:</span><br><span class="line">	int m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">int main() &#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在内存中的分布如图：</p>
+<p><img src="P24.jpg" alt=""></p>
+<p>占用的内存空间大小为0x18字节。除此之外，还有两个地址值，分别为0x00426198和0x0042501C，这两处地址的数据如图：</p>
+<p><img src="P25.jpg" alt=""></p>
+<p>这两个虚表中保存了子类的虚函数和父类的虚函数，父类的虚函数在子类中没有实现。由此可见，编译器将子类CSofaBed的虚函数制作了两份，康康编译器的操作</p>
+<p><img src="P26.jpg" alt=""></p>
+<p>在调用另-一个父类CBed时，并不是直接将对象的首地址作为this指针传递，而是向后调整了父类CSofa的大小，以调整后的地址值作为this指针，最后再调用父类CBed的构造函数。</p>
+<p>转换成父类指针的时候也是如此，如果转换成CBed，会调整首地址并跳过第一个父类所占用的空间，这样就不会错误寻址咯。</p>
+<p>看看析构过程：</p>
+<p><img src="P27.jpg" alt=""></p>
+<p><img src="P28.jpg" alt=""></p>
+<p>在析构的过程中，由于具有多个父类，当在析构的过程中调用各个父类的析构函数时，传递的首地址将有所不同，编译器会根据每个父类在对象中占用的空间位置，对应地传入各个父类部分的首地址作为this指针。</p>
+<p>在Debug版下，由于侧重调试功能，因此使用了两个临时变量来分别保存两个this指针，它们对应的地址分别为两个虚表指针的首地址。在Release版下，虽然会进行优化，但原理不变，子类析构函数调用父类的析构函数时，仍然会传人在对象中父类对应的地址，当做this指针。</p>
+<p>做个对比~</p>
+<ul>
+<li><strong>单继承类</strong><ul>
+<li>在类对象占用的内存空间中，只保存一份虚表指针。</li>
+<li>由于只有一个虚表指针，对应的也只有一个虚表。</li>
+<li>虚表中各项保存了类中各虚函数的首地址。</li>
+<li>构造时先构造父类，再构造自身，并且只调用一次父类构造函数。</li>
+<li>析构时先析构自身，再析构父类，并且只调用一-次父类析构函数。</li>
+</ul>
+</li>
+<li><strong>多重继承类</strong><ul>
+<li>在类对象所占用的内存空间中，根据继承父类的个数保存对应的虚表指针。</li>
+<li>根据所保存的虚表指针的个数，对应产生相应个数的虛表。</li>
+<li>转换父类指针时，需要跳转到对象的首地址。</li>
+<li>构造时需要调用多个父类构造函数。</li>
+<li>构造时先构造继承列表中第一个父类，然后依次调用到最后一个继承的父类构造函数。</li>
+<li>析构时先析构自身，然后以与构造函数相反的顺序调用所有父类的析构函数。</li>
+<li>当对象作为成员时，整个类对象的内存结构和多重继承很相似。当类中无虚函数时，整个类对象内存结构和多重继承完全一样，可酌情还原;当父类或成员对象存在虚函数时，通过观察虚表指针的位置和构造函数、析构函数中填写虚表指针的数目及目标地址，来还原继承或成员关系。</li>
+</ul>
+</li>
+</ul>
+<h2 id="虚基类"><a href="#虚基类" class="headerlink" title="虚基类"></a>虚基类</h2><p>直接来份代码康康</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">class CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show() &#x3D; 0;	    </span><br><span class="line">&#125;;</span><br><span class="line">class CVirtualChild : public CVirtualBase&#123;</span><br><span class="line">public:</span><br><span class="line">	virtual void Show()&#123;</span><br><span class="line">        printf(&quot;虚基类分析\r\n&quot;);</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;;</span><br><span class="line">void main(int argc,char* argv[])&#123;</span><br><span class="line">    CVirtualChild VirtualChild;</span><br><span class="line">    VirtualChild.show();</span><br><span class="line">&#125;</span><br><span class="line">&#x2F;&#x2F;反汇编代码分析，跟踪到虚基类构造函数中，查看其虚表信息</span><br><span class="line">CVirtualBase::CVirtualBase;				&#x2F;&#x2F;虚基类构造函数</span><br><span class="line">00401829	pop 	ecx</span><br><span class="line">0040182A	mov		dword ptr [ebp-4],ecx</span><br><span class="line">0040182D	mov		eax,dword ptr [ebp-4]</span><br><span class="line">;设置虚基类虚表指针，虚表地址在0x00425068处</span><br><span class="line">00401830	mov		dword ptr [eax],offset CVirtualBase::&#39;vftable&#39;(00425068)</span><br><span class="line">00401836	mov		eax,dword ptr [ebp-4]</span><br><span class="line">0040183F	ret</span><br><span class="line"></span><br><span class="line">;虚基类CVirtualBase中虚表信息的第一项所指向的函数首地址</span><br><span class="line">void _cdecl _purecall (void) &#123;</span><br><span class="line">00401E90	push	ebp</span><br><span class="line">00401E91	mov		ebp,esp</span><br><span class="line">_amsg_exit(_ RT_PUREVIRT);</span><br><span class="line">00401E93	push	19h							;压入错误编码</span><br><span class="line">00401E95	call	_amsg_exit (00401fd0)		;结束程序</span><br><span class="line">00401E9A	add		esp,4</span><br><span class="line">&#125;</span><br><span class="line">00401E9D	pop		ebp</span><br><span class="line">00401E9E	ret</span><br></pre></td></tr></table></figure>
+
+<p>如代码所示，在虚基类CVirtualBase的虚表信息中，由于纯虚函数没有实现代码，因此没有首地址。编译器为了防止误调用纯虚函数，将虛表中保存的纯虚函数的首地址项替换成函数_ purecall, 用于结束程序，并发出错误编码信息0x19。</p>
+<h2 id="菱形继承"><a href="#菱形继承" class="headerlink" title="菱形继承"></a>菱形继承</h2><p><img src="P29.jpg" alt=""></p>
+<p>来个栗子！</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CFurniture</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CFurniture() &#123;</span><br><span class="line">		m_nPrice = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CFurniture()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CFurniture()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetPrice</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nPrice;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nPrice;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofa</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofa() &#123;</span><br><span class="line">		m_nPrice = <span class="number">1</span>;</span><br><span class="line">		m_nColor = <span class="number">2</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofa()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofa()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetColor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nColor;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down and rest your legs\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nColor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CBed</span> :</span> <span class="keyword">virtual</span> <span class="keyword">public</span> CFurniture&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CBed() &#123;</span><br><span class="line">		m_nPrice = <span class="number">3</span>;</span><br><span class="line">		m_nLength = <span class="number">4</span>;</span><br><span class="line">		m_nWidth = <span class="number">5</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetArea</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nLength * m_nWidth;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nLength;</span><br><span class="line">	<span class="keyword">int</span> m_nWidth;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CSofaBed</span> :</span> <span class="keyword">public</span> CSofa, <span class="keyword">public</span> CBed &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	CSofaBed() &#123;</span><br><span class="line">		m_nHeight = <span class="number">6</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">virtual</span> ~CSofaBed()</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"virtual ~CSofaBed()\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">SitDown</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"Sit down on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">Sleep</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"go to sleep on the sofabed\r\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">int</span> <span class="title">GetHeight</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> m_nHeight;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">	<span class="keyword">int</span> m_nHeight;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	CSofaBed SofaBed;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>子类结构如图所示</p>
+<p><img src="P30.jpg" alt=""></p>
+<p><img src="P31.jpg" alt=""></p>
+<p>对于CSofaBed_vt(new)和vt_offset的解释如下</p>
+<p><img src="P32.jpg" alt=""></p>
+<p><img src="P33.jpg" alt=""></p>
+<p>从代码的指针转换过程中可以看出来，vt_offset指向的内存地址中保存的数据为偏移数据，每个vt_offset对应的数据有两项：第一项为vt_offset所属类对应的虚表指针相对于vtoffset的偏移值;第二项保存的是父类虚表指针相对于vt_offset 的偏移值。</p>
+<p><img src="P34.jpg" alt=""></p>
+<p>三个虚表指针内容如下</p>
+<p><img src="P35.jpg" alt=""></p>
+<p>如图所示，这三个虚表指针所指向的虛表包含了子类CSofaBed含有的虚函数。有了这些记录就可以随心所欲地将虚表指针转换成任意的父类指针。在利用父类指针访问虚函数时，只能调用子类与父类共有的虚函数，子类继承自其他父类的虚函数是无法调用的，虚表中也没有相关的记录。</p>
+<p>来看一下构造</p>
+<p><img src="P36.jpg" alt=""></p>
+<p><img src="P37.jpg" alt=""></p>
+<p>子类构造的过程中，在调用时要传入一个参数，这个参数是一个标志信息。构造过程中先构造父类，然后再构造自己。当标记为1时，则构造父类；当标记为0时，则跳过构造函数。</p>
+<p>在析构的时候，并没有使用标记信息，而是将祖父类放在最后调用，先依次执行两个父类CBed和CSofa的析构函数，然后执行祖父类的析构函数。</p>
+<h2 id="思考题-1"><a href="#思考题-1" class="headerlink" title="思考题"></a>思考题</h2><p><strong>为什么编译器要在子类析构函数中再次将虚表设置为子类虚表呢?</strong>这个操作非常必要，因为编译器无法预知这个子类以后是否会被其他类继承，如果被继承，原来的子类就成了父类，析构函数执行时会先执行当前对象的析构函数，然后向祖父类的方向按继承线路逐层调用各类析构函数，当前对象的析构函数开始执行时，其虚表也是当前对象的，因此执行到父类的析构函数时，虚表必须改写为父类的虚表。编译器所产生的类实现代码，必须能够适应将来不可预知的对象关系，故在每个对象的析构函数内，要加入填写自己虚表的代码。</p>
+<h1 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h1><p>学习之前先看两个blog</p>
+<p><a href="https://www.cnblogs.com/yilang/p/11233935.html" target="_blank" rel="noopener">SEH1</a></p>
+<p><a href="https://www.cnblogs.com/yilang/p/11238201.html" target="_blank" rel="noopener">SEH2</a></p>
+<h2 id="异常处理的相关知识"><a href="#异常处理的相关知识" class="headerlink" title="异常处理的相关知识"></a>异常处理的相关知识</h2><ul>
+<li>try语句块负责监视异常。</li>
+<li>throw用于异常信息的发送，也称之为抛出异常。</li>
+<li>catch用于异常的捕获，并作出相应的处理。</li>
+</ul>
+<p>VC++在处理异常时会在具有异常处理功能的函数的人口处注册一个异常回调函数，当该函数内有异常抛出时，便会执行这个已注册的异常回调函数。所有的异常信息都会被记录在相关表格中，异常回调函数根据这些表格中的信息进行异常的匹配处理工作。</p>
+<p>关于异常的实现…说实话没大看懂，留个坑，等我学明白内核来填</p>
+<h2 id="识别异常处理"><a href="#识别异常处理" class="headerlink" title="识别异常处理"></a>识别异常处理</h2><p>通过对VC++异常处理的分析，可将其处理流程总结为以下9个步骤：</p>
+<ol>
+<li>在函数入口处设置异常回调函数，其回调函数先设置eax为FuncInfo数据的地址，然后跳往 ___CxxFrameHandler。</li>
+<li>异常的抛出由 CxxThrowException函数完成，该函数使用了两个参数，一个是抛出异常的关键字throw的参数的指针，另一个是抛出信息类型的指针(ThrowInfo*)。</li>
+<li>在异常回调函数中，可以得到异常对象的地址和对应ThrowInfo数据的地址以及FunInfo表结构的地址。根据所记录的异常类型，进行try块的匹配工作。</li>
+<li>如果没有找到try块，则析构异常对象，返回ExceptionContinueSearch，继续下一个异常回调函数的处理。</li>
+<li>当找到对应的try块时，通过TryBlockMapEntry表结构中的pCatch指向catch信息表，用 ThrowInfo表结构中的异常类型遍历查找与之匹配的catch块，比较关键字名称（如整型为.h，单精度浮点为.m)，找到有效的catch块。</li>
+<li>执行栈展开操作，并产生catch块中使用的异常对象（有4种不同的产生方法)。</li>
+<li>正确析构所有生命期己结束的对象。</li>
+<li>跳转到catch块，执行catch块代码。</li>
+<li>调用 JumpToContinuation函数，返回所有catch语句块的结束地址。</li>
+</ol>
+<p>有一个具体案例的分析，书上讲的很详细，懒得做笔记了，吸吸</p>
+<p>终于看完啦，完结撒花~</p>
 ]]></content>
       <categories>
         <category>读书笔记</category>

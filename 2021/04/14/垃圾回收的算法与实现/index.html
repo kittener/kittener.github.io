@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-flash.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="RUQLkWDKqj" />
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="笔记," />
+
+
+
+
+  
+
+
+  <link rel="alternate" href="/atom.xml" title="Kittener's blog" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="垃圾回收的算法与实现，实现篇目前先做python的，Dalvik和v8的当作个坑后续补">
+<meta property="og:type" content="article">
+<meta property="og:title" content="垃圾回收的算法与实现">
+<meta property="og:url" content="http://www.kittener.top/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:site_name" content="Kittener&#39;s blog">
+<meta property="og:description" content="垃圾回收的算法与实现，实现篇目前先做python的，Dalvik和v8的当作个坑后续补">
+<meta property="og:image" content="http://www.kittener.top/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/P1.jpg">
+<meta property="og:image" content="http://www.kittener.top/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/P2.jpg">
+<meta property="og:image" content="http://www.kittener.top/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP3.jpg">
+<meta property="og:image" content="c:%5CUsers%5CKittener%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419204550063.png">
+<meta property="og:image" content="c:%5CUsers%5CKittener%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419204451339.png">
+<meta property="og:image" content="e:/BaiduNetdiskDownload/P10-1.jpg">
+<meta property="og:image" content="http://www.kittener.top/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP10-2.jpg">
+<meta property="og:image" content="http://www.kittener.top/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP10-3.jpg">
+<meta property="article:published_time" content="2021-04-14T11:21:50.000Z">
+<meta property="article:modified_time" content="2021-04-28T13:35:26.718Z">
+<meta property="article:author" content="Kittener">
+<meta property="article:tag" content="笔记">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://www.kittener.top/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/P1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.kittener.top/2021/04/14/垃圾回收的算法与实现/"/>
+
+
+
+
+
+  <title>垃圾回收的算法与实现 | Kittener's blog</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kittener's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.kittener.top/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Kittener">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kittener's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">垃圾回收的算法与实现</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-04-14T19:21:50+08:00">
+                2021-04-14
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2021-04-28T21:35:26+08:00">
+                2021-04-28
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2021/04/14/垃圾回收的算法与实现/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>垃圾回收的算法与实现，实现篇目前先做python的，Dalvik和v8的当作个坑后续补</p>
+<a id="more"></a>
+
+<h1 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h1><p><img src="/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/P1.jpg" alt=""></p>
+<h2 id="命名规则"><a href="#命名规则" class="headerlink" title="命名规则"></a>命名规则</h2><p>变量以及函数都用小写字母表示（例：obj）。常量都用大写字母表示（例：COPIED）。另外，本书采用下划线连接两个及两个以上的单词（例：free_list、update_ptr()、HEAP_SIZE）。</p>
+<h2 id="名词"><a href="#名词" class="headerlink" title="名词"></a>名词</h2><p><strong>对象</strong>：通过应用程序利用的数据的集合，由头(head)和域(field)构成</p>
+<ul>
+<li>头：对象中保存对象本身信息的部分<ul>
+<li>对象的大小</li>
+<li>对象的种类</li>
+</ul>
+</li>
+<li>域：对象使用者在对象中可访问的部分<ul>
+<li>指针</li>
+<li>非指针</li>
+</ul>
+</li>
+</ul>
+<p><strong>children(obj)</strong> ：获取指向对象 obj 的子对象的指针数组，<strong>指针默认指向对象首地址</strong></p>
+<p><strong>Mutator</strong>： 主要进行两种操作</p>
+<ul>
+<li>生成对象</li>
+<li>更新指针</li>
+</ul>
+<p><strong>活动对象/非活动对象</strong> ：我们将分配到内存空间中的对象中那些能通过 mutator 引用的对象称为“活动对象”。反过来，把分配到堆中那些不能通过程序引用的对象称为“非活动对象”。也就是说，不能通过程序引用的对象已经没有人搭理了，所以死掉了。死掉的对象（即非活动对象）我们就称为“垃圾”。</p>
+<p>死去的对象无法复活，无法通过Mutator找到死掉的对象，GC会清理死掉的对象</p>
+<p><strong>分配</strong>：在内存空间中分配对象。当 mutator 需要新对象时，就会向分配器（allocator）申请一个大小合适的空间。分配器则在堆的可用空间中找寻满足要求的空间，返回给 mutator。当堆被活动对象占满时，有以下两种选择：</p>
+<ul>
+<li>销毁至今为止的所有计算结果，输出错误信息</li>
+<li>扩大堆，分配可用空间</li>
+</ul>
+<p><strong>分块</strong>：为利用对象而事先准备出来的空间。内存里的各个区块都重复着分块→活动对象→垃圾（非活动对象）→分块→ …… 这样的过程。</p>
+<p><strong>根</strong>：指向对象的指针的“起点”部分</p>
+<h1 id="2-GC标记-清除算法"><a href="#2-GC标记-清除算法" class="headerlink" title="2 GC标记-清除算法"></a>2 GC标记-清除算法</h1><h2 id="2-1-什么是GC标记-清除算法"><a href="#2-1-什么是GC标记-清除算法" class="headerlink" title="2.1 什么是GC标记-清除算法"></a>2.1 什么是GC标记-清除算法</h2><p>GC 标记 - 清除算法由标记阶段和清除阶段构成。标记阶段是把所有活动对象都做上标记的阶段。清除阶段是把那些没有标记的对象，也就是非活动对象回收的阶段。</p>
+<h3 id="2-1-1-标记阶段"><a href="#2-1-1-标记阶段" class="headerlink" title="2.1.1 标记阶段"></a>2.1.1 标记阶段</h3><p>内存利用一般是堆，会递归标记指针数组能访问到的对象</p>
+<p>将对象头部打上记号表示这是一个活动对象</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mark(obj)&#123;</span><br><span class="line">	if(obj.mark &#x3D;&#x3D; FALSE)</span><br><span class="line"> 	obj.mark &#x3D; TRUE</span><br><span class="line"> 	for(child : children(obj))</span><br><span class="line"> 		mark(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-2-清除阶段"><a href="#2-1-2-清除阶段" class="headerlink" title="2.1.2 清除阶段"></a>2.1.2 清除阶段</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sweep_phase()&#123;</span><br><span class="line">	sweeping &#x3D; $heap_start			</span><br><span class="line"> 	while(sweeping &lt; $heap_end)</span><br><span class="line"> 		if(sweeping.mark &#x3D;&#x3D; TRUE)</span><br><span class="line"> 			sweeping.mark &#x3D; FALSE			&#x2F;&#x2F;准备下一次的GC(实际的code应该不会这样干吧233)</span><br><span class="line"> 		else</span><br><span class="line"> 			sweeping.next &#x3D; $free_list		&#x2F;&#x2F;加入free链(单向链表)</span><br><span class="line"> 			$free_list &#x3D; sweeping</span><br><span class="line"> 		sweeping +&#x3D; sweeping.size</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>next 的域，我们只在生成空闲链表以及从这个空闲链表中取出分块时才会使用到它。没有必要为各个对象特别准备域，从对象已有的域之中分出来一个就够了。在本章中，next 表示对象（或者分块）最初的域，即 field1。也就是说，给 field1 这个域起个别名叫 next。这跟 C 语言中的联合体（union）的概念相同。</p>
+<h3 id="2-1-3-分配"><a href="#2-1-3-分配" class="headerlink" title="2.1.3 分配"></a>2.1.3 分配</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line">	chunk &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 	if(chunk !&#x3D; NULL)</span><br><span class="line"> 		return chunk</span><br><span class="line"> 	else</span><br><span class="line"> 		allocation_fail()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>就是malloc嘛（摊手</p>
+<p>pickup_chunk() 函数用于遍历 $free_list，寻找大于等于 size 的分块。它不光会返回和 size 大小相同的分块，还会返回比 size 大的分块。如果它找到和 size 大小相同的分块，则会直接返回该分块；如果它找到比 size 大的分块，则会将其分割成 size 大小的分块和去掉 size 后剩余大小的分块，并把剩余的分块返回空闲链表。</p>
+<p>这里再提一下立即适配，延后适配和最佳适配吧，贴一个网上的答案</p>
+<ol>
+<li><p>首次适应算法（First Fit）   </p>
+<ul>
+<li><p>算法思想：将空闲分区链以地址递增的顺序连接；在进行内存分配时，从链首开始顺序查找，直到找到一块分区的大小可以满足需求时，按照该作业的大小，从该分区中分配出内存，将剩下的空闲分区仍然链在空闲分区链中。   </p>
+</li>
+<li><p>优点：高址部分的大的空闲分区得到保留，为大作业的内存分配创造了条件；</p>
+</li>
+<li><p>缺点：（1）每次都是优先利用低址部分的空闲分区，造成低址部分产生大量的外碎片。            </p>
+<p>​            （2）每次都是从低址部分查找，使得查找空闲分区的开销增大；  </p>
+</li>
+</ul>
+</li>
+<li><p>循环首次适应算法（Next Fit）  </p>
+<ul>
+<li><p>算法：分配内存时不是从链首进行查找可以分配 内存的空闲分区，而是从上一次分配内存的空闲分区的下一个分区开始查找，直到找到可以为该进程分配内存的空闲分区；    </p>
+</li>
+<li><p>优点：（1）使得空闲分区分布更加均匀；             </p>
+<p>​            （2）空闲分区的查找开销小；</p>
+</li>
+<li><p>缺点：高址部分的大空闲分区被分小，使得大作业进入无法分配内存；  </p>
+</li>
+</ul>
+</li>
+<li><p>最佳适应算法（Best Fit）  </p>
+<ul>
+<li>算法：将空闲分区链中的空闲分区按照空闲分区由小到大的顺序排序，从而形成空闲分区链。每次从链首进行查找合适的空闲分区为作业分配内存，这样每次找到的空闲分区是和作业大小最接近的，所谓“最佳”。    </li>
+<li>优点：第一次找到的空闲分区是大小最接近待分配内存作业大小的； </li>
+<li>缺点:产生大量难以利用的外部碎片。  </li>
+</ul>
+</li>
+<li><p>最坏适应算法（Worst Fit）  </p>
+<ul>
+<li>算法：与最佳适应算法刚好相反，将空闲分区链的分区按照从大到小的顺序排序形成空闲分区链，每次查找时只要看第一个空闲分区是否满足即可。    </li>
+<li>优点：效率高，分区查找方便；  </li>
+<li>缺点：当小作业把大空闲分区分小了，那么，大作业就找不到合适的空闲分区。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-1-4-合并"><a href="#2-1-4-合并" class="headerlink" title="2.1.4 合并"></a>2.1.4 合并</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">sweep_phase()&#123;</span><br><span class="line">	sweeping &#x3D; $heap_start</span><br><span class="line">	while(sweeping &lt; $heap_end)</span><br><span class="line">		if(sweeping.mark &#x3D;&#x3D; TRUE)</span><br><span class="line">			sweeping.mark &#x3D; FALSE</span><br><span class="line">		else</span><br><span class="line"> 			if(sweeping &#x3D;&#x3D; $free_list + $free_list.size)</span><br><span class="line"> 				$free_list.size +&#x3D; sweeping.size</span><br><span class="line"> 			else</span><br><span class="line">				sweeping.next &#x3D; $free_list</span><br><span class="line"> 				$free_list &#x3D; sweeping</span><br><span class="line"> 		sweeping +&#x3D; sweeping.size</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好嘛，free函数（摊手，但是实现的并不好</p>
+<p>作者给的多链表的其实也是malloc的简单实现，建议大家码一遍CMU的malloc lab，我就不多写了</p>
+<p>本章的几个优化方法，跟malloc lab的提分技巧大同小异，我就不做笔记了</p>
+<h1 id="3-引用计数法"><a href="#3-引用计数法" class="headerlink" title="3 引用计数法"></a>3 引用计数法</h1><p>GC 原本是一种“释放怎么都无法被引用的对象的机制”。那么人们自然而然地就会想到，可以让所有对象事先记录下“有多少程序引用自己”。让各对象知道自己的“人气指数”，从而让没有人气的对象自己消失。</p>
+<p>感觉好有意思~</p>
+<h2 id="3-1-引用计数的算法"><a href="#3-1-引用计数的算法" class="headerlink" title="3.1 引用计数的算法"></a>3.1 引用计数的算法</h2><p><img src="P2.jpg" alt=""></p>
+<h3 id="new-obj-函数"><a href="#new-obj-函数" class="headerlink" title="new_obj()函数"></a>new_obj()函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line">	obj &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 	if(obj &#x3D;&#x3D; NULL)</span><br><span class="line"> 		allocation_fail()</span><br><span class="line"> 	else</span><br><span class="line"> 		obj.ref_cnt &#x3D; 1</span><br><span class="line"> 		return obj</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这里，pickup_chunk() 函数的用法也大致与在 GC 标记 - 清除算法中的用法相同。不过这次当 pickup_chunk() 函数返回 NULL 时，分配就失败了。</p>
+<p>在引用计数法中，除了连接到空闲链表的对象，其他所有对象都是活动对象。也就是说，在 pickup_chunk() 函数返回 NULL 那一刻，堆中就没有合适大小的分块了。</p>
+<h3 id="update-ptr-函数"><a href="#update-ptr-函数" class="headerlink" title="update_ptr()函数"></a>update_ptr()函数</h3><p>update_ptr() 函数用于更新指针 ptr，使其指向对象 obj，同时进行计数器值的增减。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">update_ptr(ptr, obj)&#123;</span><br><span class="line">	inc_ref_cnt(obj)</span><br><span class="line"> 	dec_ref_cnt(*ptr)</span><br><span class="line"> 	*ptr &#x3D; obj</span><br><span class="line">&#125;</span><br><span class="line">inc_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt++</span><br><span class="line">&#125;</span><br><span class="line">dec_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt--</span><br><span class="line"> 	if(obj.ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line">		 for(child : children(obj))</span><br><span class="line"> 			dec_ref_cnt(*child)</span><br><span class="line"> 		 reclaim(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个点要注意，就是<code>inc_ref_cnt()</code> 和 <code>dec_ref_cnt()</code> 的调用顺序，这一点是为了处理 * ptr 和 obj 是同一对象时的情况。如果按照先 dec_ref_cnt() 后 inc_ref_cnt() 函数的顺序调用，* ptr 和 obj 又是同一对象的话，执行 dec_ref_cnt(*ptr) 时 *ptr 的计数器的值就有可能变为 0 而被回收。这样一来，下面再想执行 inc_ref_cnt(obj) 时 obj 早就被回收了，可能会引发重大的 BUG。因此我们要通过先对 obj 的计数器进行增量操作来回避这种 BUG。</p>
+<p>这里有个卡我的点，记录一下，就是我不大明白这个update_ptr为什么要进行这种将对象赋值给指针的操作。看了看书，知道，这个是改变指针指向对象的操作，如果一个指向正在使用中的对象的指针被改变了，那么这个对象一定被放弃了。如图中的B：</p>
+<p><img src="%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP3.jpg" alt=""></p>
+<h3 id="“致命”缺点"><a href="#“致命”缺点" class="headerlink" title="“致命”缺点"></a>“致命”缺点</h3><p>这个算法，无法回收相互引用的对象</p>
+<p>example：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class Person&#123; </span><br><span class="line">	string name</span><br><span class="line"> 	Person lover</span><br><span class="line">&#125;</span><br><span class="line">taro &#x3D; new Person(&quot;太郎&quot;)		   #生成Person类的实例太郎</span><br><span class="line">hanako &#x3D; new Person(&quot;花子&quot;)	   #生成Person类的实例花子</span><br><span class="line">taro.lover &#x3D; hanako				#太郎喜欢花子</span><br><span class="line">hanako.lover &#x3D; taro				#花子喜欢太郎</span><br><span class="line">taro &#x3D; null					    #将taro转换为null</span><br><span class="line">hanako &#x3D; null					#将hanako转换为null</span><br></pre></td></tr></table></figure>
+
+<p>为两个对象互相引用，所以各对象的计数器的值都是 1</p>
+<p>hhh，顺便说句题外话，日本人的土名也挺土的（</p>
+<p>如何改进？</p>
+<h2 id="3-2-延迟引用计数法"><a href="#3-2-延迟引用计数法" class="headerlink" title="3.2 延迟引用计数法"></a>3.2 延迟引用计数法</h2><p>简单来说，就是减轻计数器的增减处理，引入一个ZCT表</p>
+<p>所谓ZCT表就是会记录下计数器值在<code>dec_ref_cnt()</code>函数作用下为0的对象。所以应该改进一下该函数。</p>
+<h3 id="dec-ref-cnt-函数"><a href="#dec-ref-cnt-函数" class="headerlink" title="dec_ref_cnt()函数"></a>dec_ref_cnt()函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dec_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt--</span><br><span class="line"> 	if(obj.ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line"> 		if(is_full($zct) &#x3D;&#x3D; TRUE)</span><br><span class="line">			scan_zct()</span><br><span class="line"> 		push($zct, obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>逻辑就那样</p>
+<h3 id="new-obj-函数-1"><a href="#new-obj-函数-1" class="headerlink" title="new_obj()函数"></a>new_obj()函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line"> 	obj &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 	if(obj &#x3D;&#x3D; NULL)</span><br><span class="line"> 		scan_zct()</span><br><span class="line"> 		obj &#x3D; pickup_chunk(size, $free_list)</span><br><span class="line"> 		if(obj &#x3D;&#x3D; NULL)</span><br><span class="line"> 			allocation_fail()</span><br><span class="line"> 	obj.ref_cnt &#x3D; 1</span><br><span class="line"> 	return obj</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="scan-zct-函数"><a href="#scan-zct-函数" class="headerlink" title="scan_zct()函数"></a>scan_zct()函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">scan_zct()&#123;</span><br><span class="line">	for(r : $roots)</span><br><span class="line"> 		(*r).ref_cnt++</span><br><span class="line"> 	for(obj : $zct)</span><br><span class="line"> 		if(obj.ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line"> 			remove($zct, obj)</span><br><span class="line"> 			delete(obj)</span><br><span class="line"> 	for(r : $roots)</span><br><span class="line"> 		(*r).ref_cnt--</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>delete()函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">delete(obj)&#123;</span><br><span class="line"> 	for(child : children(obj)</span><br><span class="line"> 		(*child).ref_cnt--</span><br><span class="line"> 	if((*child).ref_cnt &#x3D;&#x3D; 0)</span><br><span class="line"> 		delete(*child)</span><br><span class="line"> 	reclaim(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法…让我想起了计算机科学的万能法宝——中间层</p>
+<h2 id="3-3-Sticky引用计数法"><a href="#3-3-Sticky引用计数法" class="headerlink" title="3.3 Sticky引用计数法"></a>3.3 Sticky引用计数法</h2><h2 id="3-7-部分标记-清除算法"><a href="#3-7-部分标记-清除算法" class="headerlink" title="3.7 部分标记-清除算法"></a>3.7 部分标记-清除算法</h2><h3 id="3-7-1-约定"><a href="#3-7-1-约定" class="headerlink" title="3.7.1 约定"></a>3.7.1 约定</h3><p>对象会被涂成4种不同的颜色来进行处理</p>
+<ol>
+<li>黑(BLACK) : 绝对不是垃圾的对象（对象产生时的初始颜色）</li>
+<li>白（WHITE）：绝对是垃圾的对象</li>
+<li>灰（GRAY）：搜索完毕的对象</li>
+<li>阴影（HATCH）：可能是循环垃圾的对象</li>
+</ol>
+<h3 id="3-7-2-dec-ref-cnt-函数"><a href="#3-7-2-dec-ref-cnt-函数" class="headerlink" title="3.7.2 dec_ref_cnt()函数"></a>3.7.2 dec_ref_cnt()函数</h3><p>接下来，通过 <code>mutator</code> 删除由根到对象 A 的引用。这个引用是由 <code>update_ptr()</code> 函数产生的。跟以往的引用计数法一样，为了将对象 A 的计数器减量，在 <code>update_ptr()</code> 函数中调用 <code>dec_ref_cnt()</code> 函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dec_ref_cnt(obj)&#123;</span><br><span class="line"> 	obj.ref_cnt--</span><br><span class="line"> 	<span class="keyword">if</span>(obj.ref_cnt == <span class="number">0</span>)</span><br><span class="line"> 		delete(obj)</span><br><span class="line"> 	<span class="keyword">else</span> <span class="keyword">if</span>(obj.color != HATCH)</span><br><span class="line"> 		obj.color = HATCH</span><br><span class="line"> 		enqueue(obj, $hatch_queue)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当 obj 的颜色不是阴影的时候，算法会将其涂上阴影并追加到队列中。</p>
+<h3 id="3-7-3-new-obj-函数"><a href="#3-7-3-new-obj-函数" class="headerlink" title="3.7.3 new_obj()函数"></a>3.7.3 new_obj()函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">new_obj(size)&#123;</span><br><span class="line"> 	obj &#x3D; pickup_chunk(size)</span><br><span class="line"> 	if(obj !&#x3D; NULL)</span><br><span class="line"> 		obj.color &#x3D; BLACK</span><br><span class="line"> 		obj.ref_cnt &#x3D; 1</span><br><span class="line"> 		return obj</span><br><span class="line"> 	else if(is_empty($hatch_queue) &#x3D;&#x3D; FALSE)</span><br><span class="line"> 		scan_hatch_queue()</span><br><span class="line"> 		return new_obj(size)</span><br><span class="line"> 	else</span><br><span class="line"> 		allocation_fail()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当可以分配时，对象就会被涂回黑色。当分配无法顺利进行的时候，程序会调查队列是否为空。当队列不为空时，程序会通过 <code>scan_hatch_queue()</code> 函数搜索队列，分配分块。<code>scan_hatch_queue()</code> 函数执行完毕后，程序会递归地调用 <code>new_obj()</code> 函数再次尝试分配。</p>
+<h3 id="3-7-4-scan-hatch-queue-函数"><a href="#3-7-4-scan-hatch-queue-函数" class="headerlink" title="3.7.4 scan_hatch_queue()函数"></a>3.7.4 scan_hatch_queue()函数</h3><p><code>scan_hatch_queue()</code> 函数在找到阴影对象前会一直从队列中取出对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scan_hatch_queue()&#123;</span><br><span class="line"> 	obj &#x3D; dequeue($hatch_queue)</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; HATCH)</span><br><span class="line"> 		paint_gray(obj)</span><br><span class="line"> 		scan_gray(obj)</span><br><span class="line"> 		collect_white(obj)</span><br><span class="line"> 	else if(is_empty($hatch_queue) &#x3D;&#x3D; FALSE)</span><br><span class="line"> 		scan_hatch_queue()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果取出的对象 obj 被涂上了阴影，程序就会将 obj 作为参数，依次调用 <code>paint_gray()</code>函数、<code>scan_gray()</code> 函数和 <code>collect_white()</code> 函数（第 4 行到第 6 行），从而通过这些函数找出循环引用的垃圾，将其回收。</p>
+<p>当 obj 没有被涂上阴影时，就意味着 obj 没有形成循环引用。此时程序对 obj 不会进行任何操作，而是再次调用 scan_hatch_queue() 函数。</p>
+<h3 id="3-7-5-paint-gray-函数"><a href="#3-7-5-paint-gray-函数" class="headerlink" title="3.7.5 paint_gray()函数"></a>3.7.5 paint_gray()函数</h3><p>程序会把黑色或者阴影对象涂成灰色，对子对象进行计数器减量操作，并调用 paint_gray() 函数。把对象涂成灰色是为了防止程序重复搜索。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">paint_gray(obj)&#123;</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; (BLACK | HATCH))</span><br><span class="line"> 		obj.color &#x3D; GRAY</span><br><span class="line"> 		for(child : children(obj))</span><br><span class="line"> 			(*child).ref_cnt--</span><br><span class="line"> 			paint_gray(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="C:%5CUsers%5CKittener%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419204550063.png" alt="image-20210419204550063"></p>
+<p>首先，在 (a) 中 A 被涂成了灰色。虽然程序对计数器执行了减量操作，但并不是对 A，而是对 B 的计数器进行了减量操作。下面在 (b) 中 B 也被涂成了灰色，不过这时程序并没有对 B 进行减量操作，而是对 C 进行了减量操作。在 (c) 中 C 被涂成灰色时，程序对 A 和 F 的计数器进行了减量操作。这样一来，A、B、C 的循环垃圾的计数器值都变成了 0。(d) 是 A、B、C、F 各个对象搜索结束后的样子。</p>
+<h3 id="3-7-6-scan-gray-函数"><a href="#3-7-6-scan-gray-函数" class="headerlink" title="3.7.6 scan_gray()函数"></a>3.7.6 scan_gray()函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">scan_gray(obj)&#123;</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; GRAY)</span><br><span class="line"> 		if(obj.ref_cnt &gt; 0)</span><br><span class="line"> 			paint_black(obj)</span><br><span class="line"> 		else</span><br><span class="line"> 			obj.color &#x3D; WHITE</span><br><span class="line"> 			for(child : children(obj))</span><br><span class="line"> 				scan_gray(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打个比方，在图 3.11 这种情况下，程序会从对象 A 开始搜索，但是搜索的只有灰色对象。如果对象的计数器值为 0，程序就会把这个对象涂成白色，再查找这个对象的子对象。也就是说，A、B、C 都会被涂成白色。计数器值大于 0 的对象会被 paint_black() 函数处理。</p>
+<h3 id="3-7-7-paint-black-函数"><a href="#3-7-7-paint-black-函数" class="headerlink" title="3.7.7 paint_black()函数"></a>3.7.7 paint_black()函数</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">paint_black(obj)&#123;</span><br><span class="line"> 	obj.color &#x3D; BLACK</span><br><span class="line"> 	for(child : children(obj))</span><br><span class="line"> 		(*child).ref_cnt++</span><br><span class="line"> 		if((*child).color !&#x3D; BLACK)</span><br><span class="line"> 			paint_black(*child)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-7-8-collect-white-函数"><a href="#3-7-8-collect-white-函数" class="headerlink" title="3.7.8 collect_white()函数"></a>3.7.8 collect_white()函数</h3><p>回收函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">collect_white(obj)&#123;</span><br><span class="line"> 	if(obj.color &#x3D;&#x3D; WHITE)</span><br><span class="line"> 		obj.color &#x3D; BLACK</span><br><span class="line"> 		for(child : children(obj))</span><br><span class="line"> 			collect_white(*child)</span><br><span class="line"> 		reclaim(obj)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-7-9-限定搜索对象"><a href="#3-7-9-限定搜索对象" class="headerlink" title="3.7.9 限定搜索对象"></a>3.7.9 限定搜索对象</h3><p>部分标记 - 清除算法的优点，就是把要搜索的对象限定在阴影对象及其子对象，也就是“可能是循环垃圾的对象群”中。</p>
+<p><img src="C:%5CUsers%5CKittener%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210419204451339.png" alt="image-20210419204451339"></p>
+<p>部分标记 - 清除算法中用 <code>dec_ref_cnt()</code> 函数来检查这个值。如果对象的计数器值减量后不为 0，说明这个对象可能是循环引用的一份子。这时会先让这个对象连接到队列，以方便之后搜索它。</p>
+<h1 id="4-GC复制算法"><a href="#4-GC复制算法" class="headerlink" title="4 GC复制算法"></a>4 GC复制算法</h1><p>简单来说就是复制能用的对象到另一块区域，然后把原区域全部清空。</p>
+<p>copy函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">copying()&#123;</span><br><span class="line"> 	$free &#x3D; $to_start</span><br><span class="line"> 	for(r : $roots)</span><br><span class="line"> 		*r &#x3D; copy(*r)</span><br><span class="line"> 	swap($from_start, $to_start)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>$free 是指示分块开头的变量。首先在第 2 行将 $free 设置在 To 空间的开头，然后在第 3 行、第 4 行复制能从根引用的对象。copy() 函数将作为参数传递的对象 *r 复制的同时，也将其子对象进行递归复制。复制结束后返回指针，这里返回的指针指向的是 *r 所在的新空间的对象。</p>
+<p>在 GC 复制算法中，在 GC 结束时，原空间的对象会作为垃圾被回收。因此，由根指向原空间对象的指针也会被重写成指向返回值的新对象的指针。</p>
+<h2 id="4-1-GC复制算法是什么"><a href="#4-1-GC复制算法是什么" class="headerlink" title="4.1 GC复制算法是什么"></a>4.1 GC复制算法是什么</h2><h3 id="4-1-1-copy-函数"><a href="#4-1-1-copy-函数" class="headerlink" title="4.1.1 copy()函数"></a>4.1.1 copy()函数</h3><h1 id="python的垃圾回收机制"><a href="#python的垃圾回收机制" class="headerlink" title="python的垃圾回收机制"></a>python的垃圾回收机制</h1><p>ok终于来到重头戏，让我康康python的GC机制(标记清除法)到底是怎么回事吧</p>
+<p>下载了跟书上一样python3.0.1的源代码（有时候研究实现机制并不需要最新版的</p>
+<h2 id="10-1-对象管理"><a href="#10-1-对象管理" class="headerlink" title="10.1 对象管理"></a>10.1 对象管理</h2><table>
+<thead>
+<tr>
+<th>结构体名</th>
+<th>对应的内置数据类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PyListObject</td>
+<td>列表型</td>
+</tr>
+<tr>
+<td>PyTupleObject</td>
+<td>元组型</td>
+</tr>
+<tr>
+<td>PyDictObject</td>
+<td>字典型</td>
+</tr>
+<tr>
+<td>PyFloatObject</td>
+<td>浮点型</td>
+</tr>
+<tr>
+<td>PyLongObject</td>
+<td>长整型</td>
+</tr>
+</tbody></table>
+<p>直接康源码</p>
+<p>浮点型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Include&#x2F;floatobject.h</span><br><span class="line">typedef struct &#123;</span><br><span class="line"> 	PyObject_HEAD</span><br><span class="line"> 	double ob_fval;</span><br><span class="line">&#125;PyFloatObject;</span><br></pre></td></tr></table></figure>
+
+<p>PyObject_HEAD 定义如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Include&#x2F;object.h</span><br><span class="line">#define PyObject_HEAD PyObject ob_base;</span><br></pre></td></tr></table></figure>
+
+<p>元组型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Include&#x2F;tupleobject.h</span><br><span class="line">typedef struct &#123;</span><br><span class="line"> 	PyObject_VAR_HEAD</span><br><span class="line"> 	PyObject *ob_item[1];</span><br><span class="line">&#125; PyTupleObject;</span><br></pre></td></tr></table></figure>
+
+<p>宏 PyObject_VAR_HEAD 的定义如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Include&#x2F;object.h</span><br><span class="line">#define PyObject_VAR_HEAD PyVarObject ob_base;</span><br><span class="line">typedef struct &#123;</span><br><span class="line"> 	PyObject ob_base;</span><br><span class="line"> 	Py_ssize_t ob_size; &#x2F;* 保持元素数量 *&#x2F;</span><br><span class="line">&#125; PyVarObject;</span><br></pre></td></tr></table></figure>
+
+<p>看上去好像是定义了PyVarObject型的成员，但是还是定义了PyObject</p>
+<p>那么这里就有一个问题，PyObject到底什么内容，上源码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Include&#x2F;object.h</span><br><span class="line">typedef struct _object &#123;</span><br><span class="line"> 	_PyObject_HEAD_EXTRA</span><br><span class="line"> 	Py_ssize_t ob_refcnt;</span><br><span class="line"> 	struct _typeobject *ob_type;</span><br><span class="line">&#125; PyObject;</span><br></pre></td></tr></table></figure>
+
+<p>ob_refcnt成员负责维持引用计数</p>
+<h2 id="10-2-Python的内存分配器"><a href="#10-2-Python的内存分配器" class="headerlink" title="10.2 Python的内存分配器"></a>10.2 Python的内存分配器</h2><p>python的分配器很有意思，它不是简单的malloc，它是分层的</p>
+<p><img src="E:/BaiduNetdiskDownload/P10-1.jpg" alt=""></p>
+<p>如果生成一个字典对象，则会发生如下过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PyDict_New()				——3层</span><br><span class="line">	PyObject_GC_New()		——2层</span><br><span class="line"> 	PyObject_Malloc()		——2层</span><br><span class="line"> 		new_arena()			——1层</span><br><span class="line"> 		malloc()			——0层</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-3-第0层-通用的基础分配器"><a href="#10-3-第0层-通用的基础分配器" class="headerlink" title="10.3 第0层 通用的基础分配器"></a>10.3 第0层 通用的基础分配器</h2><p>以 Linux 为例，第 0 层指的就是 glibc 的 malloc() 这样的分配器，是对 Linux 等 OS 申请内存的部分。</p>
+<p>Python 中并不是在生成所有对象时都调用 malloc()，而是根据要分配的内存大小来改变分配的方法。申请的内存大小如果大于 256 字节，就老实地调用 malloc()；如果小于等于 256 字节，就要轮到第 1 层和第 2 层出场了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">void *</span><br><span class="line">PyObject_Malloc(size_t nbytes)</span><br><span class="line">&#123;</span><br><span class="line"> block *bp;</span><br><span class="line"> poolp pool;</span><br><span class="line"> poolp next;</span><br><span class="line"> uint size;</span><br><span class="line"> &#x2F;* 这部分为异常处理，略去 *&#x2F;</span><br><span class="line"> if ((nbytes - 1) &lt; SMALL_REQUEST_THRESHOLD) &#123;</span><br><span class="line"> &#x2F;* 当申请的内存大小小于等于256字节时的内存分配(第1层和第2层) *&#x2F;</span><br><span class="line"> &#125;</span><br><span class="line"> &#x2F;* 当申请的内存大小大于256字节时的内存分配(第0层) *&#x2F;</span><br><span class="line"> return (void *)malloc(nbytes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="10-4-第1层-Python低级内存分配器"><a href="#10-4-第1层-Python低级内存分配器" class="headerlink" title="10.4 第1层 Python低级内存分配器"></a>10.4 第1层 Python低级内存分配器</h2><p>假设我们有这样一段代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for x in range(100):</span><br><span class="line">	print(x)</span><br></pre></td></tr></table></figure>
+
+<p>这段代码会使用大量一次性的小字符串，如果调用malloc()和free()这显然是我们无法接受的。</p>
+<p>所以第1层和第2层的内存分配器会进行处理</p>
+<h3 id="10-4-1-内存结构"><a href="#10-4-1-内存结构" class="headerlink" title="10.4.1 内存结构"></a>10.4.1 内存结构</h3><p>根据所管理的内存空间的作用和大小不同，划分为三级结构从大到小为arena、pool、block，三者为包含关系。</p>
+<h3 id="10-4-2-arena"><a href="#10-4-2-arena" class="headerlink" title="10.4.2 arena"></a>10.4.2 arena</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">struct arena_object &#123;</span><br><span class="line"> 	&#x2F;* malloc后的arena的地址</span><br><span class="line"> 	uptr address;</span><br><span class="line"> 	&#x2F;* 将arena的地址用于给pool使用而对齐的地址 *&#x2F;</span><br><span class="line"> 	block* pool_address;</span><br><span class="line"> 	&#x2F;* 此arena中空闲的pool数量 *&#x2F;</span><br><span class="line"> 	uint nfreepools;</span><br><span class="line"> 	&#x2F;* 此arena中pool的总数 *&#x2F;</span><br><span class="line"> 	uint ntotalpools;</span><br><span class="line"> 	&#x2F;* 连接空闲pool的单向链表 *&#x2F;</span><br><span class="line"> 	struct pool_header* freepools;</span><br><span class="line"> 	&#x2F;* 稍后说明 *&#x2F;</span><br><span class="line"> 	struct arena_object* nextarena;</span><br><span class="line"> 	struct arena_object* prevarena;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>arena的大小固定为<strong>256k字节</strong></p>
+<p>这里有个有趣的点，arena_object结构体不仅保存了malloc后arena的地址，还保存了开头pool的地址，按照常理来说，<em>这两个地址应该是一样的啊？</em></p>
+<p>arenas数组管理arena_object</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;* 将arena_object作为元素的数组 *&#x2F;</span><br><span class="line">static struct arena_object* arenas &#x3D; NULL;</span><br><span class="line">&#x2F;* arenas的元素数量 *&#x2F;</span><br><span class="line">static uint maxarenas &#x3D; 0;</span><br></pre></td></tr></table></figure>
+
+<p>然后让我们来看看uptr到底是啥吧，宏定义如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">typedef uintptr_t Py_uintptr_t;</span><br></pre></td></tr></table></figure>
+
+<p>简单来说，这个类型是整数型的一个别名，用来存放指针，会根据c指针的大小而变成4字节或者8字节，防止溢出。</p>
+<h3 id="10-4-3-pool"><a href="#10-4-3-pool" class="headerlink" title="10.4.3 pool"></a>10.4.3 pool</h3><p>pool的大小固定在<strong>4K字节</strong>，因为对几乎所有OS而言，虚拟内存的页面大小都是4K</p>
+<p>这样的话，就能让OS以pool来管理内存</p>
+<p>所以说~arena和第一个pool的地址不一定相同，<strong>因为pool开头地址需要进行4k字节的倍数进行对齐。</strong></p>
+<p>看一哈结构体</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">struct pool_header &#123;</span><br><span class="line"> 	&#x2F;* 分配到pool里的block的数量 *&#x2F;</span><br><span class="line"> 	union &#123; </span><br><span class="line"> 		block *_padding;</span><br><span class="line"> 		uint count; </span><br><span class="line"> 	&#125; ref;</span><br><span class="line"> 	&#x2F;* block的空闲链表的开头 *&#x2F;</span><br><span class="line"> 	block *freeblock;</span><br><span class="line"> 	&#x2F;* 指向下一个pool的指针（双向链表） *&#x2F;</span><br><span class="line"> 	struct pool_header *nextpool;</span><br><span class="line"> 	&#x2F;* 指向前一个pool的指针（双向链表） *&#x2F;</span><br><span class="line"> 	struct pool_header *prevpool;</span><br><span class="line"> 	&#x2F;* 自己所属的arena的索引（对于arenas而言） *&#x2F;</span><br><span class="line"> 	uint arenaindex;</span><br><span class="line"> 	&#x2F;* 分配的block的大小 *&#x2F;</span><br><span class="line">  	uint szidx;</span><br><span class="line"> 	&#x2F;* 到下一个block的偏移 *&#x2F;</span><br><span class="line"> 	uint nextoffset;</span><br><span class="line"> 	&#x2F;* 到能分配下一个block之前的偏移 *&#x2F;</span><br><span class="line"> 	uint maxnextoffset;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-4-4-new-arena"><a href="#10-4-4-new-arena" class="headerlink" title="10.4.4 new_arena()"></a>10.4.4 new_arena()</h3><p>先整体看一下new_arena()的大体部分</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">static struct arena_object*</span><br><span class="line">new_arena(void)</span><br><span class="line">&#123;</span><br><span class="line"> 	struct arena_object* arenaobj;</span><br><span class="line"> 	if (unused_arena_objects &#x3D;&#x3D; NULL) &#123;</span><br><span class="line"> 	&#x2F;* 生成arena_object *&#x2F;</span><br><span class="line"> 	&#x2F;* 把生成的arena_object 补充到arenas和unused_arena_objects里*&#x2F;</span><br><span class="line"> 	&#125;</span><br><span class="line"> 	&#x2F;* 把arena分配给未使用的arena_object *&#x2F;</span><br><span class="line"> 	&#x2F;* 把arena内部分割成pool *&#x2F;</span><br><span class="line"> 	return arenaobj; &#x2F;* 返回新的arena_object *&#x2F;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是源码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">arena_object</span>*</span></span><br><span class="line"><span class="class"><span class="title">new_arena</span>(<span class="title">void</span>)</span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">arena_object</span>* <span class="title">arenaobj</span>;</span></span><br><span class="line">	uint excess;	<span class="comment">/* number of bytes above pool alignment */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> PYMALLOC_DEBUG</span></span><br><span class="line">	<span class="keyword">if</span> (Py_GETENV(<span class="string">"PYTHONMALLOCSTATS"</span>))</span><br><span class="line">		_PyObject_DebugMallocStats();</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	<span class="keyword">if</span> (unused_arena_objects == <span class="literal">NULL</span>) &#123; </span><br><span class="line">        <span class="comment">/*unused_arena_objects 指的是现在未使用的 arena_object 的单向链表，含有新生成的arena_object和已经使用过的、已废弃的arena_object*/</span></span><br><span class="line">		uint i;</span><br><span class="line">		uint numarenas;</span><br><span class="line">		<span class="keyword">size_t</span> nbytes;</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">			maxarenas表示的是 arenas（所有的 arena 的数组）现在的元素数量，在初始时被定义成0</span></span><br><span class="line"><span class="comment">		*/</span></span><br><span class="line">		<span class="comment">/* Double the number of arena objects on each allocation.</span></span><br><span class="line"><span class="comment">		 * Note that it's possible for `numarenas` to overflow.</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		numarenas = maxarenas ? maxarenas &lt;&lt; <span class="number">1</span> : INITIAL_ARENA_OBJECTS;</span><br><span class="line">		<span class="keyword">if</span> (numarenas &lt;= maxarenas)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;	<span class="comment">/* overflow */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SIZEOF_SIZE_T &lt;= SIZEOF_INT</span></span><br><span class="line">		<span class="keyword">if</span> (numarenas &gt; PY_SIZE_MAX / <span class="keyword">sizeof</span>(*arenas))</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;	<span class="comment">/* overflow */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">		nbytes = numarenas * <span class="keyword">sizeof</span>(*arenas);</span><br><span class="line">        <span class="comment">/* 在第1个参数为NULL时，realloc与malloc相同 */</span></span><br><span class="line">		arenaobj = (struct arena_object *)<span class="built_in">realloc</span>(arenas, nbytes);</span><br><span class="line">		<span class="keyword">if</span> (arenaobj == <span class="literal">NULL</span>)</span><br><span class="line">			<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">		arenas = arenaobj;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* We might need to fix pointers that were copied.  However,</span></span><br><span class="line"><span class="comment">		 * new_arena only gets called when all the pages in the</span></span><br><span class="line"><span class="comment">		 * previous arenas are full.  Thus, there are *no* pointers</span></span><br><span class="line"><span class="comment">		 * into the old array. Thus, we don't have to worry about</span></span><br><span class="line"><span class="comment">		 * invalid pointers.  Just to be sure, some asserts:</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		assert(usable_arenas == <span class="literal">NULL</span>);</span><br><span class="line">		assert(unused_arena_objects == <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* Put the new arenas on the unused_arena_objects list. */</span></span><br><span class="line">		<span class="keyword">for</span> (i = maxarenas; i &lt; numarenas; ++i) &#123;</span><br><span class="line">            <span class="comment">/* 标记尚未分配arena */</span></span><br><span class="line">			arenas[i].address = <span class="number">0</span>;	<span class="comment">/* mark as unassociated */</span></span><br><span class="line">            <span class="comment">/* 只在末尾存入NULL，除此之外都指向下一个指针 */</span></span><br><span class="line">			arenas[i].nextarena = i &lt; numarenas - <span class="number">1</span> ?</span><br><span class="line">					       &amp;arenas[i+<span class="number">1</span>] : <span class="literal">NULL</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* Update globals. */</span></span><br><span class="line">		unused_arena_objects = &amp;arenas[maxarenas];</span><br><span class="line">		maxarenas = numarenas;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    我们把新分配的 arena_object 作为“未被使用的 arena_object”连接到一个链表。这</span></span><br><span class="line"><span class="comment">时 arena_object 结构体的成员 nextarena 是作为单向链表使用的。</span></span><br><span class="line"><span class="comment">	除此之外，我们同时把 0 加入 arena_object 的成员 address 中。成员 address 里通常</span></span><br><span class="line"><span class="comment">包含指向 arena 的指针，不过在 arena_object 不持有 arena 的时候，将其明确设置为 0，使</span></span><br><span class="line"><span class="comment">用 arena 未被保留的标志。</span></span><br><span class="line"><span class="comment">	最终我们将用单向链表连接的 arena_object 开头的指针存入 unused_arena_objects 中。</span></span><br><span class="line"><span class="comment">	另外，我们把更新后的数组 arenas 内的 arena_object 的数量存入 maxarenas 里。</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">    </span><br><span class="line">	<span class="comment">/* Take the next available arena object off the head of the list. */</span></span><br><span class="line">	assert(unused_arena_objects != <span class="literal">NULL</span>);</span><br><span class="line">    <span class="comment">/* 取出未被使用的arena_object */</span></span><br><span class="line">	arenaobj = unused_arena_objects;</span><br><span class="line">	unused_arena_objects = arenaobj-&gt;nextarena; <span class="comment">/* 取出 */</span></span><br><span class="line">	assert(arenaobj-&gt;address == <span class="number">0</span>);</span><br><span class="line">    <span class="comment">/* 分配arena（256K字节） */</span></span><br><span class="line">	arenaobj-&gt;address = (uptr)<span class="built_in">malloc</span>(ARENA_SIZE);</span><br><span class="line">	<span class="keyword">if</span> (arenaobj-&gt;address == <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="comment">/* The allocation failed: return NULL after putting the</span></span><br><span class="line"><span class="comment">		 * arenaobj back.</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		arenaobj-&gt;nextarena = unused_arena_objects;</span><br><span class="line">		unused_arena_objects = arenaobj;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	++narenas_currently_allocated;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> PYMALLOC_DEBUG</span></span><br><span class="line">	++ntimes_arena_allocated;</span><br><span class="line">	<span class="keyword">if</span> (narenas_currently_allocated &gt; narenas_highwater)</span><br><span class="line">		narenas_highwater = narenas_currently_allocated;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">	arenaobj-&gt;freepools = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="comment">/* pool_address &lt;- 对齐后开头pool的地址</span></span><br><span class="line"><span class="comment">		 nfreepools &lt;- 对齐后arena中pool的数量 */</span></span><br><span class="line">	arenaobj-&gt;pool_address = (block*)arenaobj-&gt;address;</span><br><span class="line">	arenaobj-&gt;nfreepools = ARENA_SIZE / POOL_SIZE;</span><br><span class="line">	assert(POOL_SIZE * arenaobj-&gt;nfreepools == ARENA_SIZE);</span><br><span class="line">	excess = (uint)(arenaobj-&gt;address &amp; POOL_SIZE_MASK);</span><br><span class="line">	<span class="keyword">if</span> (excess != <span class="number">0</span>) &#123;</span><br><span class="line">		--arenaobj-&gt;nfreepools;</span><br><span class="line">		arenaobj-&gt;pool_address += POOL_SIZE - excess;</span><br><span class="line">	&#125;</span><br><span class="line">	arenaobj-&gt;ntotalpools = arenaobj-&gt;nfreepools;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> arenaobj;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	结构体 arena_object 的成员 pool_address 中存有以 4K 字节对齐的 pool 的地址。</span></span><br><span class="line"><span class="comment">	在此使用 POOL_SIZE_MASK 来对用 malloc() 保留的 arena 的地址进行屏蔽处理，计算超</span></span><br><span class="line"><span class="comment">过的量（excess）。</span></span><br><span class="line"><span class="comment">	如果超过的量（excess）为 0，因为 arena 的地址刚好是 4K 字节（2 的 12 次方）的倍数，</span></span><br><span class="line"><span class="comment">所以程序会原样返回分配的 arena_object。这时候因为 arena 内已经被 pool 填满了，所以可以通过计算 arena 的大小或 pool 的大小来求出 arena 内 pool 的数量。</span></span><br><span class="line"><span class="comment">	如果超过的量不为 0，程序就会计算“arena 的地址 ＋ 超过的量”，将其设置为成员</span></span><br><span class="line"><span class="comment">pool_address。此时 arena 内前后加起来会产生一个 pool 的空白，所以要减去这部分，将其</span></span><br><span class="line"><span class="comment">设置为 nfreepools。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP10-2.jpg" alt=""></p>
+<p>hhh,这里我要记录一个点，被自己蠢到</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a &#x3D; b ? b &lt;&lt; 1 : 16;</span><br></pre></td></tr></table></figure>
+
+<p>这段代码的意思是b如果为0的话a=16，如果不为0的话，a=b*2，这里a=b的判断是b的值(胡言乱语中)</p>
+<h4 id="10-4-5-usable-arenas和unused-arena-objects"><a href="#10-4-5-usable-arenas和unused-arena-objects" class="headerlink" title="10.4.5 usable_arenas和unused_arena_objects"></a>10.4.5 usable_arenas和unused_arena_objects</h4><p>直接看源码吧~</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">unused_arena_objects</span><br><span class="line"> 将现在未被使用的arena_object连接到单向链表。</span><br><span class="line"> （可以说arena还未得到保留）</span><br><span class="line"> arena_object是从new_arena()内列表的开头取的。</span><br><span class="line"> 此外，在PyObject_Free()时arena为空的情况下，arena_object会被追加到这个列表的开头。</span><br><span class="line"> 注意：只有当结构体arena_object的成员address为0时，才将其存入这个列表。</span><br><span class="line">usable_arenas</span><br><span class="line"> 这是持有arena的arena_object的双向链表，其中arena分配了可利用的pool。</span><br><span class="line"> 这个pool正在等待被再次使用，或者还未被使用过。</span><br><span class="line"> 这个链表按照block数量最多的arena的顺序排列。</span><br><span class="line"> （基于成员nfreepools升序排列）</span><br><span class="line"> 这意味着下次分配会从使用得最多的arena开始取。</span><br><span class="line"> 然后它也会给很多将几乎为空的arena返回系统的机会。</span><br><span class="line"> 根据我的测试，这项改善能够在很大程度上释放arena。</span><br></pre></td></tr></table></figure>
+
+<p>在没有能用的 arena 时，我们使用 unused_arena_objects。如果在分配时没有 arena，就从这个链表中取出一个 arena_object，分配新的 arena。</p>
+<p>在没有能用的 pool 时，则使用 usable_arenas。如果在分配时没有 pool，就从这个链表中取出 arena_object，从分配到的 arena 里取出一个 pool。</p>
+<p><strong>unused_arena_objects 是单向链表，usable_arenas 是双向链表。</strong></p>
+<p>当我们采用 unused_arena_objects 时，只能使用结构体 arena_object 的成员 nextarena；而当我们采用 usable_arenas 时，则可以使用成员 nextarena 和成员 prevarena。</p>
+<h2 id="10-5-第2层-Python对象分配器"><a href="#10-5-第2层-Python对象分配器" class="headerlink" title="10.5 第2层 Python对象分配器"></a>10.5 第2层 <strong>Python</strong>对象分配器</h2><p>第二层管理的是block</p>
+<h3 id="10-5-1-block"><a href="#10-5-1-block" class="headerlink" title="10.5.1 block"></a>10.5.1 block</h3><p>有几个比较有意思的点记录一下</p>
+<p>block的大小一定是8的倍数，这点毋庸置疑，相应的地址也一定是8的倍数(因为pool是按照4K字节来对齐的)</p>
+<p>为什么要将 block 按 8 的倍数对齐呢？这是因为这样一来 block 的地址在 64 位 CPU 和32 位 CPU 中都不会出现问题。</p>
+<p>分配的字节数会根据申请的字节数自动调节至最接近的8字节的倍数(高于)。</p>
+<h3 id="10-5-2-usedpools"><a href="#10-5-2-usedpools" class="headerlink" title="10.5.2 usedpools"></a>10.5.2 usedpools</h3><p>Python 的分配器采用 Best - fit 的分配战略，即极力让分配的 block 的大小接近申请的大小。</p>
+<p>搜索 pool 的过程必须是高速的。因为在每次分配时都会进行这项搜索处理。</p>
+<p>秘诀在于usedpools中</p>
+<p><img src="%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0%5CP10-3.jpg" alt=""></p>
+<h3 id="10-5-4-block的状态管理"><a href="#10-5-4-block的状态管理" class="headerlink" title="10.5.4 block的状态管理"></a>10.5.4 block的状态管理</h3><p>block只有一下三种状态</p>
+<ol>
+<li>已经分配</li>
+<li>使用完毕</li>
+<li>未使用</li>
+</ol>
+<p>所有使用完毕的 block 都会被连接到一个叫作 freeblock 的空闲链表进行管理。block是在释放的时候被连接到空闲链表的。因为使用完毕的 block 肯定经过了使用→释放的流程，所以释放时空闲链表开头的地址就会被直接写入作为释放对象的 block 内。之后我们将释放完毕的 block 的地址存入 freeblock 中。这个 freeblock 是由 pool_header 定义的。我们将freeblock 放在开头，形成 block 的空闲链表。</p>
+<p>未使用的block直接通过偏移量分配</p>
+<h3 id="10-5-5-PyObject-Malloc"><a href="#10-5-5-PyObject-Malloc" class="headerlink" title="10.5.5 PyObject_Malloc()"></a>10.5.5 PyObject_Malloc()</h3>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%AC%94%E8%AE%B0/" rel="tag"># 笔记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/03/17/Frida%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="Frida学习笔记">
+                <i class="fa fa-chevron-left"></i> Frida学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div class="ds-thread" data-thread-key="2021/04/14/垃圾回收的算法与实现/"
+           data-title="垃圾回收的算法与实现" data-url="http://www.kittener.top/2021/04/14/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E7%AE%97%E6%B3%95%E4%B8%8E%E5%AE%9E%E7%8E%B0/">
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Kittener</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kittener" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:xkittener@gmail.com" target="_blank" title="mail">
+                      
+                        <i class="fa fa-fw fa-globe"></i>mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://plus.google.com/kittener" target="_blank" title="Google">
+                      
+                        <i class="fa fa-fw fa-google"></i>Google</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:xkittener@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#约定"><span class="nav-number">1.</span> <span class="nav-text">约定</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#命名规则"><span class="nav-number">1.1.</span> <span class="nav-text">命名规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#名词"><span class="nav-number">1.2.</span> <span class="nav-text">名词</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-GC标记-清除算法"><span class="nav-number">2.</span> <span class="nav-text">2 GC标记-清除算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-什么是GC标记-清除算法"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 什么是GC标记-清除算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-标记阶段"><span class="nav-number">2.1.1.</span> <span class="nav-text">2.1.1 标记阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-清除阶段"><span class="nav-number">2.1.2.</span> <span class="nav-text">2.1.2 清除阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-3-分配"><span class="nav-number">2.1.3.</span> <span class="nav-text">2.1.3 分配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-4-合并"><span class="nav-number">2.1.4.</span> <span class="nav-text">2.1.4 合并</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-引用计数法"><span class="nav-number">3.</span> <span class="nav-text">3 引用计数法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-引用计数的算法"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 引用计数的算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#new-obj-函数"><span class="nav-number">3.1.1.</span> <span class="nav-text">new_obj()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#update-ptr-函数"><span class="nav-number">3.1.2.</span> <span class="nav-text">update_ptr()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#“致命”缺点"><span class="nav-number">3.1.3.</span> <span class="nav-text">“致命”缺点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-延迟引用计数法"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 延迟引用计数法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#dec-ref-cnt-函数"><span class="nav-number">3.2.1.</span> <span class="nav-text">dec_ref_cnt()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#new-obj-函数-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">new_obj()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scan-zct-函数"><span class="nav-number">3.2.3.</span> <span class="nav-text">scan_zct()函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-Sticky引用计数法"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 Sticky引用计数法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-7-部分标记-清除算法"><span class="nav-number">3.4.</span> <span class="nav-text">3.7 部分标记-清除算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-1-约定"><span class="nav-number">3.4.1.</span> <span class="nav-text">3.7.1 约定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-2-dec-ref-cnt-函数"><span class="nav-number">3.4.2.</span> <span class="nav-text">3.7.2 dec_ref_cnt()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-3-new-obj-函数"><span class="nav-number">3.4.3.</span> <span class="nav-text">3.7.3 new_obj()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-4-scan-hatch-queue-函数"><span class="nav-number">3.4.4.</span> <span class="nav-text">3.7.4 scan_hatch_queue()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-5-paint-gray-函数"><span class="nav-number">3.4.5.</span> <span class="nav-text">3.7.5 paint_gray()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-6-scan-gray-函数"><span class="nav-number">3.4.6.</span> <span class="nav-text">3.7.6 scan_gray()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-7-paint-black-函数"><span class="nav-number">3.4.7.</span> <span class="nav-text">3.7.7 paint_black()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-8-collect-white-函数"><span class="nav-number">3.4.8.</span> <span class="nav-text">3.7.8 collect_white()函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-9-限定搜索对象"><span class="nav-number">3.4.9.</span> <span class="nav-text">3.7.9 限定搜索对象</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-GC复制算法"><span class="nav-number">4.</span> <span class="nav-text">4 GC复制算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-GC复制算法是什么"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 GC复制算法是什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-1-copy-函数"><span class="nav-number">4.1.1.</span> <span class="nav-text">4.1.1 copy()函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#python的垃圾回收机制"><span class="nav-number">5.</span> <span class="nav-text">python的垃圾回收机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-对象管理"><span class="nav-number">5.1.</span> <span class="nav-text">10.1 对象管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-Python的内存分配器"><span class="nav-number">5.2.</span> <span class="nav-text">10.2 Python的内存分配器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-第0层-通用的基础分配器"><span class="nav-number">5.3.</span> <span class="nav-text">10.3 第0层 通用的基础分配器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-4-第1层-Python低级内存分配器"><span class="nav-number">5.4.</span> <span class="nav-text">10.4 第1层 Python低级内存分配器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-4-1-内存结构"><span class="nav-number">5.4.1.</span> <span class="nav-text">10.4.1 内存结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-4-2-arena"><span class="nav-number">5.4.2.</span> <span class="nav-text">10.4.2 arena</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-4-3-pool"><span class="nav-number">5.4.3.</span> <span class="nav-text">10.4.3 pool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-4-4-new-arena"><span class="nav-number">5.4.4.</span> <span class="nav-text">10.4.4 new_arena()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#10-4-5-usable-arenas和unused-arena-objects"><span class="nav-number">5.4.4.1.</span> <span class="nav-text">10.4.5 usable_arenas和unused_arena_objects</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-第2层-Python对象分配器"><span class="nav-number">5.5.</span> <span class="nav-text">10.5 第2层 Python对象分配器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-5-1-block"><span class="nav-number">5.5.1.</span> <span class="nav-text">10.5.1 block</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-5-2-usedpools"><span class="nav-number">5.5.2.</span> <span class="nav-text">10.5.2 usedpools</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-5-4-block的状态管理"><span class="nav-number">5.5.3.</span> <span class="nav-text">10.5.4 block的状态管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-5-5-PyObject-Malloc"><span class="nav-number">5.5.4.</span> <span class="nav-text">10.5.5 PyObject_Malloc()</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kittener</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"your-duoshuo-shortname"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'FSYBzoLmcoINlfmLJmsXaDA8-gzGzoHsz',
+        appKey: 'aYNlN8CfvruV4yvdvxARsbD5',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+ <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas>
+ <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+ <script type="text/javascript" src="/js/src/fireworks.js"></script>
+ </pre>
+</body>
+</html>
